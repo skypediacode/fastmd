@@ -1,0 +1,7 @@
+<!DOCTYPE RCC>
+<RCC version="1.0">
+  <qresource prefix="/">
+    <file alias="fastmd.ico">fastmd.ico</file>
+    <file alias="fonts/MaterialIcons-Regular.ttf">fonts/MaterialIcons-Regular.ttf</file>
+  </qresource>
+</RCC>

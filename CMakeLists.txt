@@ -1,0 +1,66 @@
+cmake_minimum_required(VERSION 3.20)
+project(FastMD VERSION 0.1.0 LANGUAGES CXX C)
+
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTORCC ON)
+
+find_package(Qt6 REQUIRED COMPONENTS Widgets PrintSupport)
+
+# MD4C - fast CommonMark parser
+include(FetchContent)
+FetchContent_Declare(
+    md4c
+    GIT_REPOSITORY https://github.com/mity/md4c.git
+    GIT_TAG        release-0.5.2
+)
+set(BUILD_MD2HTML_EXECUTABLE OFF CACHE BOOL "" FORCE)
+set(BUILD_TESTING             OFF CACHE BOOL "" FORCE)
+FetchContent_MakeAvailable(md4c)
+
+set(SOURCES
+    src/main.cpp
+    src/MainWindow.cpp
+    src/DocumentModel.cpp
+    src/MarkdownEditor.cpp
+    src/MarkdownHighlighter.cpp
+    src/PreviewWidget.cpp
+    src/TabWidget.cpp
+    src/FindReplaceDialog.cpp
+    src/ExportManager.cpp
+    resources/resources.qrc
+)
+
+if(WIN32)
+    list(APPEND SOURCES resources/fastmd.rc)
+endif()
+
+add_executable(FastMD WIN32 ${SOURCES})
+
+target_include_directories(FastMD PRIVATE
+    src
+    ${md4c_SOURCE_DIR}/src   # MD4C headers (md4c.h, md4c-html.h)
+)
+
+target_link_libraries(FastMD PRIVATE
+    Qt6::Widgets
+    Qt6::PrintSupport
+    md4c
+    md4c-html
+)
+
+if(MSVC)
+    target_compile_options(FastMD PRIVATE /W3 /utf-8)
+    target_compile_definitions(FastMD PRIVATE _UNICODE UNICODE)
+endif()
+
+# Deploy Qt DLLs next to the executable on Windows
+if(WIN32)
+    add_custom_command(TARGET FastMD POST_BUILD
+        COMMAND "${Qt6_DIR}/../../../bin/windeployqt.exe"
+                --no-translations --no-system-d3d-compiler --no-quick-import
+                "$<TARGET_FILE:FastMD>"
+        COMMENT "Deploying Qt DLLs"
+    )
+endif()
