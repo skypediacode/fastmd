@@ -17,3 +17,11 @@ squash_history.ps1
 AGENTS.md
 HANDOFF.md
 screenshot.md
+app-startup-benchmark.csv
+Measure-AppStartup.ps1
+tasks/
+agents/
+config/
+screenshots/
+scripts/
+.agent-review*
