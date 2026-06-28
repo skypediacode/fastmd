@@ -92,6 +92,7 @@ QToolButton {
     padding: 4px;
     min-width: 28px;
     min-height: 28px;
+    color: #333333;
 }
 QToolButton:hover {
     background: rgba(0,0,0,0.08);
@@ -255,6 +256,19 @@ QCheckBox::indicator:checked {
     border-color: #0078d4;
     image: url(:/icons/checkmark.svg);
 }
+
+/* ─── Workspace tree ────────────────────────────────────────── */
+QTreeView {
+    background: #ffffff;
+    color: #222222;
+    border: none;
+    show-decoration-selected: 1;
+}
+QTreeView::item { padding: 2px 4px; }
+QTreeView::item:hover { background: rgba(0,0,0,0.06); }
+QTreeView::item:selected { background: #0078d4; color: #ffffff; }
+QTreeView::item:selected:!active { background: #cce4f7; color: #222222; }
+QTreeView::branch { background: #ffffff; }
 )");
 }
 
@@ -296,6 +310,7 @@ QToolButton {
     padding: 4px;
     min-width: 28px;
     min-height: 28px;
+    color: #cccccc;
 }
 QToolButton:hover {
     background: rgba(255,255,255,0.10);
@@ -459,6 +474,19 @@ QCheckBox::indicator:checked {
     border-color: #0078d4;
     image: url(:/icons/checkmark.svg);
 }
+
+/* ─── Workspace tree ────────────────────────────────────────── */
+QTreeView {
+    background: #252526;
+    color: #d4d4d4;
+    border: none;
+    show-decoration-selected: 1;
+}
+QTreeView::item { padding: 2px 4px; }
+QTreeView::item:hover { background: rgba(255,255,255,0.08); }
+QTreeView::item:selected { background: #264f78; color: #ffffff; }
+QTreeView::item:selected:!active { background: #2d4a6b; color: #cccccc; }
+QTreeView::branch { background: #252526; }
 )");
 }
 

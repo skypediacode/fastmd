@@ -297,6 +297,7 @@ void MainWindow::createWorkspacePanel()
     m_workspaceToggle->setAutoRaise(true);
     m_workspaceToggle->setCheckable(true);
     m_workspaceToggle->setCursor(Qt::PointingHandCursor);
+    m_workspaceToggle->setFixedHeight(28);
     m_workspaceToggle->setToolTip(tr("Workspace Tree"));
     connect(m_workspaceToggle, &QToolButton::toggled, this, [this](bool checked) {
         setWorkspaceTreeVisible(checked);
@@ -304,6 +305,7 @@ void MainWindow::createWorkspacePanel()
 
     m_tabs = new TabWidget(m_mainSplitter);
     m_tabs->setCornerWidget(m_workspaceToggle, Qt::TopLeftCorner);
+    m_workspaceToggle->installEventFilter(m_tabs);
 
     m_mainSplitter->addWidget(m_workspacePanel);
     m_mainSplitter->addWidget(m_tabs);
@@ -653,6 +655,13 @@ void MainWindow::applyTheme(const QString& theme)
 
     for (QAction* a : m_themeGroup->actions())
         a->setChecked(a->text().toLower().contains(theme));
+
+    if (m_workspaceToggle && m_activeEditor) {
+        m_workspaceToggle->setFixedWidth(m_activeEditor->lineNumberWidth());
+    }
+
+    if (m_tabs)
+        QTimer::singleShot(0, m_tabs, &TabWidget::updateTabBarLayout);
 }
 
 void MainWindow::setTheme(const QString& theme)
@@ -1076,24 +1085,21 @@ void MainWindow::onEditorActivated(MarkdownEditor* editor, PreviewWidget* previe
 
     if (m_lineNumberWidthConn) {
         disconnect(m_lineNumberWidthConn);
+        m_lineNumberWidthConn = {};
     }
 
-    if (editor) {
-        m_lineNumberWidthConn = connect(editor, &MarkdownEditor::lineNumberWidthChanged, this, [this](int w) {
-            if (m_workspaceToggle) {
-                m_workspaceToggle->setFixedWidth(w);
-            }
-            if (m_tabs) {
+    if (editor && m_workspaceToggle) {
+        const int w = editor->lineNumberWidth();
+        m_workspaceToggle->setFixedWidth(w);
+        m_lineNumberWidthConn = connect(editor, &MarkdownEditor::lineNumberWidthChanged, this, [this](int width) {
+            if (!m_workspaceToggle)
+                return;
+            m_workspaceToggle->setFixedWidth(width);
+            if (m_tabs)
                 m_tabs->updateTabBarLayout();
-            }
         });
-        if (m_workspaceToggle) {
-            int w = editor->lineNumberWidth();
-            m_workspaceToggle->setFixedWidth(w);
-            if (m_tabs) {
-                m_tabs->updateTabBarLayout();
-            }
-        }
+        if (m_tabs)
+            m_tabs->updateTabBarLayout();
     }
 }
 

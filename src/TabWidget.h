@@ -80,6 +80,7 @@ public:
 
 protected:
     bool event(QEvent* event) override;
+    bool eventFilter(QObject* obj, QEvent* event) override;
     void resizeEvent(QResizeEvent* event) override;
     void showEvent(QShowEvent* event) override;
     void tabInserted(int index) override;
@@ -96,7 +97,10 @@ private slots:
 private:
     class CloseTabButton;
     QWidget* makeCloseButton(TabPage* page);
+    void scheduleTabBarLayoutUpdate();
     QList<TabPage*> m_pages;
-    bool            m_darkMode = false;
+    bool            m_darkMode    = false;
+    bool            m_layoutGuard = false;
+    bool            m_layoutPending = false;
     static int      s_untitled;
 };

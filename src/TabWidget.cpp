@@ -82,6 +82,8 @@ TabWidget::TabWidget(QWidget* parent)
     connect(bar,  &TabBar::middleClickCloseRequested, this, &TabWidget::onCloseRequested);
     connect(this, &QTabWidget::currentChanged,    this, &TabWidget::onCurrentChanged);
     connect(this, &QTabWidget::tabCloseRequested, this, &TabWidget::onCloseRequested);
+
+    tabBar()->installEventFilter(this);
 }
 
 // ---------------------------------------------------------------------------
@@ -113,7 +115,9 @@ int TabWidget::addNewTab(const QString& filePath, bool activate)
     page->model->setMarkdownPreviewVisible(markdownPreviewVisible);
     page->preview->setVisible(page->model->editorMode() == EditorMode::Markdown && markdownPreviewVisible);
     page->editor->setMarkdownMode(page->model->editorMode() == EditorMode::Markdown);
-    
+    page->editor->setDarkMode(m_darkMode);
+    page->preview->setDarkMode(m_darkMode);
+
     int fontSize = s.value(QStringLiteral("editorFontSize"), FastMdDefaults::EditorFontSize).toInt();
     QFont f = page->editor->font();
     f.setPixelSize(fontSize);
@@ -233,48 +237,83 @@ void TabWidget::onCloseRequested(int index)
     emit tabClosed(index);
 }
 
+void TabWidget::scheduleTabBarLayoutUpdate()
+{
+    if (m_layoutPending)
+        return;
+    m_layoutPending = true;
+    QTimer::singleShot(0, this, [this]() {
+        m_layoutPending = false;
+        updateTabBarLayout();
+    });
+}
+
 void TabWidget::updateTabBarLayout()
 {
-    if (auto* bar = tabBar()) {
-        int w = 0;
-        if (auto* corner = cornerWidget(Qt::TopLeftCorner)) {
-            if (!corner->isHidden()) {
-                w = corner->width();
-            }
-        }
-        bar->move(w, bar->y());
-        bar->resize(width() - w, bar->height());
+    auto* bar = tabBar();
+    if (!bar)
+        return;
+
+    int w = 0;
+    if (auto* corner = cornerWidget(Qt::TopLeftCorner)) {
+        if (!corner->isHidden())
+            w = corner->x() + corner->width();
     }
+    if (bar->x() == w && bar->width() == width() - w)
+        return;
+
+    m_layoutGuard = true;
+    bar->move(w, bar->y());
+    bar->resize(width() - w, bar->height());
+    m_layoutGuard = false;
+}
+
+bool TabWidget::eventFilter(QObject* obj, QEvent* event)
+{
+    const bool cornerWidgetEvent = (obj == cornerWidget(Qt::TopLeftCorner));
+
+    if ((obj == tabBar() || cornerWidgetEvent) &&
+        (event->type() == QEvent::Move ||
+         event->type() == QEvent::Resize ||
+         event->type() == QEvent::Show ||
+         event->type() == QEvent::Hide ||
+         event->type() == QEvent::StyleChange ||
+         event->type() == QEvent::FontChange) &&
+        !m_layoutGuard)
+        scheduleTabBarLayoutUpdate();
+    return false;
 }
 
 bool TabWidget::event(QEvent* event)
 {
     bool result = QTabWidget::event(event);
     if (event->type() == QEvent::LayoutRequest)
-        updateTabBarLayout();
+        scheduleTabBarLayoutUpdate();
+    else if (event->type() == QEvent::StyleChange)
+        scheduleTabBarLayoutUpdate();
     return result;
 }
 
 void TabWidget::resizeEvent(QResizeEvent* event)
 {
     QTabWidget::resizeEvent(event);
-    updateTabBarLayout();
+    scheduleTabBarLayoutUpdate();
 }
 
 void TabWidget::showEvent(QShowEvent* event)
 {
     QTabWidget::showEvent(event);
-    QTimer::singleShot(0, this, &TabWidget::updateTabBarLayout);
+    scheduleTabBarLayoutUpdate();
 }
 
 void TabWidget::tabInserted(int index)
 {
     QTabWidget::tabInserted(index);
-    QTimer::singleShot(0, this, &TabWidget::updateTabBarLayout);
+    scheduleTabBarLayoutUpdate();
 }
 
 void TabWidget::tabRemoved(int index)
 {
     QTabWidget::tabRemoved(index);
-    QTimer::singleShot(0, this, &TabWidget::updateTabBarLayout);
+    scheduleTabBarLayoutUpdate();
 }
