@@ -25,3 +25,4 @@ config/
 screenshots/
 scripts/
 .agent-review*
+CONTEXT.md

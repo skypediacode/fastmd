@@ -418,7 +418,7 @@ void MainWindow::createMenus()
     help->addAction(tr("About FastMD"), this, [this] {
         QMessageBox::about(this, tr("About FastMD"),
             tr("<b>FastMD</b> v1.5.0<br>"
-               "A lightweight Markdown editor built with C++20 and Qt 6.<br><br>"
+               "A lightweight Markdown Text Editor built with C++20 and Qt 6.<br><br>"
                "Copyright &copy; 2026 Skypedia<br><br>"
                "Licensed under the MIT License. This software is provided "
                "\"as is\", without warranty of any kind."));

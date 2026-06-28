@@ -1,4 +1,4 @@
-# FastMD: The Lightning-Fast, Native Markdown Editor
+# FastMD: The Lightning-Fast, Native Markdown Text Editor
 
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)](https://github.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
@@ -6,9 +6,9 @@
 
 ![FastMD Screenshot](screenshot.png)
 
-**FastMD** is an ultra-fast, native, and distraction-free Markdown editor. It is currently available on Windows. Built from the ground up with **C++20** and **Qt 6 Widgets**, FastMD focuses on one thing: providing the absolute best typing performance and a frictionless writing experience.
+**FastMD** is an ultra-fast, native, and distraction-free Markdown Text Editor. It is currently available on Windows. Built from the ground up with **C++20** and **Qt 6 Widgets**, FastMD focuses on one thing: providing the absolute best typing performance and a frictionless writing experience.
 
-If you are tired of sluggish, memory-heavy Electron apps and want a Markdown editor that launches instantly and respects your system resources, FastMD is built for you.
+If you are tired of sluggish, memory-heavy Electron apps and want a Markdown Text Editor that launches instantly and respects your system resources, FastMD is built for you.
 
 ## 🚀 The FastMD Philosophy: Speed Over Bloat
 
@@ -28,7 +28,7 @@ Just you, your words, and blistering fast performance.
 
 ### 🎯 Core Capabilities
 
-- **Markdown Editor:** Full CommonMark support with syntax highlighting
+- **Markdown Text Editor:** Full CommonMark support with syntax highlighting
 - **Plain Text Mode:** Edit plain text files (.txt, .log, .csv, etc.) with dedicated mode
 - **Live Preview:** Real-time Markdown preview side-by-side with editor
 - **HTML & PDF Export:** Generate clean, self-contained HTML or beautifully formatted PDFs
@@ -40,7 +40,7 @@ Just you, your words, and blistering fast performance.
 
 ### 📊 By The Numbers (FastMD vs. Electron)
 
-While standard Markdown editors rely on embedding an entire Chromium web browser and Node.js instance just to render text, FastMD goes straight to the metal. Here is a rough comparison of what that means for your system:
+While standard Markdown Text Editors rely on embedding an entire Chromium web browser and Node.js instance just to render text, FastMD goes straight to the metal. Here is a rough comparison of what that means for your system:
 
 | Metric                   | Typical Electron Editor | FastMD (C++ / Qt)    | Difference    |
 | ------------------------ | ----------------------- | -------------------- | ------------- |
