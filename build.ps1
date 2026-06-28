@@ -28,7 +28,10 @@ foreach ($line in $envLines) {
         [System.Environment]::SetEnvironmentVariable($k, $v, "Process")
     }
 }
+$oldPreference = $ErrorActionPreference
+$ErrorActionPreference = "Continue"
 Write-Host "[env] MSVC ready: $(& cl.exe /? 2>&1 | Select-Object -First 1)" -ForegroundColor Green
+$ErrorActionPreference = $oldPreference
 
 if ($Clean -and (Test-Path $buildDir)) {
     Write-Host "[clean] Removing $buildDir" -ForegroundColor Yellow
