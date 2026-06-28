@@ -1,10 +1,12 @@
 #pragma once
 #include "ExportManager.h"
+#include "DocumentModel.h"
 
 #include <QMainWindow>
 #include <QStringList>
 #include <QIcon>
 
+struct TabPage;
 class TabWidget;
 class MarkdownEditor;
 class PreviewWidget;
@@ -13,8 +15,13 @@ class QLabel;
 class QActionGroup;
 class QTimer;
 class QFileSystemWatcher;
+class QFileSystemModel;
+class QTreeView;
 class QToolBar;
 class QToolButton;
+class QWidget;
+class QSplitter;
+class QNetworkAccessManager;
 
 class MainWindow : public QMainWindow {
     Q_OBJECT
@@ -36,6 +43,7 @@ private slots:
     void doExportHtml();
     void doExportPdf();
     void editPdfPageSetup();
+    void openPreferences();
     void doPreviewBrowser();
 
     // Edit
@@ -44,6 +52,7 @@ private slots:
 
     // View
     void togglePreview();
+    void setEditorMode(bool markdown);
     void setTheme(const QString& theme);
     void zoomIn();
     void zoomOut();
@@ -58,11 +67,15 @@ private slots:
 
     void openRecentFile();
     void clearRecentFiles();
+    void checkForUpdates();
 
 private:
+    struct SessionTabState;
+
     void createMenus();
     void createToolbar();
     void createStatusBar();
+    void createWorkspacePanel();
 
     void connectEditor(MarkdownEditor* editor, PreviewWidget* preview);
     void disconnectEditor();
@@ -72,6 +85,12 @@ private:
 
     void addToRecent(const QString& path);
     void rebuildRecentMenu();
+    void updateWorkspaceTreeRoot();
+    void setWorkspaceTreeVisible(bool visible, bool persist = true);
+    QString workspaceRootForTabs() const;
+    void restoreWorkspaceExpandedState();
+    void rememberWorkspaceExpansion(const QString& path, bool expanded);
+    void updateWorkspaceToggleIcon();
 
     void applyTheme(const QString& theme);
     void updateWindowTitle();
@@ -80,11 +99,17 @@ private:
     void updateWordCount(const QString& text = {});
     void watchFile(const QString& path);
     void updateToolbarIcons(bool dark);
+    void syncCurrentTabUi();
     bool isPreviewVisible() const;
     void setPreviewVisible(bool visible, bool persist = true);
 
     void readSettings();
     void writeSettings();
+    void restorePreviousSession();
+    void restoreTabState(TabPage* page, const SessionTabState& state);
+    bool loadFileText(const QString& path, QString* content, QString* lineEnding) const;
+    int addTabFromFile(const QString& path, bool activate, bool addToRecent, bool showError,
+                       const SessionTabState* state = nullptr);
 
     // ---- toolbar icon registry ----
     struct TbIcon {
@@ -97,19 +122,26 @@ private:
     QToolBar*     m_toolbar      = nullptr;
     QToolButton*  m_openButton   = nullptr;
     QToolButton*  m_recentChevron = nullptr;
+    QToolButton*  m_workspaceToggle = nullptr;
 
     // ---- widgets ----
     TabWidget*          m_tabs;
     FindReplaceDialog*  m_findDialog;
     QLabel*             m_lblPosition;
     QLabel*             m_lblWords;
+    QLabel*             m_lblMode;
     QLabel*             m_lblEncoding;
+    QSplitter*          m_mainSplitter = nullptr;
+    QWidget*            m_workspacePanel = nullptr;
+    QTreeView*          m_workspaceTree = nullptr;
+    QFileSystemModel*    m_workspaceModel = nullptr;
 
     // ---- menus / actions ----
     QMenu*        m_recentMenu;
     QActionGroup* m_themeGroup;
     QAction*      m_actTogglePreview;
     QAction*      m_actToolbarPreview = nullptr;
+    QAction*      m_actModeToggle = nullptr;
 
     // ---- state ----
     QStringList        m_recentFiles;
@@ -119,11 +151,29 @@ private:
     QFileSystemWatcher* m_watcher;
     QStringList         m_ignoredFileChanges;
     ExportManager::PdfExportOptions m_pdfExportOptions;
+    QString             m_workspaceRootPath;
+    QStringList         m_workspaceExpandedPaths;
+    bool                m_workspaceTreeVisible = false;
+    bool                m_restoreSessionOnStartup = false;
+    QNetworkAccessManager* m_networkManager = nullptr;
+
+    struct SessionTabState {
+        QString path;
+        int     cursorPos = 0;
+        int     editorScroll = 0;
+        int     previewScroll = 0;
+        EditorMode mode = EditorMode::Markdown;
+        bool    previewVisible = true;
+    };
+
+    QList<SessionTabState> m_sessionTabs;
+    int                    m_sessionActiveTab = -1;
 
     // current HTML body (kept for export)
     QString m_currentHtml;
     bool m_htmlDirty = true;
     bool m_previewDirty = true;
     bool m_scrollSyncing = false;
-    bool m_previewVisible = true;
+    bool m_markdownPreviewVisible = true;
+    QMetaObject::Connection m_lineNumberWidthConn;
 };

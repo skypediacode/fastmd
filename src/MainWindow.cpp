@@ -4,6 +4,7 @@
 #include "MarkdownEditor.h"
 #include "PreviewWidget.h"
 #include "FindReplaceDialog.h"
+#include "PreferencesDialog.h"
 #include "ExportManager.h"
 #include "DocumentModel.h"
 #include "Stylesheet.h"
@@ -17,6 +18,7 @@
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QFile>
+#include <QFileInfo>
 #include <QTextStream>
 #include <QSettings>
 #include <QCloseEvent>
@@ -29,6 +31,7 @@
 #include <QUrl>
 #include <QDir>
 #include <QScrollBar>
+#include <QTextCursor>
 #include <QSplitter>
 #include <QPalette>
 #include <QStyle>
@@ -37,10 +40,28 @@
 #include <QHBoxLayout>
 #include <QToolButton>
 #include <QTimer>
+#include <QStandardPaths>
 #include <QPageSetupDialog>
 #include <QPrinter>
 #include <QSignalBlocker>
 #include <QGridLayout>
+#include <QFileSystemModel>
+#include <QTreeView>
+#include <QHeaderView>
+#include <QAbstractItemView>
+#include <QVBoxLayout>
+#include <QVector>
+#include <algorithm>
+#include <QNetworkAccessManager>
+#include <QNetworkRequest>
+#include <QNetworkReply>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonArray>
+#include <QDialog>
+#include <QHBoxLayout>
+#include <QTextBrowser>
+#include <QPushButton>
 
 static const int MAX_RECENT = 20;
 
@@ -78,6 +99,39 @@ static int countWordsInText(QStringView text)
         }
     }
     return words;
+}
+
+
+static QString detectLineEnding(const QByteArray& data)
+{
+    if (data.contains("\r\n"))
+        return QStringLiteral("\r\n");
+    if (data.contains('\r'))
+        return QStringLiteral("\r");
+    return QStringLiteral("\n");
+}
+
+static QString normalizeLoadedText(QString text)
+{
+    text.replace(QStringLiteral("\r\n"), QStringLiteral("\n"));
+    text.replace(QLatin1Char('\r'), QLatin1Char('\n'));
+    return text;
+}
+
+static QString decodeUtf8Text(const QByteArray& raw)
+{
+    QString text = QString::fromUtf8(raw);
+    if (!text.isEmpty() && text.front() == QChar(0xFEFF))
+        text.removeFirst();
+    return text;
+}
+
+static QByteArray encodeWithLineEnding(QString text, const QString& lineEnding)
+{
+    if (!lineEnding.isEmpty() && lineEnding != QStringLiteral("\n")) {
+        text.replace(QStringLiteral("\n"), lineEnding);
+    }
+    return text.toUtf8();
 }
 
 static QString normalizeMarkdownSpacing(const QString& text)
@@ -132,6 +186,23 @@ static QString normalizeMarkdownSpacing(const QString& text)
     return out.join('\n');
 }
 
+static bool readTextFile(const QString& path, QString* content, QString* lineEnding)
+{
+    QFile f(path);
+    if (!f.open(QIODevice::ReadOnly))
+        return false;
+
+    const QByteArray raw = f.readAll();
+    if (lineEnding)
+        *lineEnding = detectLineEnding(raw);
+    if (content) {
+        *content = decodeUtf8Text(raw);
+        content->replace(QStringLiteral("\r\n"), QStringLiteral("\n"));
+        content->replace(QLatin1Char('\r'), QLatin1Char('\n'));
+    }
+    return true;
+}
+
 } // namespace
 
 // ---------------------------------------------------------------------------
@@ -142,16 +213,15 @@ MainWindow::MainWindow(QWidget* parent)
     setMinimumSize(800, 500);
     resize(1200, 750);
 
-    m_tabs = new TabWidget(this);
-    setCentralWidget(m_tabs);
-
     m_findDialog = new FindReplaceDialog(this);
     m_watcher    = new QFileSystemWatcher(this);
 
+    createWorkspacePanel();
     createMenus();
     createToolbar();
     createStatusBar();
     readSettings();
+    setWorkspaceTreeVisible(m_workspaceTreeVisible, false);
     applyTheme(m_theme);
 
     connect(m_tabs, &TabWidget::editorActivated, this, &MainWindow::onEditorActivated);
@@ -160,9 +230,87 @@ MainWindow::MainWindow(QWidget* parent)
 
     setAcceptDrops(true);
 
-    // open with one blank tab
-    m_tabs->addNewTab();
-    setPreviewVisible(m_previewVisible, false);
+    if (m_restoreSessionOnStartup) {
+        QTimer::singleShot(0, this, [this]() { restorePreviousSession(); });
+    } else {
+        m_tabs->addNewTab();
+        updateWorkspaceTreeRoot();
+        syncCurrentTabUi();
+    }
+}
+
+// ---------------------------------------------------------------------------
+void MainWindow::createWorkspacePanel()
+{
+    m_mainSplitter = new QSplitter(Qt::Horizontal, this);
+    m_mainSplitter->setChildrenCollapsible(false);
+
+    m_workspacePanel = new QWidget(m_mainSplitter);
+    auto* panelLayout = new QVBoxLayout(m_workspacePanel);
+    panelLayout->setContentsMargins(4, 4, 0, 4);
+    panelLayout->setSpacing(0);
+
+    m_workspaceTree = new QTreeView(m_workspacePanel);
+    m_workspaceTree->setHeaderHidden(true);
+    m_workspaceTree->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    m_workspaceTree->setSelectionMode(QAbstractItemView::SingleSelection);
+    m_workspaceTree->setUniformRowHeights(true);
+    m_workspaceTree->setAnimated(false);
+    m_workspaceTree->setTextElideMode(Qt::ElideMiddle);
+    m_workspaceTree->setIndentation(16);
+    m_workspaceTree->setRootIsDecorated(true);
+    m_workspaceTree->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
+
+    m_workspaceModel = new QFileSystemModel(this);
+    m_workspaceModel->setOption(QFileSystemModel::DontUseCustomDirectoryIcons, true);
+    m_workspaceModel->setFilter(QDir::AllDirs | QDir::Files | QDir::NoDotAndDotDot);
+    m_workspaceModel->setReadOnly(true);
+    m_workspaceTree->setModel(m_workspaceModel);
+    m_workspaceTree->setSortingEnabled(true);
+    m_workspaceTree->sortByColumn(0, Qt::AscendingOrder);
+
+    connect(m_workspaceTree, &QTreeView::activated, this, [this](const QModelIndex& index) {
+        if (!index.isValid() || !m_workspaceModel || m_workspaceModel->isDir(index))
+            return;
+        openFilePath(m_workspaceModel->filePath(index));
+    });
+    connect(m_workspaceTree, &QTreeView::expanded, this, [this](const QModelIndex& index) {
+        if (!index.isValid() || !m_workspaceModel)
+            return;
+        rememberWorkspaceExpansion(m_workspaceModel->filePath(index), true);
+    });
+    connect(m_workspaceTree, &QTreeView::collapsed, this, [this](const QModelIndex& index) {
+        if (!index.isValid() || !m_workspaceModel)
+            return;
+        rememberWorkspaceExpansion(m_workspaceModel->filePath(index), false);
+    });
+    connect(m_workspaceModel, &QFileSystemModel::directoryLoaded, this, [this](const QString& /*path*/) {
+        if (m_workspaceTreeVisible) {
+            restoreWorkspaceExpandedState();
+        }
+    });
+
+    panelLayout->addWidget(m_workspaceTree, 1);
+
+    m_workspaceToggle = new QToolButton(this);
+    m_workspaceToggle->setToolButtonStyle(Qt::ToolButtonIconOnly);
+    m_workspaceToggle->setAutoRaise(true);
+    m_workspaceToggle->setCheckable(true);
+    m_workspaceToggle->setCursor(Qt::PointingHandCursor);
+    m_workspaceToggle->setToolTip(tr("Workspace Tree"));
+    connect(m_workspaceToggle, &QToolButton::toggled, this, [this](bool checked) {
+        setWorkspaceTreeVisible(checked);
+    });
+
+    m_tabs = new TabWidget(m_mainSplitter);
+    m_tabs->setCornerWidget(m_workspaceToggle, Qt::TopLeftCorner);
+
+    m_mainSplitter->addWidget(m_workspacePanel);
+    m_mainSplitter->addWidget(m_tabs);
+    m_mainSplitter->setStretchFactor(0, 0);
+    m_mainSplitter->setStretchFactor(1, 1);
+    m_mainSplitter->setSizes({ 220, 980 });
+    setCentralWidget(m_mainSplitter);
 }
 
 // ---------------------------------------------------------------------------
@@ -200,6 +348,8 @@ void MainWindow::createMenus()
     mkAct(file, tr("Export &HTML…"), QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_H), this, &MainWindow::doExportHtml);
     mkAct(file, tr("Export &PDF…"),  QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_P), this, &MainWindow::doExportPdf);
     mkAct(file, tr("PDF Page Set&up…"), {}, this, &MainWindow::editPdfPageSetup);
+    file->addSeparator();
+    mkAct(file, tr("Preferences..."), QKeySequence(Qt::CTRL | Qt::Key_Comma), this, &MainWindow::openPreferences);
     file->addSeparator();
     mkAct(file, tr("E&xit"), QKeySequence::Quit, qApp, &QApplication::closeAllWindows);
 
@@ -261,9 +411,11 @@ void MainWindow::createMenus()
 
     // ---- Help ----
     QMenu* help = menuBar()->addMenu(tr("&Help"));
+    help->addAction(tr("Check for updates ..."), this, &MainWindow::checkForUpdates);
+    help->addSeparator();
     help->addAction(tr("About FastMD"), this, [this] {
         QMessageBox::about(this, tr("About FastMD"),
-            tr("<b>FastMD</b> v0.1.0<br>"
+            tr("<b>FastMD</b> v1.5.0<br>"
                "A lightweight Markdown editor built with C++20 and Qt 6.<br><br>"
                "Copyright &copy; 2026 Skypedia<br><br>"
                "Licensed under the MIT License. This software is provided "
@@ -410,6 +562,24 @@ void MainWindow::createToolbar()
     connect(m_actToolbarPreview, &QAction::triggered, this, &MainWindow::togglePreview);
     m_toolbar->addAction(m_actToolbarPreview);
     m_tbIcons.append({m_actToolbarPreview, false, QChar(0xE8F4), {}});
+
+    m_toolbar->addSeparator();
+
+    m_actModeToggle = new QAction(this);
+    m_actModeToggle->setCheckable(true);
+    m_actModeToggle->setChecked(true);
+    m_actModeToggle->setText(tr("Markdown"));
+    m_actModeToggle->setToolTip(tip(tr("Switch editor mode"), QKeySequence()));
+    connect(m_actModeToggle, &QAction::triggered, this, &MainWindow::setEditorMode);
+    m_toolbar->addAction(m_actModeToggle);
+    m_tbIcons.append({m_actModeToggle, false, QChar(0xE873), {}});
+
+    if (auto* button = qobject_cast<QToolButton*>(m_toolbar->widgetForAction(m_actModeToggle))) {
+        button->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+        button->setProperty("modeToggle", true);
+        button->setAutoRaise(false);
+        button->setCursor(Qt::PointingHandCursor);
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -427,6 +597,9 @@ void MainWindow::updateToolbarIcons(bool dark)
         m_openButton->setIcon(IconHelper::materialIcon(QChar(0xE2C8), iconColor, sz));
     if (m_recentChevron)
         m_recentChevron->setIcon(IconHelper::materialIcon(QChar(0xE5C5), iconColor, 20));
+    if (m_workspaceToggle) {
+        updateWorkspaceToggleIcon();
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -434,10 +607,12 @@ void MainWindow::createStatusBar()
 {
     m_lblPosition = new QLabel(tr("Line: 1, Col: 1"));
     m_lblWords    = new QLabel(tr("Words: 0"));
+    m_lblMode     = new QLabel(tr("Markdown"));
     m_lblEncoding = new QLabel(tr("UTF-8"));
 
-    statusBar()->addPermanentWidget(m_lblEncoding);
     statusBar()->addPermanentWidget(m_lblWords);
+    statusBar()->addPermanentWidget(m_lblMode);
+    statusBar()->addPermanentWidget(m_lblEncoding);
     statusBar()->addWidget(m_lblPosition);
 }
 
@@ -492,13 +667,14 @@ void MainWindow::setTheme(const QString& theme)
 void MainWindow::newFile()
 {
     m_tabs->addNewTab();
-    setPreviewVisible(m_previewVisible, false);
+    syncCurrentTabUi();
+    updateWorkspaceTreeRoot();
 }
 
 void MainWindow::openFile()
 {
     QStringList paths = QFileDialog::getOpenFileNames(
-        this, tr("Open Markdown Files"),
+        this, tr("Open Files"),
         QString(),
         tr("Markdown (*.md *.markdown *.txt);;All Files (*)"));
 
@@ -508,37 +684,152 @@ void MainWindow::openFile()
 
 void MainWindow::openFilePath(const QString& path)
 {
+    const EditorMode targetMode = DocumentModel::modeForPath(path);
+
     // check if already open
     for (int i = 0; i < m_tabs->count(); ++i) {
         if (auto* pg = m_tabs->pageAt(i)) {
             if (pg->model->filePath() == path) {
+                pg->model->setEditorMode(targetMode);
                 m_tabs->setCurrentIndex(i);
+                m_htmlDirty = true;
+                m_previewDirty = true;
+                syncCurrentTabUi();
+                updateWorkspaceTreeRoot();
                 return;
             }
         }
     }
 
-    QFile f(path);
-    if (!f.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        QMessageBox::warning(this, tr("Open Failed"),
-            tr("Cannot read file:\n%1").arg(path));
+    if (addTabFromFile(path, true, true, true, nullptr) < 0)
         return;
-    }
-    QTextStream in(&f);
-    in.setEncoding(QStringConverter::Utf8);
-    QString content = in.readAll();
 
-    int idx = m_tabs->addNewTab(path);
+    updateWindowTitle();
+    syncCurrentTabUi();
+    updateWorkspaceTreeRoot();
+}
+
+int MainWindow::addTabFromFile(const QString& path, bool activate, bool addToRecent,
+                               bool showError, const SessionTabState* state)
+{
+    QString content;
+    QString lineEnding;
+    if (!loadFileText(path, &content, &lineEnding)) {
+        if (showError) {
+            QMessageBox::warning(this, tr("Open Failed"),
+                tr("Cannot read file:\n%1").arg(path));
+        }
+        return -1;
+    }
+
+    int idx = m_tabs->addNewTab(path, activate);
     if (TabPage* pg = m_tabs->pageAt(idx)) {
+        pg->model->setLineEnding(lineEnding);
         pg->editor->setPlainText(content);
         pg->editor->document()->setModified(false);
         pg->model->setDirty(false);
         m_tabs->refreshTitle(idx);
+        if (state)
+            restoreTabState(pg, *state);
     }
-    setPreviewVisible(m_previewVisible, false);
-    addToRecent(path);
+
+    if (addToRecent)
+        this->addToRecent(path);
     watchFile(path);
-    updateWindowTitle();
+
+    return idx;
+}
+
+bool MainWindow::loadFileText(const QString& path, QString* content, QString* lineEnding) const
+{
+    return readTextFile(path, content, lineEnding);
+}
+
+void MainWindow::restoreTabState(TabPage* page, const SessionTabState& state)
+{
+    if (!page)
+        return;
+
+    const bool markdown = state.mode == EditorMode::Markdown;
+    page->model->setEditorMode(state.mode);
+    page->editor->setMarkdownMode(markdown);
+    page->model->setMarkdownPreviewVisible(markdown ? state.previewVisible : false);
+    page->preview->setVisible(markdown && state.previewVisible);
+
+    if (markdown) {
+        page->preview->setBasePath(page->model->filePath());
+        page->preview->setBodyHtml(ExportManager::markdownToHtml(page->editor->toPlainText()));
+        page->preview->verticalScrollBar()->setValue(qMax(0, state.previewScroll));
+    }
+
+    QTimer::singleShot(0, page->editor, [this, editor = page->editor, cursorPos = state.cursorPos, editorScroll = state.editorScroll]() {
+        if (!editor)
+            return;
+        QTextCursor cursor = editor->textCursor();
+        cursor.setPosition(qBound(0, cursorPos, editor->toPlainText().size()));
+        editor->setTextCursor(cursor);
+        editor->verticalScrollBar()->setValue(qMax(0, editorScroll));
+        if (editor == m_activeEditor)
+            onCursorPositionChanged();
+    });
+}
+
+void MainWindow::restorePreviousSession()
+{
+    if (!m_restoreSessionOnStartup) {
+        if (m_tabs->count() == 0)
+            m_tabs->addNewTab();
+        updateWorkspaceTreeRoot();
+        syncCurrentTabUi();
+        return;
+    }
+
+    QVector<int> restoredMap(m_sessionTabs.size(), -1);
+    int restoredCount = 0;
+    bool needsManualActivation = false;
+
+    {
+        QSignalBlocker blockTabs(m_tabs);
+        for (int i = 0; i < m_sessionTabs.size(); ++i) {
+            const SessionTabState& state = m_sessionTabs.at(i);
+            if (state.path.isEmpty() || !QFile::exists(state.path))
+                continue;
+
+            const int idx = addTabFromFile(state.path, false, false, false, &state);
+            if (idx >= 0) {
+                restoredMap[i] = idx;
+                ++restoredCount;
+            }
+        }
+
+        int activeIndex = -1;
+        if (m_sessionActiveTab >= 0 && m_sessionActiveTab < restoredMap.size())
+            activeIndex = restoredMap.at(m_sessionActiveTab);
+        if (activeIndex < 0) {
+            for (int idx : restoredMap) {
+                if (idx >= 0) {
+                    activeIndex = idx;
+                    break;
+                }
+            }
+        }
+        if (activeIndex < 0)
+            activeIndex = 0;
+
+        if (restoredCount > 0) {
+            m_tabs->setCurrentIndex(activeIndex);
+            needsManualActivation = true;
+        }
+    }
+
+    if (restoredCount == 0) {
+        m_tabs->addNewTab();
+    } else if (needsManualActivation) {
+        if (TabPage* pg = m_tabs->currentPage()) {
+            onEditorActivated(pg->editor, pg->preview);
+        }
+    }
+    updateWorkspaceTreeRoot();
 }
 
 bool MainWindow::saveDocument(int tabIndex, bool forceDialog)
@@ -550,10 +841,13 @@ bool MainWindow::saveDocument(int tabIndex, bool forceDialog)
     QString path = oldPath;
 
     if (forceDialog || path.isEmpty()) {
+        const QString defaultExt = pg->model->editorMode() == EditorMode::PlainText
+            ? QStringLiteral(".txt")
+            : QStringLiteral(".md");
         path = QFileDialog::getSaveFileName(
-            this, tr("Save Markdown File"),
-            path.isEmpty() ? pg->model->displayName() + QStringLiteral(".md") : path,
-            tr("Markdown (*.md *.markdown);;All Files (*)"));
+            this, tr("Save File"),
+            path.isEmpty() ? pg->model->displayName() + defaultExt : path,
+            tr("Text/Markdown (*.txt *.md *.markdown);;All Files (*)"));
         if (path.isEmpty()) return false;
     }
 
@@ -561,7 +855,7 @@ bool MainWindow::saveDocument(int tabIndex, bool forceDialog)
         m_watcher->removePath(oldPath);
 
     QFile f(path);
-    if (!f.open(QIODevice::WriteOnly | QIODevice::Text)) {
+    if (!f.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
         if (!oldPath.isEmpty())
             watchFile(oldPath);
         QMessageBox::warning(this, tr("Save Failed"),
@@ -569,21 +863,29 @@ bool MainWindow::saveDocument(int tabIndex, bool forceDialog)
         return false;
     }
 
-    const QString normalizedText = normalizeMarkdownSpacing(pg->editor->toPlainText());
-    if (normalizedText != pg->editor->toPlainText()) {
+    QString text = pg->editor->toPlainText();
+    if (pg->model->editorMode() == EditorMode::Markdown)
+        text = normalizeMarkdownSpacing(text);
+
+    if (text != pg->editor->toPlainText()) {
         QTextCursor cursor = pg->editor->textCursor();
         const int oldPos = cursor.position();
         const int oldAnchor = cursor.anchor();
-        pg->editor->setPlainText(normalizedText);
+        pg->editor->setPlainText(text);
         QTextCursor updated = pg->editor->textCursor();
-        updated.setPosition(qMin(oldAnchor, normalizedText.size()));
-        updated.setPosition(qMin(oldPos, normalizedText.size()), QTextCursor::KeepAnchor);
+        updated.setPosition(qMin(oldAnchor, text.size()));
+        updated.setPosition(qMin(oldPos, text.size()), QTextCursor::KeepAnchor);
         pg->editor->setTextCursor(updated);
     }
 
-    QTextStream out(&f);
-    out.setEncoding(QStringConverter::Utf8);
-    out << normalizedText;
+    const QByteArray bytes = encodeWithLineEnding(text, pg->model->lineEnding());
+    if (f.write(bytes) != bytes.size()) {
+        if (!oldPath.isEmpty())
+            watchFile(oldPath);
+        QMessageBox::warning(this, tr("Save Failed"),
+            tr("Cannot write file:\n%1").arg(path));
+        return false;
+    }
     f.close();
 
     pg->model->setFilePath(path);
@@ -594,7 +896,8 @@ bool MainWindow::saveDocument(int tabIndex, bool forceDialog)
     m_ignoredFileChanges.removeAll(path);
     watchFile(path);
     updateWindowTitle();
-    
+    updateWorkspaceTreeRoot();
+
     if (tabIndex == m_tabs->currentIndex()) {
         updatePreview();
     }
@@ -654,6 +957,14 @@ void MainWindow::editPdfPageSetup()
     writeSettings();
 }
 
+void MainWindow::openPreferences()
+{
+    PreferencesDialog dlg(this);
+    if (dlg.exec() == QDialog::Accepted) {
+        m_restoreSessionOnStartup = dlg.restoreSessionOnStartup();
+    }
+}
+
 void MainWindow::doPreviewBrowser()
 {
     if (!m_activeEditor) return;
@@ -670,12 +981,20 @@ void MainWindow::zoomIn()
 {
     if (m_activeEditor) m_activeEditor->zoomIn(1);
     if (m_activePreview) m_activePreview->zoomIn(1);
+    if (m_activeEditor) {
+        QSettings s;
+        s.setValue(QStringLiteral("editorFontSize"), m_activeEditor->font().pixelSize());
+    }
 }
 
 void MainWindow::zoomOut()
 {
     if (m_activeEditor) m_activeEditor->zoomOut(1);
     if (m_activePreview) m_activePreview->zoomOut(1);
+    if (m_activeEditor) {
+        QSettings s;
+        s.setValue(QStringLiteral("editorFontSize"), m_activeEditor->font().pixelSize());
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -752,8 +1071,30 @@ void MainWindow::onEditorActivated(MarkdownEditor* editor, PreviewWidget* previe
     onCursorPositionChanged();
     updateWordCount();
     updateWindowTitle();
-    if (editor && isPreviewVisible())
-        updatePreview();
+    syncCurrentTabUi();
+    updateWorkspaceTreeRoot();
+
+    if (m_lineNumberWidthConn) {
+        disconnect(m_lineNumberWidthConn);
+    }
+
+    if (editor) {
+        m_lineNumberWidthConn = connect(editor, &MarkdownEditor::lineNumberWidthChanged, this, [this](int w) {
+            if (m_workspaceToggle) {
+                m_workspaceToggle->setFixedWidth(w);
+            }
+            if (m_tabs) {
+                m_tabs->updateTabBarLayout();
+            }
+        });
+        if (m_workspaceToggle) {
+            int w = editor->lineNumberWidth();
+            m_workspaceToggle->setFixedWidth(w);
+            if (m_tabs) {
+                m_tabs->updateTabBarLayout();
+            }
+        }
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -776,10 +1117,12 @@ void MainWindow::onContentReady()
 void MainWindow::updatePreview()
 {
     if (!m_activeEditor || !m_activePreview) return;
+    TabPage* pg = m_tabs->currentPage();
+    if (!pg || pg->model->editorMode() != EditorMode::Markdown || !pg->preview->isVisible())
+        return;
 
     updateCurrentHtml();
 
-    TabPage* pg = m_tabs->currentPage();
     if (pg && pg->model) {
         m_activePreview->setBasePath(pg->model->filePath());
     }
@@ -799,35 +1142,94 @@ void MainWindow::updateCurrentHtml()
 
 void MainWindow::togglePreview()
 {
-    setPreviewVisible(!m_previewVisible);
+    setPreviewVisible(!isPreviewVisible());
 }
 
 void MainWindow::setPreviewVisible(bool visible, bool persist)
 {
-    m_previewVisible = visible;
+    TabPage* pg = m_tabs->currentPage();
+    if (!pg || pg->model->editorMode() != EditorMode::Markdown)
+        return;
 
-    for (int i = 0; i < m_tabs->count(); ++i) {
-        if (TabPage* pg = m_tabs->pageAt(i)) {
-            pg->preview->setVisible(visible);
+    pg->model->setMarkdownPreviewVisible(visible);
+    if (persist) {
+        m_markdownPreviewVisible = visible;
+        writeSettings();
+    }
+
+    syncCurrentTabUi();
+    if (visible && m_previewDirty)
+        updatePreview();
+}
+
+void MainWindow::setEditorMode(bool markdown)
+{
+    TabPage* pg = m_tabs->currentPage();
+    if (!pg)
+        return;
+
+    const EditorMode mode = markdown ? EditorMode::Markdown : EditorMode::PlainText;
+    if (pg->model->editorMode() == mode) {
+        syncCurrentTabUi();
+        return;
+    }
+
+    pg->model->setEditorMode(mode);
+    pg->editor->setMarkdownMode(markdown);
+    if (!markdown) {
+        pg->preview->setVisible(false);
+    }
+
+    m_previewDirty = true;
+    syncCurrentTabUi();
+    if (markdown && isPreviewVisible())
+        updatePreview();
+}
+
+void MainWindow::syncCurrentTabUi()
+{
+    TabPage* pg = m_tabs->currentPage();
+    if (!pg)
+        return;
+
+    const bool markdown = pg->model->editorMode() == EditorMode::Markdown;
+    const bool previewVisible = markdown && pg->model->markdownPreviewVisible();
+
+    if (m_lblMode)
+        m_lblMode->setText(markdown ? tr("Markdown") : tr("Plain Text"));
+
+    if (m_actModeToggle) {
+        QSignalBlocker blocker(m_actModeToggle);
+        m_actModeToggle->setChecked(markdown);
+        m_actModeToggle->setText(markdown ? tr("Markdown") : tr("Plain Text"));
+    }
+
+    if (m_toolbar && m_actModeToggle) {
+        if (auto* button = qobject_cast<QToolButton*>(m_toolbar->widgetForAction(m_actModeToggle))) {
+            button->setProperty("modeToggle", true);
+            button->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
         }
     }
 
     if (m_actTogglePreview) {
         QSignalBlocker blocker(m_actTogglePreview);
-        m_actTogglePreview->setChecked(visible);
+        m_actTogglePreview->setChecked(previewVisible);
+        m_actTogglePreview->setEnabled(markdown);
     }
     if (m_actToolbarPreview) {
         QSignalBlocker blocker(m_actToolbarPreview);
-        m_actToolbarPreview->setChecked(visible);
+        m_actToolbarPreview->setChecked(previewVisible);
+        m_actToolbarPreview->setEnabled(markdown);
     }
 
-    if (visible && m_previewDirty) {
+    if (m_activeEditor)
+        m_activeEditor->setMarkdownMode(markdown);
+
+    if (pg->preview)
+        pg->preview->setVisible(previewVisible);
+
+    if (markdown && previewVisible && m_previewDirty)
         updatePreview();
-    }
-
-    if (persist) {
-        writeSettings();
-    }
 }
 
 // ---------------------------------------------------------------------------
@@ -863,7 +1265,8 @@ void MainWindow::updateWordCount(const QString& text)
 bool MainWindow::isPreviewVisible() const
 {
     TabPage* pg = m_tabs->currentPage();
-    return pg && pg->preview && pg->preview->isVisible();
+    return pg && pg->model->editorMode() == EditorMode::Markdown
+        && pg->model->markdownPreviewVisible();
 }
 
 void MainWindow::updateWindowTitle()
@@ -918,6 +1321,7 @@ void MainWindow::onTabCloseRequested(int index)
         return;
     }
     updateWindowTitle();
+    updateWorkspaceTreeRoot();
 }
 
 void MainWindow::closeEvent(QCloseEvent* event)
@@ -982,6 +1386,149 @@ void MainWindow::clearRecentFiles()
 }
 
 // ---------------------------------------------------------------------------
+// Workspace tree
+// ---------------------------------------------------------------------------
+QString MainWindow::workspaceRootForTabs() const
+{
+    QString fallbackRoot;
+
+    for (int i = 0; i < m_tabs->count(); ++i) {
+        TabPage* pg = m_tabs->pageAt(i);
+        if (!pg)
+            continue;
+
+        const QString path = pg->model->filePath();
+        if (path.isEmpty())
+            continue;
+
+        const QString root = QFileInfo(path).absolutePath();
+        if (i == m_tabs->currentIndex())
+            return root;
+        if (fallbackRoot.isEmpty())
+            fallbackRoot = root;
+    }
+
+    if (fallbackRoot.isEmpty()) {
+        return QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
+    }
+
+    return fallbackRoot;
+}
+
+void MainWindow::rememberWorkspaceExpansion(const QString& path, bool expanded)
+{
+    if (path.isEmpty())
+        return;
+
+    if (expanded) {
+        if (!m_workspaceExpandedPaths.contains(path))
+            m_workspaceExpandedPaths.append(path);
+    } else {
+        m_workspaceExpandedPaths.removeAll(path);
+    }
+}
+
+void MainWindow::restoreWorkspaceExpandedState()
+{
+    if (!m_workspaceTree || !m_workspaceModel || m_workspaceRootPath.isEmpty())
+        return;
+
+    QStringList paths = m_workspaceExpandedPaths;
+    paths.removeDuplicates();
+    std::sort(paths.begin(), paths.end(), [](const QString& a, const QString& b) {
+        if (a.size() != b.size())
+            return a.size() < b.size();
+        return a < b;
+    });
+
+    const QDir rootDir(m_workspaceRootPath);
+    for (const QString& path : paths) {
+        if (path.isEmpty())
+            continue;
+        const QString rel = rootDir.relativeFilePath(path);
+        if (rel.startsWith(QStringLiteral("..")))
+            continue;
+
+        const QModelIndex idx = m_workspaceModel->index(path);
+        if (idx.isValid())
+            m_workspaceTree->expand(idx);
+    }
+}
+
+void MainWindow::setWorkspaceTreeVisible(bool visible, bool persist)
+{
+    m_workspaceTreeVisible = visible;
+
+    if (m_workspaceToggle) {
+        const QSignalBlocker blocker(m_workspaceToggle);
+        m_workspaceToggle->setChecked(visible);
+    }
+
+    updateWorkspaceToggleIcon();
+
+    if (m_workspacePanel) {
+        m_workspacePanel->setVisible(visible && !m_workspaceRootPath.isEmpty());
+    }
+
+    if (visible && !m_workspaceRootPath.isEmpty())
+        QTimer::singleShot(0, this, [this]() { restoreWorkspaceExpandedState(); });
+
+    if (persist)
+        writeSettings();
+}
+
+void MainWindow::updateWorkspaceTreeRoot()
+{
+    if (!m_workspacePanel || !m_workspaceTree || !m_workspaceModel)
+        return;
+
+    const QString root = workspaceRootForTabs();
+    if (root.isEmpty()) {
+        m_workspaceRootPath.clear();
+        m_workspacePanel->setVisible(false);
+        return;
+    }
+
+    const bool rootChanged = (root != m_workspaceRootPath);
+    m_workspaceRootPath = root;
+    m_workspacePanel->setVisible(m_workspaceTreeVisible);
+
+    const QModelIndex rootIndex = m_workspaceModel->setRootPath(root);
+    m_workspaceTree->setRootIndex(rootIndex);
+    QModelIndex selectionIndex = rootIndex;
+    if (TabPage* pg = m_tabs->currentPage()) {
+        const QString currentPath = pg->model->filePath();
+        if (!currentPath.isEmpty()) {
+            const QString rel = QDir(root).relativeFilePath(currentPath);
+            if (!rel.startsWith(QStringLiteral(".."))) {
+                const QModelIndex currentIndex = m_workspaceModel->index(currentPath);
+                if (currentIndex.isValid())
+                    selectionIndex = currentIndex;
+            }
+        }
+    }
+    m_workspaceTree->setCurrentIndex(selectionIndex);
+
+    if (rootChanged || m_workspaceTreeVisible)
+        QTimer::singleShot(0, this, [this]() { restoreWorkspaceExpandedState(); });
+}
+
+void MainWindow::updateWorkspaceToggleIcon()
+{
+    if (!m_workspaceToggle)
+        return;
+    bool dark = false;
+    if (m_theme == QStringLiteral("dark")) {
+        dark = true;
+    } else if (m_theme == QStringLiteral("system")) {
+        dark = (QApplication::palette().color(QPalette::Window).lightness() < 128);
+    }
+    QColor iconColor = dark ? QColor(0xcc, 0xcc, 0xcc) : QColor(0x44, 0x44, 0x44);
+    const QChar code = m_workspaceTreeVisible ? QChar(0xE2C8) : QChar(0xE2C7);
+    m_workspaceToggle->setIcon(IconHelper::materialIcon(code, iconColor, 20));
+}
+
+// ---------------------------------------------------------------------------
 // Drag and drop
 // ---------------------------------------------------------------------------
 void MainWindow::dragEnterEvent(QDragEnterEvent* event)
@@ -1023,10 +1570,10 @@ void MainWindow::onFileChanged(const QString& path)
 
         if (btn == QMessageBox::Yes) {
             QFile f(path);
-            if (f.open(QIODevice::ReadOnly | QIODevice::Text)) {
-                QTextStream in(&f);
-                in.setEncoding(QStringConverter::Utf8);
-                pg->editor->setPlainText(in.readAll());
+            if (f.open(QIODevice::ReadOnly)) {
+                const QByteArray raw = f.readAll();
+                pg->model->setLineEnding(detectLineEnding(raw));
+                pg->editor->setPlainText(normalizeLoadedText(decodeUtf8Text(raw)));
                 pg->model->setDirty(false);
                 m_tabs->refreshTitle(i);
                 updateWindowTitle();
@@ -1048,7 +1595,29 @@ void MainWindow::readSettings()
     restoreGeometry(s.value(QStringLiteral("geometry")).toByteArray());
     m_recentFiles = s.value(QStringLiteral("recentFiles")).toStringList();
     m_theme = s.value(QStringLiteral("theme"), QStringLiteral("system")).toString();
-    m_previewVisible = s.value(QStringLiteral("previewVisible"), true).toBool();
+    m_markdownPreviewVisible = s.value(QStringLiteral("previewVisible"), true).toBool();
+    m_workspaceTreeVisible = s.value(QStringLiteral("workspaceTreeVisible"), false).toBool();
+    m_restoreSessionOnStartup = s.value(QStringLiteral("restoreSessionOnStartup"), false).toBool();
+
+    m_sessionTabs.clear();
+    const int sessionCount = s.beginReadArray(QStringLiteral("session/tabs"));
+    m_sessionTabs.reserve(sessionCount);
+    for (int i = 0; i < sessionCount; ++i) {
+        s.setArrayIndex(i);
+        SessionTabState state;
+        state.path = s.value(QStringLiteral("path")).toString();
+        state.cursorPos = s.value(QStringLiteral("cursorPos"), 0).toInt();
+        state.editorScroll = s.value(QStringLiteral("editorScroll"), 0).toInt();
+        state.previewScroll = s.value(QStringLiteral("previewScroll"), 0).toInt();
+        state.mode = static_cast<EditorMode>(
+            s.value(QStringLiteral("mode"), static_cast<int>(EditorMode::Markdown)).toInt());
+        state.previewVisible = s.value(QStringLiteral("previewVisible"), true).toBool();
+        if (!state.path.isEmpty())
+            m_sessionTabs.append(state);
+    }
+    s.endArray();
+    m_sessionActiveTab = s.value(QStringLiteral("session/activeTab"), -1).toInt();
+
     const auto pageSizeId = static_cast<QPageSize::PageSizeId>(
         s.value(QStringLiteral("pdf/pageSizeId"), static_cast<int>(QPageSize::A4)).toInt());
     if (pageSizeId == QPageSize::Custom) {
@@ -1071,15 +1640,175 @@ void MainWindow::readSettings()
         s.value(QStringLiteral("pdf/marginBottomMm"), 20.0).toDouble());
     m_pdfExportOptions.fontSize = s.value(QStringLiteral("pdf/fontSize"), 12).toInt();
     rebuildRecentMenu();
+    const QByteArray splitterState = s.value(QStringLiteral("workspaceSplitterState")).toByteArray();
+    if (!splitterState.isEmpty() && m_mainSplitter)
+        m_mainSplitter->restoreState(splitterState);
 }
 
+// ---------------------------------------------------------------------------
+// Update check
+// ---------------------------------------------------------------------------
+void MainWindow::checkForUpdates()
+{
+    if (!m_networkManager)
+        m_networkManager = new QNetworkAccessManager(this);
+
+    statusBar()->showMessage(tr("Checking for updates..."));
+
+    QNetworkRequest request(QUrl(QStringLiteral("https://api.github.com/repos/skypediacode/fastmd/releases/latest")));
+    request.setHeader(QNetworkRequest::UserAgentHeader,
+        QStringLiteral("FastMD/") + QApplication::applicationVersion());
+    request.setRawHeader("Accept", "application/vnd.github+json");
+
+    QNetworkReply* reply = m_networkManager->get(request);
+    connect(reply, &QNetworkReply::finished, this, [this, reply]() {
+        reply->deleteLater();
+        statusBar()->clearMessage();
+
+        if (reply->error() != QNetworkReply::NoError) {
+            QMessageBox::warning(this, tr("Update Check Failed"),
+                tr("Could not check for updates:\n%1").arg(reply->errorString()));
+            return;
+        }
+
+        const QJsonDocument doc = QJsonDocument::fromJson(reply->readAll());
+        if (!doc.isObject()) {
+            QMessageBox::warning(this, tr("Update Check Failed"),
+                tr("Received an unexpected response from the server."));
+            return;
+        }
+
+        const QJsonObject obj = doc.object();
+        QString tagName = obj.value(QStringLiteral("tag_name")).toString().trimmed();
+        if (tagName.startsWith('v', Qt::CaseInsensitive))
+            tagName.removeFirst();
+
+        if (tagName.isEmpty()) {
+            QMessageBox::warning(this, tr("Update Check Failed"),
+                tr("Could not parse the release information."));
+            return;
+        }
+
+        const QString currentVersion = QApplication::applicationVersion();
+
+        auto compareVersions = [](const QString& a, const QString& b) -> int {
+            auto parts = [](const QString& v) {
+                QList<int> r;
+                for (const QString& s : v.split('.'))
+                    r.append(s.toInt());
+                while (r.size() < 3) r.append(0);
+                return r;
+            };
+            const QList<int> pa = parts(a), pb = parts(b);
+            for (int i = 0; i < 3; ++i) {
+                if (pa[i] < pb[i]) return -1;
+                if (pa[i] > pb[i]) return  1;
+            }
+            return 0;
+        };
+
+        if (compareVersions(currentVersion, tagName) >= 0) {
+            QMessageBox::information(this, tr("Up to Date"),
+                tr("<b>FastMD</b> is up to date.<br><br>"
+                   "Installed version: <b>%1</b>").arg(currentVersion));
+            return;
+        }
+
+        // Newer version available
+        const QString releaseTitle = obj.value(QStringLiteral("name")).toString();
+        const QString releaseNotes = obj.value(QStringLiteral("body")).toString();
+        const QString releaseUrl   = obj.value(QStringLiteral("html_url")).toString();
+
+        QString downloadUrl;
+        const QJsonArray assets = obj.value(QStringLiteral("assets")).toArray();
+        for (const QJsonValue& asset : assets) {
+            const QJsonObject a = asset.toObject();
+            const QString name = a.value(QStringLiteral("name")).toString();
+            if (name.endsWith(QStringLiteral("Setup.exe"), Qt::CaseInsensitive)) {
+                downloadUrl = a.value(QStringLiteral("browser_download_url")).toString();
+                break;
+            }
+        }
+
+        auto* dlg = new QDialog(this);
+        dlg->setAttribute(Qt::WA_DeleteOnClose);
+        dlg->setWindowTitle(tr("Update Available"));
+        dlg->setMinimumWidth(480);
+
+        auto* vbox = new QVBoxLayout(dlg);
+        vbox->setSpacing(12);
+        vbox->setContentsMargins(20, 20, 20, 20);
+
+        auto* headerLabel = new QLabel(
+            tr("<b>A new version of FastMD is available!</b><br><br>"
+               "Current version:&nbsp;<b>%1</b><br>"
+               "Latest version:&nbsp;&nbsp;<b>%2</b>")
+            .arg(currentVersion, tagName), dlg);
+        headerLabel->setWordWrap(true);
+        vbox->addWidget(headerLabel);
+
+        if (!releaseTitle.isEmpty()) {
+            auto* titleLabel = new QLabel(
+                QStringLiteral("<b>") + releaseTitle.toHtmlEscaped() + QStringLiteral("</b>"), dlg);
+            titleLabel->setWordWrap(true);
+            vbox->addWidget(titleLabel);
+        }
+
+        if (!releaseNotes.isEmpty()) {
+            auto* notesBox = new QTextBrowser(dlg);
+            notesBox->setPlainText(releaseNotes);
+            notesBox->setReadOnly(true);
+            notesBox->setMaximumHeight(200);
+            vbox->addWidget(notesBox);
+        }
+
+        auto* hbox = new QHBoxLayout;
+        hbox->addStretch();
+
+        if (!releaseUrl.isEmpty()) {
+            auto* btnGitHub = new QPushButton(tr("View on GitHub"), dlg);
+            const QString capturedUrl = releaseUrl;
+            connect(btnGitHub, &QPushButton::clicked, this, [capturedUrl]() {
+                QDesktopServices::openUrl(QUrl(capturedUrl));
+            });
+            hbox->addWidget(btnGitHub);
+        }
+
+        if (!downloadUrl.isEmpty()) {
+            auto* btnDownload = new QPushButton(tr("Download"), dlg);
+            btnDownload->setDefault(true);
+            const QString capturedDownload = downloadUrl;
+            connect(btnDownload, &QPushButton::clicked, this, [capturedDownload]() {
+                QDesktopServices::openUrl(QUrl(capturedDownload));
+            });
+            hbox->addWidget(btnDownload);
+        }
+
+        auto* btnClose = new QPushButton(tr("Close"), dlg);
+        connect(btnClose, &QPushButton::clicked, dlg, &QDialog::close);
+        hbox->addWidget(btnClose);
+
+        vbox->addLayout(hbox);
+        dlg->exec();
+    });
+}
+
+// ---------------------------------------------------------------------------
 void MainWindow::writeSettings()
 {
     QSettings s;
-    s.setValue(QStringLiteral("geometry"),    saveGeometry());
+    s.setValue(QStringLiteral("geometry"), saveGeometry());
     s.setValue(QStringLiteral("recentFiles"), m_recentFiles);
-    s.setValue(QStringLiteral("theme"),       m_theme);
-    s.setValue(QStringLiteral("previewVisible"), m_previewVisible);
+    s.setValue(QStringLiteral("theme"), m_theme);
+    s.setValue(QStringLiteral("previewVisible"), m_markdownPreviewVisible);
+    s.setValue(QStringLiteral("workspaceTreeVisible"), m_workspaceTreeVisible);
+    s.setValue(QStringLiteral("restoreSessionOnStartup"), m_restoreSessionOnStartup);
+    if (m_mainSplitter && m_workspacePanel && m_workspacePanel->isVisible())
+        s.setValue(QStringLiteral("workspaceSplitterState"), m_mainSplitter->saveState());
+    if (m_activeEditor) {
+        int ps = m_activeEditor->font().pixelSize();
+        if (ps > 0) s.setValue(QStringLiteral("editorFontSize"), ps);
+    }
     s.setValue(QStringLiteral("pdf/pageSizeId"), static_cast<int>(m_pdfExportOptions.pageSize.id()));
     if (m_pdfExportOptions.pageSize.id() == QPageSize::Custom) {
         const QSizeF sizeMm = m_pdfExportOptions.pageSize.size(QPageSize::Millimeter);
@@ -1093,4 +1822,27 @@ void MainWindow::writeSettings()
     s.setValue(QStringLiteral("pdf/marginRightMm"), m_pdfExportOptions.marginsMm.right());
     s.setValue(QStringLiteral("pdf/marginBottomMm"), m_pdfExportOptions.marginsMm.bottom());
     s.setValue(QStringLiteral("pdf/fontSize"), m_pdfExportOptions.fontSize);
+
+    s.remove(QStringLiteral("session/tabs"));
+    s.beginWriteArray(QStringLiteral("session/tabs"));
+    int sessionIndex = 0;
+    int activeIndex = -1;
+    for (int i = 0; i < m_tabs->count(); ++i) {
+        TabPage* pg = m_tabs->pageAt(i);
+        if (!pg || pg->model->filePath().isEmpty())
+            continue;
+
+        s.setArrayIndex(sessionIndex);
+        s.setValue(QStringLiteral("path"), pg->model->filePath());
+        s.setValue(QStringLiteral("cursorPos"), pg->editor->textCursor().position());
+        s.setValue(QStringLiteral("editorScroll"), pg->editor->verticalScrollBar()->value());
+        s.setValue(QStringLiteral("previewScroll"), pg->preview->verticalScrollBar()->value());
+        s.setValue(QStringLiteral("mode"), static_cast<int>(pg->model->editorMode()));
+        s.setValue(QStringLiteral("previewVisible"), pg->model->markdownPreviewVisible());
+        if (i == m_tabs->currentIndex())
+            activeIndex = sessionIndex;
+        ++sessionIndex;
+    }
+    s.endArray();
+    s.setValue(QStringLiteral("session/activeTab"), activeIndex);
 }
