@@ -24,7 +24,19 @@ To guarantee that typing performance remains inviolable, FastMD relies on strict
 
 Just you, your words, and blistering fast performance.
 
-## ✨ Key Features & Unique Selling Propositions (USP)
+## ✨ Key Features
+
+### 🎯 Core Capabilities
+
+- **Markdown Editor:** Full CommonMark support with syntax highlighting
+- **Plain Text Mode:** Edit plain text files (.txt, .log, .csv, etc.) with dedicated mode
+- **Live Preview:** Real-time Markdown preview side-by-side with editor
+- **HTML & PDF Export:** Generate clean, self-contained HTML or beautifully formatted PDFs
+- **Workspace Tree:** Browse and open files from your project folder
+- **Session Restore:** Automatically restore previous session on startup
+- **File Type Association:** Associate supported file types with FastMD
+- **Check for Updates:** Stay up-to-date with built-in GitHub release checker
+- **Preferences:** Customize editor behavior and startup settings
 
 ### 📊 By The Numbers (FastMD vs. Electron)
 
@@ -59,6 +71,14 @@ What you see is what you export. FastMD uses a **single rendering pipeline** for
 - **Material Icons Toolbar:** A crisp, Notepad++ style lightweight toolbar utilizing embedded Material Icons.
 - **Tabbed Interface:** Effortlessly manage multiple files with an intuitive tabbed workspace.
 
+## 📥 Installation
+
+### For End Users
+
+Download the latest `FastMD-Setup.exe` from the [GitHub Releases](https://github.com/skypediacode/fastmd/releases) page. The installer will set up FastMD on your Windows system and optionally associate supported file types.
+
+### For Developers
+
 ## 🛠️ Build Instructions
 
 FastMD is currently a Windows-only application compiled with MSVC. Other operating systems will be supported in the future.
@@ -86,7 +106,7 @@ FastMD is currently a Windows-only application compiled with MSVC. Other operati
 
 ## 🤝 Contributing
 
-FastMD is an open-source project. If you are aligned with our philosophy of extreme speed and native execution, we welcome your pull requests! Please review our `AGENTS.md` to understand our architectural constraints before contributing.
+FastMD is an open-source project. If you are aligned with our philosophy of extreme speed and native execution, we welcome your pull requests! Please ensure your contributions maintain our core architectural principles: prioritize speed, keep the codebase lean, and avoid heavy dependencies.
 
 ## 📜 License
 
