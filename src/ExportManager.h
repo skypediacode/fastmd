@@ -7,8 +7,8 @@
 class QWidget;
 
 namespace FastMdDefaults {
-inline constexpr int PreviewFontSize = 16;
-inline constexpr int EditorFontSize = 15;
+inline constexpr int PreviewFontSize = 17;
+inline constexpr int EditorFontSize = 16;
 inline constexpr int MinimumPreviewFontSize = 6;
 }
 

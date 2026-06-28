@@ -10,6 +10,7 @@ public:
     explicit MarkdownHighlighter(QTextDocument* parent = nullptr);
 
     void setDarkMode(bool dark);
+    void setEnabled(bool enabled);
 
 protected:
     void highlightBlock(const QString& text) override;
@@ -24,6 +25,7 @@ private:
     std::vector<Rule> m_rules;
     QTextCharFormat   m_codeBlockFmt;
     bool              m_dark = false;
+    bool              m_enabled = true;
 
     void buildRules();
 };

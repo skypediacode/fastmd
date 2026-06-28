@@ -11,6 +11,7 @@ public:
     void setBasePath(const QString& path);
     void setDarkMode(bool dark);
     bool isRefreshing() const { return m_refreshing; }
+    void setBaseFontSize(int size) { m_baseFontSize = size; refresh(); }
 
 public slots:
     void zoomIn(int range = 1);

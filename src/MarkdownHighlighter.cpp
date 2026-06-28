@@ -13,6 +13,15 @@ void MarkdownHighlighter::setDarkMode(bool dark)
     rehighlight();
 }
 
+void MarkdownHighlighter::setEnabled(bool enabled)
+{
+    if (m_enabled == enabled)
+        return;
+
+    m_enabled = enabled;
+    rehighlight();
+}
+
 void MarkdownHighlighter::buildRules()
 {
     m_rules.clear();
@@ -148,6 +157,11 @@ void MarkdownHighlighter::buildRules()
 
 void MarkdownHighlighter::highlightBlock(const QString& text)
 {
+    if (!m_enabled) {
+        setCurrentBlockState(0);
+        return;
+    }
+
     // --- fenced code block (multi-line state) ---
     // state 0 = normal, state 1 = inside ``` block
     bool wasInBlock = (previousBlockState() == 1);
