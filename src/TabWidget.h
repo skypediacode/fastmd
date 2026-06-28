@@ -10,6 +10,7 @@ class PreviewWidget;
 class QSplitter;
 class QToolButton;
 class QPaintEvent;
+class QShowEvent;
 
 struct TabPage {
     DocumentModel* model   = nullptr;
@@ -57,10 +58,14 @@ protected:
 class TabWidget : public QTabWidget {
     Q_OBJECT
 public:
+    using QTabWidget::tabBar;
+
     explicit TabWidget(QWidget* parent = nullptr);
 
+    void updateTabBarLayout();
+
     // Returns the new tab index
-    int  addNewTab(const QString& filePath = {});
+    int  addNewTab(const QString& filePath = {}, bool activate = true);
     void closeTabAt(int index);
 
     TabPage*      currentPage()  const;
@@ -72,6 +77,13 @@ public:
     void markDirty(int index, bool dirty);
     void refreshTitle(int index);
     void setDarkMode(bool dark);
+
+protected:
+    bool event(QEvent* event) override;
+    void resizeEvent(QResizeEvent* event) override;
+    void showEvent(QShowEvent* event) override;
+    void tabInserted(int index) override;
+    void tabRemoved(int index) override;
 
 signals:
     void editorActivated(MarkdownEditor* editor, PreviewWidget* preview);

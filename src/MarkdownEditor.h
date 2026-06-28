@@ -11,6 +11,7 @@ public:
     explicit MarkdownEditor(QWidget* parent = nullptr);
 
     void setDarkMode(bool dark);
+    void setMarkdownMode(bool markdown);
     void setDocumentPath(const QString& path);
     const QString& documentPath() const;
 
@@ -39,6 +40,7 @@ public slots:
 signals:
     void contentReady();   // emitted after 200 ms debounce
     void zoomRequested(int delta); // delta is +1 or -1
+    void lineNumberWidthChanged(int width);
 
 protected:
     void resizeEvent(QResizeEvent* event) override;
@@ -63,6 +65,7 @@ private:
     QTimer*             m_debounce;
     QString             m_documentPath;
     bool                m_dark = false;
+    bool                m_markdownMode = true;
 };
 
 

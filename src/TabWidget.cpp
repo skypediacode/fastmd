@@ -6,13 +6,21 @@
 #include <QSplitter>
 #include <QScrollBar>
 #include <QToolButton>
+#include <QTimer>
 #include <QHBoxLayout>
 #include <QStyle>
 #include <QFont>
 #include <QPainter>
 #include <QSettings>
+#include <QFileInfo>
+#include <QEvent>
+#include <QMoveEvent>
+#include <QResizeEvent>
+#include <QShowEvent>
 
 int TabWidget::s_untitled = 0;
+
+
 
 class TabWidget::CloseTabButton : public QToolButton {
 public:
@@ -77,7 +85,7 @@ TabWidget::TabWidget(QWidget* parent)
 }
 
 // ---------------------------------------------------------------------------
-int TabWidget::addNewTab(const QString& filePath)
+int TabWidget::addNewTab(const QString& filePath, bool activate)
 {
     auto* page    = new TabPage;
     page->model   = new DocumentModel(++s_untitled);
@@ -101,7 +109,16 @@ int TabWidget::addNewTab(const QString& filePath)
     if (!state.isEmpty()) {
         page->splitter->restoreState(state);
     }
-    page->preview->setVisible(s.value(QStringLiteral("previewVisible"), true).toBool());
+    const bool markdownPreviewVisible = s.value(QStringLiteral("previewVisible"), true).toBool();
+    page->model->setMarkdownPreviewVisible(markdownPreviewVisible);
+    page->preview->setVisible(page->model->editorMode() == EditorMode::Markdown && markdownPreviewVisible);
+    page->editor->setMarkdownMode(page->model->editorMode() == EditorMode::Markdown);
+    
+    int fontSize = s.value(QStringLiteral("editorFontSize"), FastMdDefaults::EditorFontSize).toInt();
+    QFont f = page->editor->font();
+    f.setPixelSize(fontSize);
+    page->editor->setFont(f);
+    page->preview->setBaseFontSize(fontSize);
 
     connect(page->splitter, &QSplitter::splitterMoved, this, [page](int, int) {
         QSettings s;
@@ -121,8 +138,10 @@ int TabWidget::addNewTab(const QString& filePath)
     m_pages.append(page);
     int idx = addTab(page->splitter, page->model->displayName());
     tabBar()->setTabButton(idx, QTabBar::RightSide, makeCloseButton(page));
-    setCurrentIndex(idx);
-    page->editor->setFocus();
+    if (activate) {
+        setCurrentIndex(idx);
+        page->editor->setFocus();
+    }
     return idx;
 }
 
@@ -206,9 +225,56 @@ void TabWidget::onCurrentChanged(int index)
 {
     if (TabPage* p = pageAt(index))
         emit editorActivated(p->editor, p->preview);
+    QTimer::singleShot(0, this, &TabWidget::updateTabBarLayout);
 }
 
 void TabWidget::onCloseRequested(int index)
 {
     emit tabClosed(index);
+}
+
+void TabWidget::updateTabBarLayout()
+{
+    if (auto* bar = tabBar()) {
+        int w = 0;
+        if (auto* corner = cornerWidget(Qt::TopLeftCorner)) {
+            if (!corner->isHidden()) {
+                w = corner->width();
+            }
+        }
+        bar->move(w, bar->y());
+        bar->resize(width() - w, bar->height());
+    }
+}
+
+bool TabWidget::event(QEvent* event)
+{
+    bool result = QTabWidget::event(event);
+    if (event->type() == QEvent::LayoutRequest)
+        updateTabBarLayout();
+    return result;
+}
+
+void TabWidget::resizeEvent(QResizeEvent* event)
+{
+    QTabWidget::resizeEvent(event);
+    updateTabBarLayout();
+}
+
+void TabWidget::showEvent(QShowEvent* event)
+{
+    QTabWidget::showEvent(event);
+    QTimer::singleShot(0, this, &TabWidget::updateTabBarLayout);
+}
+
+void TabWidget::tabInserted(int index)
+{
+    QTabWidget::tabInserted(index);
+    QTimer::singleShot(0, this, &TabWidget::updateTabBarLayout);
+}
+
+void TabWidget::tabRemoved(int index)
+{
+    QTabWidget::tabRemoved(index);
+    QTimer::singleShot(0, this, &TabWidget::updateTabBarLayout);
 }

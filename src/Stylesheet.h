@@ -104,6 +104,25 @@ QToolButton:checked {
     background: rgba(0,120,212,0.13);
     border-color: rgba(0,120,212,0.30);
 }
+QToolButton[modeToggle="true"] {
+    min-width: 150px;
+    max-width: 150px;
+    padding: 4px 12px;
+    font-weight: 600;
+    font-size: 16px;
+}
+QToolButton[modeToggle="true"]::menu-indicator {
+    image: none;
+    width: 0px;
+}
+QToolButton[modeToggle="true"]:hover {
+    background: rgba(0,0,0,0.10);
+    border-color: rgba(0,0,0,0.16);
+}
+QToolButton[modeToggle="true"]:checked {
+    background: rgba(0,120,212,0.18);
+    border-color: rgba(0,120,212,0.36);
+}
 
 /* ─── Menu bar ──────────────────────────────────────────────── */
 QMenuBar {
@@ -180,7 +199,7 @@ QPlainTextEdit {
     color: #222222;
     selection-background-color: #add6ff;
     selection-color: #000000;
-    font-family: "JetBrains Mono", "IBM Plex Mono", "Cascadia Code", "Cascadia Mono", "Consolas", monospace;
+    font-family: "Consolas", "JetBrains Mono", "IBM Plex Mono", "Cascadia Code", "Cascadia Mono", "Courier New", monospace;
 }
 QTextBrowser  { border: none; background: #f9f9f9; }
 
@@ -204,7 +223,7 @@ QPushButton {
     background: #f0f0f0;
     border: 1px solid #c4c4c4;
     border-radius: 4px;
-    padding: 5px 18px;
+    padding: 4px 18px 6px 18px;
     font-size: 13px;
     font-family: "Segoe UI";
     color: #222;
@@ -289,6 +308,25 @@ QToolButton:checked {
     background: rgba(0,120,212,0.28);
     border-color: rgba(0,120,212,0.45);
 }
+QToolButton[modeToggle="true"] {
+    min-width: 150px;
+    max-width: 150px;
+    padding: 4px 12px;
+    font-weight: 600;
+    font-size: 16px;
+}
+QToolButton[modeToggle="true"]::menu-indicator {
+    image: none;
+    width: 0px;
+}
+QToolButton[modeToggle="true"]:hover {
+    background: rgba(255,255,255,0.14);
+    border-color: rgba(255,255,255,0.18);
+}
+QToolButton[modeToggle="true"]:checked {
+    background: rgba(0,120,212,0.34);
+    border-color: rgba(0,120,212,0.52);
+}
 
 /* ─── Menu bar ──────────────────────────────────────────────── */
 QMenuBar {
@@ -365,7 +403,7 @@ QPlainTextEdit {
     color: #d4d4d4;
     selection-background-color: #264f78;
     selection-color: #ffffff;
-    font-family: "JetBrains Mono", "IBM Plex Mono", "Cascadia Code", "Cascadia Mono", "Consolas", monospace;
+    font-family: "Consolas", "JetBrains Mono", "IBM Plex Mono", "Cascadia Code", "Cascadia Mono", "Courier New", monospace;
 }
 QTextBrowser  { border: none; background: #252526; }
 
@@ -389,7 +427,7 @@ QPushButton {
     background: #3c3c3c;
     border: 1px solid #555555;
     border-radius: 4px;
-    padding: 5px 18px;
+    padding: 4px 18px 6px 18px;
     font-size: 13px;
     font-family: "Segoe UI";
     color: #cccccc;

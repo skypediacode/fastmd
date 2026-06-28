@@ -43,12 +43,14 @@ MarkdownEditor::MarkdownEditor(QWidget* parent)
 {
     // monospace font — prefer modern coding fonts, fall back gracefully
     QFont font;
-    font.setFamilies({ QStringLiteral("JetBrains Mono"),
+    font.setFamilies({ QStringLiteral("Consolas"),
+                       QStringLiteral("JetBrains Mono"),
                        QStringLiteral("IBM Plex Mono"),
                        QStringLiteral("Cascadia Code"),
                        QStringLiteral("Cascadia Mono"),
-                       QStringLiteral("Consolas"),
-                       QStringLiteral("Courier New") });
+                       QStringLiteral("Courier New"),
+                       QStringLiteral("monospace") });
+    font.setStyleHint(QFont::Monospace);
     font.setPixelSize(FastMdDefaults::EditorFontSize);
     font.setFixedPitch(true);
     setFont(font);
@@ -93,6 +95,15 @@ void MarkdownEditor::setDarkMode(bool dark)
     m_lineNumbers->update();
 }
 
+void MarkdownEditor::setMarkdownMode(bool markdown)
+{
+    if (m_markdownMode == markdown)
+        return;
+
+    m_markdownMode = markdown;
+    m_highlighter->setEnabled(markdown);
+}
+
 void MarkdownEditor::setDocumentPath(const QString& path)
 {
     m_documentPath = path;
@@ -116,6 +127,7 @@ void MarkdownEditor::repositionLineNumberArea()
     setViewportMargins(w, kEditorTopPadding, 0, 0);
     QRect cr = contentsRect();
     m_lineNumbers->setGeometry(QRect(cr.left(), cr.top(), w, cr.height()));
+    emit lineNumberWidthChanged(w);
 }
 
 void MarkdownEditor::resizeEvent(QResizeEvent* e)
@@ -141,19 +153,15 @@ void MarkdownEditor::wheelEvent(QWheelEvent* e)
 
 bool MarkdownEditor::canInsertFromMimeData(const QMimeData* source) const
 {
+    if (source && source->hasText())
+        return true;
+
     if (source && source->hasUrls()) {
         const QList<QUrl> urls = source->urls();
-        bool hasImageFile = false;
         for (const QUrl& url : urls) {
-            if (!url.isLocalFile())
-                return QPlainTextEdit::canInsertFromMimeData(source);
-            if (isImageFilePath(url.toLocalFile()))
-                hasImageFile = true;
-            else
-                return QPlainTextEdit::canInsertFromMimeData(source);
+            if (url.isLocalFile() && isImageFilePath(url.toLocalFile()))
+                return true;
         }
-        if (hasImageFile)
-            return true;
     }
 
     return QPlainTextEdit::canInsertFromMimeData(source);
@@ -165,20 +173,13 @@ void MarkdownEditor::insertFromMimeData(const QMimeData* source)
         QStringList imagePaths;
         const QList<QUrl> urls = source->urls();
         for (const QUrl& url : urls) {
-            if (!url.isLocalFile()) {
-                QPlainTextEdit::insertFromMimeData(source);
-                return;
+            if (url.isLocalFile() && isImageFilePath(url.toLocalFile())) {
+                imagePaths.append(url.toLocalFile());
             }
-
-            const QString localPath = url.toLocalFile();
-            if (!isImageFilePath(localPath)) {
-                QPlainTextEdit::insertFromMimeData(source);
-                return;
-            }
-            imagePaths.append(localPath);
         }
 
-        if (!imagePaths.isEmpty()) {
+        // If the user pasted image files ONLY (no text), insert the images
+        if (!imagePaths.isEmpty() && (!source->hasText() || source->text().trimmed().isEmpty() || source->text().startsWith("file://"))) {
             insertDroppedImages(imagePaths);
             return;
         }
@@ -189,13 +190,30 @@ void MarkdownEditor::insertFromMimeData(const QMimeData* source)
 
 void MarkdownEditor::zoomIn(int range)
 {
-    QPlainTextEdit::zoomIn(range);
+    QFont f = font();
+    int ps = f.pixelSize();
+    if (ps > 0) {
+        f.setPixelSize(ps + range);
+        setFont(f);
+    } else {
+        QPlainTextEdit::zoomIn(range);
+    }
     repositionLineNumberArea();
 }
 
 void MarkdownEditor::zoomOut(int range)
 {
-    QPlainTextEdit::zoomOut(range);
+    QFont f = font();
+    int ps = f.pixelSize();
+    if (ps > 0) {
+        int newSize = ps - range;
+        if (newSize < FastMdDefaults::MinimumPreviewFontSize)
+            newSize = FastMdDefaults::MinimumPreviewFontSize;
+        f.setPixelSize(newSize);
+        setFont(f);
+    } else {
+        QPlainTextEdit::zoomOut(range);
+    }
     repositionLineNumberArea();
 }
 
