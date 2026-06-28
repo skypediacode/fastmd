@@ -11,3 +11,11 @@ QString DocumentModel::displayName() const
         return QStringLiteral("Untitled %1").arg(m_untitledIndex);
     return QFileInfo(m_filePath).fileName();
 }
+
+EditorMode DocumentModel::modeForPath(const QString& path)
+{
+    const QString suffix = QFileInfo(path).suffix().toLower();
+    if (suffix == QStringLiteral("txt"))
+        return EditorMode::PlainText;
+    return EditorMode::Markdown;
+}
