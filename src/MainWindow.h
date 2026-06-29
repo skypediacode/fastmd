@@ -49,6 +49,7 @@ private slots:
     // Edit
     void openFind();
     void openReplace();
+    FindReplaceDialog* findDialog();  // lazily creates m_findDialog on first use
 
     // View
     void togglePreview();
@@ -85,6 +86,7 @@ private:
 
     void addToRecent(const QString& path);
     void rebuildRecentMenu();
+    void ensureWorkspaceModel();   // lazily creates the QFileSystemModel on first tree reveal
     void updateWorkspaceTreeRoot();
     void setWorkspaceTreeVisible(bool visible, bool persist = true);
     QString workspaceRootForTabs() const;
@@ -126,7 +128,7 @@ private:
 
     // ---- widgets ----
     TabWidget*          m_tabs;
-    FindReplaceDialog*  m_findDialog;
+    FindReplaceDialog*  m_findDialog = nullptr;
     QLabel*             m_lblPosition;
     QLabel*             m_lblWords;
     QLabel*             m_lblMode;

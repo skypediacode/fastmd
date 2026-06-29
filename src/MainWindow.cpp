@@ -1,4 +1,5 @@
 #include "MainWindow.h"
+#include "StartupProfiler.h"
 
 #include "TabWidget.h"
 #include "MarkdownEditor.h"
@@ -213,16 +214,25 @@ MainWindow::MainWindow(QWidget* parent)
     setMinimumSize(800, 500);
     resize(1200, 750);
 
-    m_findDialog = new FindReplaceDialog(this);
+    FASTMD_MARK("  ctor: begin");
     m_watcher    = new QFileSystemWatcher(this);
+    FASTMD_MARK("  ctor: watcher");
+    // m_findDialog is created lazily on first Find/Replace — see findDialog().
+    FASTMD_MARK("  ctor: findDialog (deferred)");
 
     createWorkspacePanel();
+    FASTMD_MARK("  ctor: createWorkspacePanel");
     createMenus();
+    FASTMD_MARK("  ctor: createMenus");
     createToolbar();
+    FASTMD_MARK("  ctor: createToolbar");
     createStatusBar();
+    FASTMD_MARK("  ctor: createStatusBar");
     readSettings();
+    FASTMD_MARK("  ctor: readSettings");
     setWorkspaceTreeVisible(m_workspaceTreeVisible, false);
     applyTheme(m_theme);
+    FASTMD_MARK("  ctor: applyTheme");
 
     connect(m_tabs, &TabWidget::editorActivated, this, &MainWindow::onEditorActivated);
     connect(m_tabs, &TabWidget::tabClosed,       this, &MainWindow::onTabCloseRequested);
@@ -234,8 +244,10 @@ MainWindow::MainWindow(QWidget* parent)
         QTimer::singleShot(0, this, [this]() { restorePreviousSession(); });
     } else {
         m_tabs->addNewTab();
+        FASTMD_MARK("  ctor: first tab created");
         updateWorkspaceTreeRoot();
         syncCurrentTabUi();
+        FASTMD_MARK("  ctor: first tab UI synced");
     }
 }
 
@@ -261,14 +273,12 @@ void MainWindow::createWorkspacePanel()
     m_workspaceTree->setRootIsDecorated(true);
     m_workspaceTree->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
 
-    m_workspaceModel = new QFileSystemModel(this);
-    m_workspaceModel->setOption(QFileSystemModel::DontUseCustomDirectoryIcons, true);
-    m_workspaceModel->setFilter(QDir::AllDirs | QDir::Files | QDir::NoDotAndDotDot);
-    m_workspaceModel->setReadOnly(true);
-    m_workspaceTree->setModel(m_workspaceModel);
-    m_workspaceTree->setSortingEnabled(true);
-    m_workspaceTree->sortByColumn(0, Qt::AscendingOrder);
-
+    // The QFileSystemModel is NOT created here: constructing it spins up a
+    // background file-info-gatherer thread and initializes the Windows shell
+    // icon provider (~100 ms), yet the workspace tree is hidden by default.
+    // It is created lazily by ensureWorkspaceModel() the first time the tree
+    // is actually shown. The tree's signal handlers below all null-guard the
+    // model, so they are safe before it exists.
     connect(m_workspaceTree, &QTreeView::activated, this, [this](const QModelIndex& index) {
         if (!index.isValid() || !m_workspaceModel || m_workspaceModel->isDir(index))
             return;
@@ -283,11 +293,6 @@ void MainWindow::createWorkspacePanel()
         if (!index.isValid() || !m_workspaceModel)
             return;
         rememberWorkspaceExpansion(m_workspaceModel->filePath(index), false);
-    });
-    connect(m_workspaceModel, &QFileSystemModel::directoryLoaded, this, [this](const QString& /*path*/) {
-        if (m_workspaceTreeVisible) {
-            restoreWorkspaceExpandedState();
-        }
     });
 
     panelLayout->addWidget(m_workspaceTree, 1);
@@ -1057,7 +1062,18 @@ void MainWindow::connectEditor(MarkdownEditor* editor, PreviewWidget* preview)
         m_tabs->markDirty(idx, modified);
         updateWindowTitle();
     });
-    m_findDialog->setEditor(editor);
+    if (m_findDialog)
+        m_findDialog->setEditor(editor);
+}
+
+FindReplaceDialog* MainWindow::findDialog()
+{
+    if (!m_findDialog) {
+        m_findDialog = new FindReplaceDialog(this);
+        if (m_activeEditor)
+            m_findDialog->setEditor(m_activeEditor);
+    }
+    return m_findDialog;
 }
 
 void MainWindow::disconnectEditor()
@@ -1351,12 +1367,12 @@ void MainWindow::closeEvent(QCloseEvent* event)
 // ---------------------------------------------------------------------------
 void MainWindow::openFind()
 {
-    m_findDialog->openFind();
+    findDialog()->openFind();
 }
 
 void MainWindow::openReplace()
 {
-    m_findDialog->openReplace();
+    findDialog()->openReplace();
 }
 
 // ---------------------------------------------------------------------------
@@ -1476,8 +1492,11 @@ void MainWindow::setWorkspaceTreeVisible(bool visible, bool persist)
 
     updateWorkspaceToggleIcon();
 
-    if (m_workspacePanel) {
-        m_workspacePanel->setVisible(visible && !m_workspaceRootPath.isEmpty());
+    if (visible) {
+        // First reveal lazily builds the filesystem model and sets the root.
+        updateWorkspaceTreeRoot();
+    } else if (m_workspacePanel) {
+        m_workspacePanel->setVisible(false);
     }
 
     if (visible && !m_workspaceRootPath.isEmpty())
@@ -1487,9 +1506,29 @@ void MainWindow::setWorkspaceTreeVisible(bool visible, bool persist)
         writeSettings();
 }
 
+void MainWindow::ensureWorkspaceModel()
+{
+    if (m_workspaceModel)
+        return;
+
+    m_workspaceModel = new QFileSystemModel(this);
+    m_workspaceModel->setOption(QFileSystemModel::DontUseCustomDirectoryIcons, true);
+    m_workspaceModel->setFilter(QDir::AllDirs | QDir::Files | QDir::NoDotAndDotDot);
+    m_workspaceModel->setReadOnly(true);
+    m_workspaceTree->setModel(m_workspaceModel);
+    m_workspaceTree->setSortingEnabled(true);
+    m_workspaceTree->sortByColumn(0, Qt::AscendingOrder);
+
+    connect(m_workspaceModel, &QFileSystemModel::directoryLoaded, this, [this](const QString& /*path*/) {
+        if (m_workspaceTreeVisible) {
+            restoreWorkspaceExpandedState();
+        }
+    });
+}
+
 void MainWindow::updateWorkspaceTreeRoot()
 {
-    if (!m_workspacePanel || !m_workspaceTree || !m_workspaceModel)
+    if (!m_workspacePanel || !m_workspaceTree)
         return;
 
     const QString root = workspaceRootForTabs();
@@ -1502,6 +1541,11 @@ void MainWindow::updateWorkspaceTreeRoot()
     const bool rootChanged = (root != m_workspaceRootPath);
     m_workspaceRootPath = root;
     m_workspacePanel->setVisible(m_workspaceTreeVisible);
+
+    // Only build the (expensive) filesystem model once the tree is visible.
+    if (!m_workspaceTreeVisible)
+        return;
+    ensureWorkspaceModel();
 
     const QModelIndex rootIndex = m_workspaceModel->setRootPath(root);
     m_workspaceTree->setRootIndex(rootIndex);
