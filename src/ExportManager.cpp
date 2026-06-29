@@ -461,6 +461,23 @@ static QString buildCss(bool dark, int fontSize, bool isPrint)
         "hr{border:none;border-bottom:2px solid %9;margin-top:24px;margin-bottom:24px;}"
     ).arg(bg, fg, codeBg, codeFg, preBg, bqBdr, bqFg, link, border, h1Bdr).arg(actualFontSize).arg(fontSizeUnit).arg(marginStyle);
 
+    // Print-only refinements. These rely on real CSS support, so they only take
+    // effect on the browser PDF path (the QTextDocument fallback ignores the
+    // properties it doesn't understand, which is harmless).
+    if (isPrint) {
+        css += QStringLiteral(
+            "body{line-height:1.5;-webkit-print-color-adjust:exact;print-color-adjust:exact;}"
+            "p,li,blockquote{orphans:3;widows:3;}"
+            // keep headings attached to the content that follows them
+            "h1,h2,h3,h4,h5,h6{page-break-after:avoid;break-after:avoid;}"
+            // never split code blocks, tables, blockquotes or images across pages
+            "pre,blockquote,table,img{page-break-inside:avoid;break-inside:avoid;}"
+            // wrap long inline code / links instead of overflowing the page
+            "code{white-space:pre-wrap;overflow-wrap:anywhere;}"
+            "a{overflow-wrap:anywhere;}"
+        );
+    }
+
     return css;
 }
 
@@ -518,7 +535,7 @@ QString ExportManager::buildFullHtml(const QString& bodyHtml, bool dark, int fon
 
     // Replace <pre><code with a table to guarantee background color and padding in QTextBrowser.
     finalBody.replace(QStringLiteral("<pre><code"),
-        QStringLiteral("<table width=\"100%\" style=\"margin-top:16px; margin-bottom:16px;\"><tr><td bgcolor=\"%1\" style=\"background-color:%1; padding:12px;\"><pre style=\"margin:0; background-color:%1; border:none;\"><code").arg(preBg));
+        QStringLiteral("<table width=\"100%\" style=\"margin-top:16px; margin-bottom:16px; border-collapse:separate; page-break-inside:avoid;\"><tr><td bgcolor=\"%1\" style=\"background-color:%1; padding:12px 14px; border:1px solid %2; border-radius:6px;\"><pre style=\"margin:0; background-color:%1; border:none; white-space:pre-wrap; word-break:break-word; overflow-wrap:anywhere;\"><code").arg(preBg, h1Bdr));
     finalBody.replace(QStringLiteral("</code></pre>"), QStringLiteral("</code></pre></td></tr></table>"));
 
     // Only reference KaTeX assets when math is actually present, so the default
@@ -666,46 +683,16 @@ static bool exportPdfViaQTextDocument(const QString& bodyHtml, const QString& fi
     return true;
 }
 
-// ---------------------------------------------------------------------------
-bool ExportManager::exportPdf(const QString& markdown, const QString& filePath, const QString& docPath, const PdfExportOptions& options, QWidget* parent)
+// Render a PDF by driving an installed Chrome/Edge in headless mode. This
+// produces a properly authored PDF that renders identically across all viewers
+// (Edge, Chrome, Adobe, Foxit) and supports the full CSS stylesheet, unlike the
+// limited QTextDocument path. Used whenever a browser is available.
+static bool exportPdfViaBrowser(const QString& bodyHtml, const QString& filePath,
+                                const QString& docPath, const ExportManager::PdfExportOptions& options,
+                                const QString& browser, bool injectKatex, QWidget* parent)
 {
-    bool mathDetected = false;
-    const QString katexBody = markdownToHtml(markdown, MathRenderMode::KatexOutput, &mathDetected);
-
-    // No math: keep the fast, dependency-free QTextDocument/QPrinter path so PDF
-    // export still works offline without a browser installed.
-    if (!mathDetected) {
-        const QString body = markdownToHtml(markdown, MathRenderMode::UnicodePreview);
-        if (!exportPdfViaQTextDocument(body, filePath, docPath, options)) {
-            if (parent)
-                QMessageBox::warning(parent, QObject::tr("Export Failed"),
-                                     QObject::tr("Could not write %1").arg(filePath));
-            return false;
-        }
-        return true;
-    }
-
-    // Math present: KaTeX must execute, so print through an installed browser.
-    if (katexAssetsDir().isEmpty()) {
-        if (parent)
-            QMessageBox::warning(parent, QObject::tr("PDF Export Failed"),
-                                 QObject::tr("Bundled KaTeX math assets were not found next to the "
-                                             "application. Cannot render math for PDF export."));
-        return false;
-    }
-
-    const QString browser = findBrowserExecutable();
-    if (browser.isEmpty()) {
-        if (parent)
-            QMessageBox::warning(parent, QObject::tr("PDF Export Failed"),
-                                 QObject::tr("This document contains math, which requires Google Chrome or "
-                                             "Microsoft Edge to be installed for correct PDF rendering. "
-                                             "Neither browser was found."));
-        return false;
-    }
-
-    // Build a self-referencing temporary HTML file using the KaTeX render path.
-    QString fullHtml = buildFullHtml(katexBody, false, options.fontSize, true, /*injectKatex=*/true);
+    // Build a self-referencing temporary HTML file.
+    QString fullHtml = ExportManager::buildFullHtml(bodyHtml, false, options.fontSize, true, injectKatex);
     fullHtml.insert(fullHtml.indexOf(QStringLiteral("</head>")), buildPageCss(options));
 
     // Place the temp HTML next to the source document (if any) so relative image
@@ -763,6 +750,48 @@ bool ExportManager::exportPdf(const QString& markdown, const QString& filePath, 
             QMessageBox::warning(parent, QObject::tr("PDF Export Failed"),
                                  QObject::tr("The browser failed to generate the PDF.\n\n%1")
                                      .arg(QString::fromLocal8Bit(proc.readAllStandardError()).trimmed()));
+        return false;
+    }
+    return true;
+}
+
+// ---------------------------------------------------------------------------
+bool ExportManager::exportPdf(const QString& markdown, const QString& filePath, const QString& docPath, const PdfExportOptions& options, QWidget* parent)
+{
+    bool mathDetected = false;
+    const QString katexBody = markdownToHtml(markdown, MathRenderMode::KatexOutput, &mathDetected);
+
+    const QString browser = findBrowserExecutable();
+
+    // Prefer the browser whenever one is available: it yields a properly authored
+    // PDF that renders consistently in every viewer (Edge's PDF engine, in
+    // particular, hides QTextDocument table-cell text behind its background fill)
+    // and honors the full CSS stylesheet. Math additionally *requires* a browser
+    // so KaTeX can typeset it.
+    if (!browser.isEmpty() && (!mathDetected || !katexAssetsDir().isEmpty())) {
+        return exportPdfViaBrowser(katexBody, filePath, docPath, options, browser,
+                                   /*injectKatex=*/mathDetected, parent);
+    }
+
+    // From here, no usable browser path. Math can't be rendered without one.
+    if (mathDetected) {
+        if (parent) {
+            const QString reason = katexAssetsDir().isEmpty()
+                ? QObject::tr("Bundled KaTeX math assets were not found next to the application.")
+                : QObject::tr("This document contains math, which requires Google Chrome or "
+                              "Microsoft Edge to be installed. Neither browser was found.");
+            QMessageBox::warning(parent, QObject::tr("PDF Export Failed"),
+                                 QObject::tr("Cannot render math for PDF export.\n\n%1").arg(reason));
+        }
+        return false;
+    }
+
+    // No math, no browser: fall back to the offline QTextDocument/QPrinter path.
+    const QString body = markdownToHtml(markdown, MathRenderMode::UnicodePreview);
+    if (!exportPdfViaQTextDocument(body, filePath, docPath, options)) {
+        if (parent)
+            QMessageBox::warning(parent, QObject::tr("Export Failed"),
+                                 QObject::tr("Could not write %1").arg(filePath));
         return false;
     }
     return true;
