@@ -31,7 +31,8 @@ Just you, your words, and blistering fast performance.
 - **Markdown Text Editor:** Full CommonMark support with syntax highlighting
 - **Plain Text Mode:** Edit plain text files (.txt, .log, .csv, etc.) with dedicated mode
 - **Live Preview:** Real-time Markdown preview side-by-side with editor
-- **HTML & PDF Export:** Generate clean, self-contained HTML or beautifully formatted PDFs
+- **Tables:** Insert custom-sized tables from the toolbar using a quick grid picker
+- **HTML & PDF Export:** Generate clean, self-contained HTML or beautifully formatted PDFs with smarter filename defaults
 - **Workspace Tree:** Browse and open files from your project folder
 - **Session Restore:** Automatically restore previous session on startup
 - **File Type Association:** Associate supported file types with FastMD

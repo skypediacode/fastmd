@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.6.1] - 2026-06-29
+
+### Added
+
+- **Table Size Picker:** The toolbar table button now opens an 8x8 grid picker so you can insert custom table dimensions instead of a fixed 3x3 table
+- **Separate Find Actions:** The toolbar now exposes distinct Find and Find and Replace buttons with matching shortcuts
+
+### Changed
+
+- Export dialogs now prefill a sensible filename based on the current document and remember the last open/export folders
+- PDF export now prefers browser-backed rendering when Chrome or Edge is available, which improves fidelity and page-breaking behavior
+- Markdown-only formatting actions are disabled in Plain Text mode so the toolbar and shortcuts stay consistent with the active file type
+
 ## [1.6.0] - 2026-06-29
 
 ### Added
