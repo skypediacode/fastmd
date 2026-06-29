@@ -57,6 +57,15 @@ if(MSVC)
     target_compile_definitions(FastMD PRIVATE _UNICODE UNICODE)
 endif()
 
+# Bundle KaTeX assets next to the executable for offline math rendering in
+# Browser Preview / HTML export / PDF export. The in-app preview never uses these.
+add_custom_command(TARGET FastMD POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+            "${CMAKE_SOURCE_DIR}/resources/katex"
+            "$<TARGET_FILE_DIR:FastMD>/katex"
+    COMMENT "Bundling KaTeX assets"
+)
+
 # Deploy Qt DLLs next to the executable on Windows
 if(WIN32)
     add_custom_command(TARGET FastMD POST_BUILD

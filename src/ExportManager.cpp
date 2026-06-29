@@ -9,6 +9,12 @@
 #include <QStringList>
 #include <QUrl>
 #include <QFileInfo>
+#include <QDir>
+#include <QCoreApplication>
+#include <QProcess>
+#include <QStandardPaths>
+#include <QSettings>
+#include <QMessageBox>
 
 #include "md4c-html.h"
 
@@ -168,7 +174,19 @@ static QString renderMathBlock(const QString& expr)
     return QStringLiteral("<div class=\"math-block\">%1</div>").arg(renderMathInline(expr));
 }
 
-static QString preprocessMath(const QString& markdown, QStringList* mathSnippets)
+// Build the snippet that replaces a detected math span.
+//  - UnicodePreview: convert to the Unicode/HTML fallback.
+//  - KatexOutput: keep the raw LaTeX wrapped in its original delimiters (HTML
+//    escaped) so KaTeX auto-render can find and typeset it in the browser.
+static QString makeMathSnippet(MathRenderMode mode, bool block, const QString& expr,
+                               const QString& openDelim, const QString& closeDelim)
+{
+    if (mode == MathRenderMode::KatexOutput)
+        return (openDelim + expr + closeDelim).toHtmlEscaped();
+    return block ? renderMathBlock(expr) : renderMathInline(expr);
+}
+
+static QString preprocessMath(const QString& markdown, MathRenderMode mode, QStringList* mathSnippets)
 {
     QString out;
     out.reserve(markdown.size());
@@ -231,10 +249,31 @@ static QString preprocessMath(const QString& markdown, QStringList* mathSnippets
             if (end > start) {
                 const QString expr = markdown.mid(start, end - start);
                 const QString placeholder = QStringLiteral("@@FASTMD_MATH_%1@@").arg(mathSnippets->size());
-                mathSnippets->append(block ? renderMathBlock(expr) : renderMathInline(expr));
+                const QString delim = block ? QStringLiteral("$$") : QStringLiteral("$");
+                mathSnippets->append(makeMathSnippet(mode, block, expr, delim, delim));
                 out += placeholder;
                 i = end + (block ? 2 : 1);
                 continue;
+            }
+        }
+
+        // LaTeX bracket delimiters: \(...\) (inline) and \[...\] (display).
+        if (!inInlineCode && ch == '\\' && i + 1 < markdown.size()) {
+            const QChar next = markdown.at(i + 1);
+            if (next == '(' || next == '[') {
+                const bool block = (next == '[');
+                const QString closeDelim = block ? QStringLiteral("\\]") : QStringLiteral("\\)");
+                const int start = i + 2;
+                const int end = markdown.indexOf(closeDelim, start);
+                if (end >= start) {
+                    const QString expr = markdown.mid(start, end - start);
+                    const QString placeholder = QStringLiteral("@@FASTMD_MATH_%1@@").arg(mathSnippets->size());
+                    const QString openDelim = block ? QStringLiteral("\\[") : QStringLiteral("\\(");
+                    mathSnippets->append(makeMathSnippet(mode, block, expr, openDelim, closeDelim));
+                    out += placeholder;
+                    i = end + 2;
+                    continue;
+                }
             }
         }
 
@@ -248,17 +287,19 @@ static QString preprocessMath(const QString& markdown, QStringList* mathSnippets
 } // namespace
 
 // ---------------------------------------------------------------------------
-QString ExportManager::markdownToHtml(const QString& markdown)
+QString ExportManager::markdownToHtml(const QString& markdown, MathRenderMode mode, bool* mathDetected)
 {
     QString md = markdown;
-    
+
     // Auto-fix links and images that have spaces or brackets in their unquoted paths
     // e.g., ![alt](C:/path with space[1].png) -> ![alt](<C:/path with space[1].png>)
     QRegularExpression re(QStringLiteral(R"((!?\[[^\]\n]*\])\(([^)<>\"\n]*(?:\s+|\[|\])[^)<>\"\n]*)\))"));
     md.replace(re, QStringLiteral("\\1(<\\2>)"));
 
     QStringList mathSnippets;
-    const QString preprocessed = preprocessMath(md, &mathSnippets);
+    const QString preprocessed = preprocessMath(md, mode, &mathSnippets);
+    if (mathDetected)
+        *mathDetected = !mathSnippets.isEmpty();
     QByteArray utf8 = preprocessed.toUtf8();
     QString result;
 
@@ -288,6 +329,43 @@ QString ExportManager::markdownToHtml(const QString& markdown)
     }
 
     return result;
+}
+
+// ---------------------------------------------------------------------------
+QString ExportManager::katexAssetsDir()
+{
+    // KaTeX is bundled next to the executable (copied there at build/deploy time).
+    const QString dir = QCoreApplication::applicationDirPath() + QStringLiteral("/katex");
+    if (QFileInfo::exists(dir + QStringLiteral("/katex.min.css")))
+        return dir;
+    return {};
+}
+
+// Build the <head> KaTeX injection that references the bundled local assets and
+// triggers auto-render on load. Returns empty when assets are unavailable.
+static QString buildKatexHead()
+{
+    const QString dir = ExportManager::katexAssetsDir();
+    if (dir.isEmpty())
+        return {};
+
+    const QString cssUrl  = QUrl::fromLocalFile(dir + QStringLiteral("/katex.min.css")).toString();
+    const QString jsUrl   = QUrl::fromLocalFile(dir + QStringLiteral("/katex.min.js")).toString();
+    const QString autoUrl = QUrl::fromLocalFile(dir + QStringLiteral("/contrib/auto-render.min.js")).toString();
+
+    // Both scripts are deferred so they execute in order: katex defines the API,
+    // auto-render's onload then typesets all four delimiter styles.
+    return QStringLiteral(
+        "<link rel=\"stylesheet\" href=\"%1\">"
+        "<script defer src=\"%2\"></script>"
+        "<script defer src=\"%3\" onload=\""
+        "renderMathInElement(document.body,{delimiters:["
+        "{left:'$$',right:'$$',display:true},"
+        "{left:'\\\\[',right:'\\\\]',display:true},"
+        "{left:'\\\\(',right:'\\\\)',display:false},"
+        "{left:'$',right:'$',display:false}"
+        "],throwOnError:false});\"></script>"
+    ).arg(cssUrl, jsUrl, autoUrl);
 }
 
 // ---------------------------------------------------------------------------
@@ -387,7 +465,7 @@ static QString buildCss(bool dark, int fontSize, bool isPrint)
 }
 
 // ---------------------------------------------------------------------------
-QString ExportManager::buildFullHtml(const QString& bodyHtml, bool dark, int fontSize, bool isPrint)
+QString ExportManager::buildFullHtml(const QString& bodyHtml, bool dark, int fontSize, bool isPrint, bool injectKatex)
 {
     // Cache the CSS — it only changes when (dark, fontSize, isPrint) change.
     struct CssCache { bool dark; int fontSize; bool isPrint; QString css; };
@@ -443,31 +521,94 @@ QString ExportManager::buildFullHtml(const QString& bodyHtml, bool dark, int fon
         QStringLiteral("<table width=\"100%\" style=\"margin-top:16px; margin-bottom:16px;\"><tr><td bgcolor=\"%1\" style=\"background-color:%1; padding:12px;\"><pre style=\"margin:0; background-color:%1; border:none;\"><code").arg(preBg));
     finalBody.replace(QStringLiteral("</code></pre>"), QStringLiteral("</code></pre></td></tr></table>"));
 
+    // Only reference KaTeX assets when math is actually present, so the default
+    // in-app preview path stays free of any KaTeX injection.
+    const QString katexHead = injectKatex ? buildKatexHead() : QString();
+
     return QStringLiteral(
         "<!DOCTYPE html>"
         "<html><head>"
         "<meta charset='utf-8'>"
         "<meta name='viewport' content='width=device-width,initial-scale=1'>"
         "<style>%1</style>"
+        "%3"
         "</head><body>%2</body></html>"
-    ).arg(css, finalBody);
+    ).arg(css, finalBody, katexHead);
 }
 
 // ---------------------------------------------------------------------------
-bool ExportManager::exportHtml(const QString& bodyHtml, const QString& filePath, bool dark)
+bool ExportManager::exportHtml(const QString& markdown, const QString& filePath, bool dark)
 {
+    // Regenerate from raw markdown using the KaTeX path so exported HTML keeps
+    // real LaTeX math (never the Unicode preview output).
+    bool mathDetected = false;
+    const QString body = markdownToHtml(markdown, MathRenderMode::KatexOutput, &mathDetected);
+    const QString fullHtml = buildFullHtml(body, dark, FastMdDefaults::PreviewFontSize, false, mathDetected);
+
     QFile file(filePath);
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
         return false;
 
     QTextStream out(&file);
     out.setEncoding(QStringConverter::Utf8);
-    out << buildFullHtml(bodyHtml, dark);
+    out << fullHtml;
     return true;
 }
 
 // ---------------------------------------------------------------------------
-bool ExportManager::exportPdf(const QString& bodyHtml, const QString& filePath, const QString& docPath, const PdfExportOptions& options, QWidget*)
+// Locate an installed Chrome or Edge on Windows for headless PDF printing.
+static QString findBrowserExecutable()
+{
+    QStringList candidates;
+    auto addEnv = [&](const char* var, const char* rel) {
+        const QString base = qEnvironmentVariable(var);
+        if (!base.isEmpty())
+            candidates << base + QLatin1StringView(rel);
+    };
+    addEnv("ProgramFiles",      "/Google/Chrome/Application/chrome.exe");
+    addEnv("ProgramFiles(x86)", "/Google/Chrome/Application/chrome.exe");
+    addEnv("LocalAppData",      "/Google/Chrome/Application/chrome.exe");
+    addEnv("ProgramFiles",      "/Microsoft/Edge/Application/msedge.exe");
+    addEnv("ProgramFiles(x86)", "/Microsoft/Edge/Application/msedge.exe");
+    for (const QString& c : candidates) {
+        if (QFileInfo::exists(c))
+            return c;
+    }
+
+    // Best-effort registry "App Paths" lookup.
+    const char* keys[] = {
+        "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\App Paths\\chrome.exe",
+        "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\App Paths\\msedge.exe",
+    };
+    for (const char* k : keys) {
+        QSettings reg(QString::fromLatin1(k), QSettings::NativeFormat);
+        const QString path = reg.value(QStringLiteral(".")).toString();
+        if (!path.isEmpty() && QFileInfo::exists(path))
+            return path;
+    }
+    return {};
+}
+
+// CSS @page rule so the headless browser honors the chosen page size & margins.
+static QString buildPageCss(const ExportManager::PdfExportOptions& options)
+{
+    QSizeF sizeMm = options.pageSize.size(QPageSize::Millimeter);
+    if (options.orientation == QPageLayout::Landscape && sizeMm.width() < sizeMm.height())
+        sizeMm.transpose();
+    const QMarginsF m = options.marginsMm;
+    return QStringLiteral(
+        "<style>@page{size:%1mm %2mm;margin:%3mm %4mm %5mm %6mm;}</style>")
+        .arg(QString::number(sizeMm.width(), 'f', 2),
+             QString::number(sizeMm.height(), 'f', 2),
+             QString::number(m.top(), 'f', 2),
+             QString::number(m.right(), 'f', 2),
+             QString::number(m.bottom(), 'f', 2),
+             QString::number(m.left(), 'f', 2));
+}
+
+// Fast, offline QTextDocument/QPrinter path used when the document has no math.
+static bool exportPdfViaQTextDocument(const QString& bodyHtml, const QString& filePath,
+                                      const QString& docPath, const ExportManager::PdfExportOptions& options)
 {
     QPrinter printer(QPrinter::HighResolution);
     printer.setOutputFormat(QPrinter::PdfFormat);
@@ -480,7 +621,7 @@ bool ExportManager::exportPdf(const QString& bodyHtml, const QString& filePath, 
     const QSizeF pageSize = printer.pageRect(QPrinter::Point).size() * (96.0 / 72.0);
     const int pageWidthPx = qRound(pageSize.width());
 
-    QString fullHtml = buildFullHtml(bodyHtml, false, options.fontSize, true);
+    QString fullHtml = ExportManager::buildFullHtml(bodyHtml, false, options.fontSize, true);
 
     // QTextDocument ignores CSS max-width percentages, so stamp an explicit pixel max-width on every <img>.
     static const QRegularExpression imgTagRe(
@@ -522,5 +663,107 @@ bool ExportManager::exportPdf(const QString& bodyHtml, const QString& filePath, 
     doc.setHtml(fullHtml);
     doc.setPageSize(pageSize);
     doc.print(&printer);
+    return true;
+}
+
+// ---------------------------------------------------------------------------
+bool ExportManager::exportPdf(const QString& markdown, const QString& filePath, const QString& docPath, const PdfExportOptions& options, QWidget* parent)
+{
+    bool mathDetected = false;
+    const QString katexBody = markdownToHtml(markdown, MathRenderMode::KatexOutput, &mathDetected);
+
+    // No math: keep the fast, dependency-free QTextDocument/QPrinter path so PDF
+    // export still works offline without a browser installed.
+    if (!mathDetected) {
+        const QString body = markdownToHtml(markdown, MathRenderMode::UnicodePreview);
+        if (!exportPdfViaQTextDocument(body, filePath, docPath, options)) {
+            if (parent)
+                QMessageBox::warning(parent, QObject::tr("Export Failed"),
+                                     QObject::tr("Could not write %1").arg(filePath));
+            return false;
+        }
+        return true;
+    }
+
+    // Math present: KaTeX must execute, so print through an installed browser.
+    if (katexAssetsDir().isEmpty()) {
+        if (parent)
+            QMessageBox::warning(parent, QObject::tr("PDF Export Failed"),
+                                 QObject::tr("Bundled KaTeX math assets were not found next to the "
+                                             "application. Cannot render math for PDF export."));
+        return false;
+    }
+
+    const QString browser = findBrowserExecutable();
+    if (browser.isEmpty()) {
+        if (parent)
+            QMessageBox::warning(parent, QObject::tr("PDF Export Failed"),
+                                 QObject::tr("This document contains math, which requires Google Chrome or "
+                                             "Microsoft Edge to be installed for correct PDF rendering. "
+                                             "Neither browser was found."));
+        return false;
+    }
+
+    // Build a self-referencing temporary HTML file using the KaTeX render path.
+    QString fullHtml = buildFullHtml(katexBody, false, options.fontSize, true, /*injectKatex=*/true);
+    fullHtml.insert(fullHtml.indexOf(QStringLiteral("</head>")), buildPageCss(options));
+
+    // Place the temp HTML next to the source document (if any) so relative image
+    // paths resolve; otherwise fall back to the system temp directory.
+    const QString tempDir = docPath.isEmpty()
+        ? QDir::tempPath()
+        : QFileInfo(docPath).absolutePath();
+    const QString tempHtml = QDir(tempDir).filePath(
+        QStringLiteral(".fastmd_pdf_%1.html").arg(QFileInfo(filePath).completeBaseName()));
+
+    {
+        QFile f(tempHtml);
+        if (!f.open(QIODevice::WriteOnly | QIODevice::Text)) {
+            if (parent)
+                QMessageBox::warning(parent, QObject::tr("PDF Export Failed"),
+                                     QObject::tr("Could not create a temporary HTML file for PDF export."));
+            return false;
+        }
+        QTextStream out(&f);
+        out.setEncoding(QStringConverter::Utf8);
+        out << fullHtml;
+    }
+
+    // Isolated profile dir so we never collide with a browser the user already
+    // has open (a locked default profile can make headless printing hang/fail).
+    const QString profileDir = QDir(QDir::tempPath()).filePath(
+        QStringLiteral(".fastmd_chrome_%1").arg(QFileInfo(filePath).completeBaseName()));
+
+    QProcess proc;
+    QStringList args;
+    args << QStringLiteral("--headless")
+         << QStringLiteral("--disable-gpu")
+         << QStringLiteral("--no-pdf-header-footer")
+         << QStringLiteral("--user-data-dir=") + QDir::toNativeSeparators(profileDir)
+         << QStringLiteral("--print-to-pdf=") + QDir::toNativeSeparators(filePath)
+         << QStringLiteral("--virtual-time-budget=10000")
+         << QUrl::fromLocalFile(tempHtml).toString();
+
+    // Remove any stale output so we can reliably detect success.
+    QFile::remove(filePath);
+
+    proc.start(browser, args);
+    bool ok = proc.waitForStarted(10000);
+    if (ok)
+        ok = proc.waitForFinished(60000);
+
+    // The browser may keep the file briefly; confirm a non-empty PDF was produced.
+    const bool produced = QFileInfo::exists(filePath) && QFileInfo(filePath).size() > 0;
+
+    QFile::remove(tempHtml);
+    QDir(profileDir).removeRecursively();
+
+    if (!ok || !produced) {
+        if (parent)
+            QMessageBox::warning(parent, QObject::tr("PDF Export Failed"),
+                                 QObject::tr("The browser failed to generate the PDF.\n\n%1")
+                                     .arg(QString::fromLocal8Bit(proc.readAllStandardError()).trimmed()));
+        return false;
+    }
     return true;
 }

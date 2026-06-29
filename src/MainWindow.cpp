@@ -926,30 +926,33 @@ void MainWindow::saveFileAs()
 
 void MainWindow::doExportHtml()
 {
-    updateCurrentHtml();
-    if (m_currentHtml.isEmpty()) return;
+    if (!m_activeEditor) return;
+    const QString markdown = m_activeEditor->toPlainText();
+    if (markdown.isEmpty()) return;
     QString path = QFileDialog::getSaveFileName(
         this, tr("Export HTML"), {},
         tr("HTML (*.html *.htm);;All Files (*)"));
     if (path.isEmpty()) return;
-    if (!ExportManager::exportHtml(m_currentHtml, path, m_theme == QStringLiteral("dark")))
+    // Regenerate from raw markdown via the KaTeX path — never the preview body.
+    if (!ExportManager::exportHtml(markdown, path, m_theme == QStringLiteral("dark")))
         QMessageBox::warning(this, tr("Export Failed"), tr("Could not write %1").arg(path));
 }
 
 void MainWindow::doExportPdf()
 {
-    updateCurrentHtml();
-    if (m_currentHtml.isEmpty()) return;
+    if (!m_activeEditor) return;
+    const QString markdown = m_activeEditor->toPlainText();
+    if (markdown.isEmpty()) return;
     QString path = QFileDialog::getSaveFileName(
         this, tr("Export PDF"), {},
         tr("PDF (*.pdf);;All Files (*)"));
     if (path.isEmpty()) return;
-    
+
     TabPage* pg = m_tabs->currentPage();
     QString docPath = pg ? pg->model->filePath() : QString();
-    
-    if (!ExportManager::exportPdf(m_currentHtml, path, docPath, m_pdfExportOptions, this))
-        QMessageBox::warning(this, tr("Export Failed"), tr("Could not write %1").arg(path));
+
+    // exportPdf surfaces its own (specific) error dialogs for the browser path.
+    ExportManager::exportPdf(markdown, path, docPath, m_pdfExportOptions, this);
 }
 
 void MainWindow::editPdfPageSetup()
@@ -977,10 +980,11 @@ void MainWindow::openPreferences()
 void MainWindow::doPreviewBrowser()
 {
     if (!m_activeEditor) return;
-    updateCurrentHtml();
-    const QString& html = m_currentHtml;
+    // Regenerate from raw markdown via the KaTeX path so the browser renders real
+    // LaTeX math, not the in-app Unicode fallback.
+    const QString markdown = m_activeEditor->toPlainText();
     QString tempPath = QDir::tempPath() + QStringLiteral("/fastmd_preview.html");
-    if (ExportManager::exportHtml(html, tempPath, m_theme == QStringLiteral("dark"))) {
+    if (ExportManager::exportHtml(markdown, tempPath, m_theme == QStringLiteral("dark"))) {
         QDesktopServices::openUrl(QUrl::fromLocalFile(tempPath));
     }
 }
