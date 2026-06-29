@@ -568,15 +568,18 @@ void MainWindow::createToolbar()
         });
         m_toolbar->addAction(a);
         m_tbIcons.append({a, true, {}, text});
+        m_formatActions.append(a);
         return a;
     };
 
     // Convenience: Material-icon formatting button wired to the active editor
     auto addFmtMat = [&](QChar code, const QString& tooltip, QKeySequence sc,
                          void (MarkdownEditor::*slot)(), bool bindShortcut = true) -> QAction* {
-        return addMat(code, tooltip, sc, this, [this, slot]() {
+        QAction* a = addMat(code, tooltip, sc, this, [this, slot]() {
             if (m_activeEditor) (m_activeEditor->*slot)();
         }, bindShortcut);
+        m_formatActions.append(a);
+        return a;
     };
 
     // ── File ops ─────────────────────────────────────────────
@@ -672,18 +675,19 @@ void MainWindow::createToolbar()
         connect(m_tableButton, &QToolButton::clicked, this, showTablePicker);
 
         // Keyboard shortcut
-        auto* tableShortcut = new QShortcut(QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_T), this);
-        connect(tableShortcut, &QShortcut::activated, this, showTablePicker);
+        m_tableShortcut = new QShortcut(QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_T), this);
+        connect(m_tableShortcut, &QShortcut::activated, this, showTablePicker);
 
         m_toolbar->addWidget(m_tableButton);
     }
     addFmtMat(QChar(0xE157), tr("Link"),         QKeySequence(Qt::CTRL | Qt::Key_K),         &MarkdownEditor::fmtLink);
-    addMat(QChar(0xE3F4), tr("Image"), QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_I), this, [this]() {
-        if (m_activeEditor) {
-            TabPage* pg = m_tabs->currentPage();
-            m_activeEditor->fmtImage(pg ? pg->model->filePath() : QString());
-        }
-    }, true);
+    m_formatActions.append(
+        addMat(QChar(0xE3F4), tr("Image"), QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_I), this, [this]() {
+            if (m_activeEditor) {
+                TabPage* pg = m_tabs->currentPage();
+                m_activeEditor->fmtImage(pg ? pg->model->filePath() : QString());
+            }
+        }, true));
     m_toolbar->addSeparator();
 
     // m_toolbar->addSeparator();
@@ -1420,6 +1424,16 @@ void MainWindow::syncCurrentTabUi()
         m_actToolbarPreview->setChecked(previewVisible);
         m_actToolbarPreview->setEnabled(markdown);
     }
+
+    // Markdown-syntax formatting actions are meaningless on .txt files: gray
+    // them out (and their shortcuts) in Plain Text mode, re-enable in Markdown.
+    for (QAction* a : m_formatActions) {
+        if (a) a->setEnabled(markdown);
+    }
+    if (m_tableButton)
+        m_tableButton->setEnabled(markdown);
+    if (m_tableShortcut)
+        m_tableShortcut->setEnabled(markdown);
 
     if (m_activeEditor)
         m_activeEditor->setMarkdownMode(markdown);

@@ -19,6 +19,7 @@ class QFileSystemModel;
 class QTreeView;
 class QToolBar;
 class QToolButton;
+class QShortcut;
 class QWidget;
 class QSplitter;
 class QNetworkAccessManager;
@@ -131,6 +132,9 @@ private:
     QToolButton*  m_recentChevron = nullptr;
     QToolButton*  m_workspaceToggle = nullptr;
     QToolButton*  m_tableButton    = nullptr;
+    QShortcut*    m_tableShortcut  = nullptr;
+    // Markdown-syntax-inserting actions, disabled in Plain Text mode.
+    QList<QAction*> m_formatActions;
 
     // ---- widgets ----
     TabWidget*          m_tabs;
