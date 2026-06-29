@@ -1394,8 +1394,12 @@ void MainWindow::rebuildRecentMenu()
         QAction* a = m_recentMenu->addAction(p, this, &MainWindow::openRecentFile);
         a->setData(p);
     }
-    if (m_recentFiles.isEmpty())
+    if (m_recentFiles.isEmpty()) {
         m_recentMenu->addAction(tr("(empty)"))->setEnabled(false);
+    } else {
+        m_recentMenu->addSeparator();
+        m_recentMenu->addAction(tr("Clear Recent Files"), this, &MainWindow::clearRecentFiles);
+    }
 }
 
 void MainWindow::openRecentFile()
