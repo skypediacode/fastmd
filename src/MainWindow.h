@@ -40,6 +40,7 @@ private slots:
     void openFilePath(const QString& path);
     void saveFile();
     void saveFileAs();
+    void saveAll();
     void doExportHtml();
     void doExportPdf();
     void editPdfPageSetup();

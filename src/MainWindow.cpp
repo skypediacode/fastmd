@@ -339,8 +339,9 @@ void MainWindow::createMenus()
     auto* actNew   = mkAct(file, tr("&New"),        QKeySequence::New,    this, &MainWindow::newFile);
     auto* actOpen  = mkAct(file, tr("&Open..."),    QKeySequence::Open,   this, &MainWindow::openFile);
     file->addSeparator();
-    auto* actSave   = mkAct(file, tr("&Save"),      QKeySequence::Save,   this, &MainWindow::saveFile);
-    auto* actSaveAs = mkAct(file, tr("Save &As…"),  QKeySequence::SaveAs, this, &MainWindow::saveFileAs);
+    auto* actSave    = mkAct(file, tr("&Save"),         QKeySequence::Save,                            this, &MainWindow::saveFile);
+    auto* actSaveAs  = mkAct(file, tr("Save &As…"),     QKeySequence(Qt::CTRL | Qt::ALT | Qt::Key_S),  this, &MainWindow::saveFileAs);
+    auto* actSaveAll = mkAct(file, tr("Save A&ll"),     QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_S), this, &MainWindow::saveAll);
     file->addSeparator();
     mkAct(file, tr("Close &Tab"), QKeySequence(Qt::CTRL | Qt::Key_W), this, [this] {
         if (m_tabs->count() > 0)
@@ -360,7 +361,7 @@ void MainWindow::createMenus()
     file->addSeparator();
     mkAct(file, tr("E&xit"), QKeySequence::Quit, qApp, &QApplication::closeAllWindows);
 
-    Q_UNUSED(actNew); Q_UNUSED(actOpen); Q_UNUSED(actSave); Q_UNUSED(actSaveAs);
+    Q_UNUSED(actNew); Q_UNUSED(actOpen); Q_UNUSED(actSave); Q_UNUSED(actSaveAll); Q_UNUSED(actSaveAs);
 
     // ---- Edit ----
     QMenu* edit = menuBar()->addMenu(tr("&Edit"));
@@ -420,15 +421,15 @@ void MainWindow::createMenus()
     QMenu* help = menuBar()->addMenu(tr("&Help"));
     help->addAction(tr("Check for updates ..."), this, &MainWindow::checkForUpdates);
     help->addSeparator();
+    help->addAction(tr("About Qt"), qApp, &QApplication::aboutQt);
     help->addAction(tr("About FastMD"), this, [this] {
         QMessageBox::about(this, tr("About FastMD"),
-            tr("<b>FastMD</b> v1.5.0<br>"
-               "A lightweight Markdown Text Editor built with C++20 and Qt 6.<br><br>"
-               "Copyright &copy; 2026 Skypedia<br><br>"
-               "Licensed under the MIT License. This software is provided "
-               "\"as is\", without warranty of any kind."));
+            tr("<p style=\"margin: 0; margin-bottom: 4px;\"><b>FastMD</b> v1.6.0</p>"
+               "<p style=\"margin: 0; margin-bottom: 6px;\">A lightweight Markdown Text Editor built with C++20 and Qt 6.</p>"
+               "<p style=\"margin: 0; margin-bottom: 4px;\">Copyright &copy; 2026 Skypedia</p>"
+               "<p style=\"margin: 0;\">Licensed under the MIT License. This software is provided "
+               "\"as is\", without warranty of any kind.</p>"));
     });
-    help->addAction(tr("About Qt"), qApp, &QApplication::aboutQt);
 }
 
 // ---------------------------------------------------------------------------
@@ -515,7 +516,8 @@ void MainWindow::createToolbar()
 
         m_toolbar->addWidget(container);
     }
-    addMat(QChar(0xE161), tr("Save"),      QKeySequence::Save, this, &MainWindow::saveFile, false);
+    addMat(QChar(0xE161), tr("Save"),      QKeySequence::Save,                            this, &MainWindow::saveFile, false);
+    // addMat(QChar(0xE18F), tr("Save All"),  QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_S), this, &MainWindow::saveAll, false);
     addMat(QChar(0xE80B), tr("Export HTML"), QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_H), this, &MainWindow::doExportHtml, false);
     addMat(QChar(0xE415), tr("Export PDF"),  QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_P), this, &MainWindow::doExportPdf, false);
     addMat(QChar(0xE89E), tr("Preview in Browser"), QKeySequence(Qt::CTRL | Qt::ALT | Qt::Key_P), this, &MainWindow::doPreviewBrowser, true);
@@ -922,6 +924,12 @@ bool MainWindow::saveDocument(int tabIndex, bool forceDialog)
 void MainWindow::saveFile()
 {
     saveDocument(m_tabs->currentIndex(), false);
+}
+
+void MainWindow::saveAll()
+{
+    for (int i = 0; i < m_tabs->count(); ++i)
+        saveDocument(i, false);
 }
 
 void MainWindow::saveFileAs()
