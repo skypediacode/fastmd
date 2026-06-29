@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.6.0] - 2026-06-29
+
+### Added
+
+- **LaTeX Math Rendering:** Render LaTeX math expressions with bundled KaTeX in browser preview and exports
+- **Clear Recent Files Action:** New separator and clear action in the Recent Files toolbar menu
+- **Save All Action:** Save all modified files at once using the Ctrl+Shift+S keyboard shortcut
+
+### Changed
+
+- Improved startup performance through lazy initialization of Find dialog and workspace model
+
 ## [1.5.0] - 2026-06-29
 
 ### Added

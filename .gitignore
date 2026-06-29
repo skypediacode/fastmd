@@ -12,7 +12,6 @@ prompt.md
 CMakeLists_test.txt
 test*.cpp
 build*.bat
-publish.ps1
 squash_history.ps1
 AGENTS.md
 HANDOFF.md
@@ -23,6 +22,5 @@ tasks/
 agents/
 config/
 screenshots/
-scripts/
 .agent-review*
 CONTEXT.md

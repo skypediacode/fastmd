@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.20)
-project(FastMD VERSION 1.5.0 LANGUAGES CXX C)
+project(FastMD VERSION 1.6.0 LANGUAGES CXX C)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -53,7 +53,7 @@ target_link_libraries(FastMD PRIVATE
 )
 
 if(MSVC)
-    target_compile_options(FastMD PRIVATE /W3 /utf-8)
+    target_compile_options(FastMD PRIVATE /W3 /utf-8 $<$<CONFIG:Release>:/O2>)
     target_compile_definitions(FastMD PRIVATE _UNICODE UNICODE)
 endif()
 

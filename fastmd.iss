@@ -3,7 +3,7 @@
 
 [Setup]
 AppName=FastMD
-AppVersion=1.5.0
+AppVersion=1.6.0
 AppPublisher=FastMD Contributors
 DefaultDirName={autopf}\FastMD
 DefaultGroupName=FastMD
