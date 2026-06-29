@@ -379,7 +379,7 @@ static QString buildCss(bool dark, int fontSize, bool isPrint)
     QLatin1StringView fg      = isPrint ? QLatin1StringView("#000000") : c("#24292f", "#c9d1d9");
     QLatin1StringView codeBg  = isPrint ? QLatin1StringView("#f0f0f0") : c("#eaebed", "#383e44");
     QLatin1StringView codeFg  = isPrint ? QLatin1StringView("#000000") : c("#24292f", "#c9d1d9");
-    QLatin1StringView preBg   = isPrint ? QLatin1StringView("#f0f0f0") : c("#d8dce3", "#141414");
+    QLatin1StringView preBg   = isPrint ? QLatin1StringView("#f8f8f8") : c("#d8dce3", "#141414");
     QLatin1StringView bqBdr   = c("#d0d7de", "#30363d");
     QLatin1StringView bqFg    = c("#57606a", "#8b949e");
     QLatin1StringView link    = c("#0969da", "#58a6ff");
@@ -472,9 +472,21 @@ static QString buildCss(bool dark, int fontSize, bool isPrint)
             "h1,h2,h3,h4,h5,h6{page-break-after:avoid;break-after:avoid;}"
             // never split code blocks, tables, blockquotes or images across pages
             "pre,blockquote,table,img{page-break-inside:avoid;break-inside:avoid;}"
+            // code blocks: light fill, hairline border, rounded, soft-wrapped
+            // (mirrors markdown-pdf.css)
+            "pre{border:1px solid #cccccc;border-radius:3px;line-height:1.45;"
+            "white-space:pre-wrap;overflow-wrap:break-word;}"
             // wrap long inline code / links instead of overflowing the page
             "code{white-space:pre-wrap;overflow-wrap:anywhere;}"
             "a{overflow-wrap:anywhere;}"
+            // inline code accent so it reads as code, not an error (darkened from
+            // markdown-pdf.css #C9AE75 for print contrast); code blocks keep fg
+            ":not(pre) > code{color:#9a6700;}"
+            // blockquote: subtle neutral tint with a blue accent rule
+            "blockquote{background:rgba(127,127,127,0.1);border-left-color:rgba(0,122,204,0.6);"
+            "font-style:normal;border-radius:0 3px 3px 0;}"
+            // manual page break helper: <div class=\"page\"></div>
+            ".page{page-break-after:always;break-after:page;}"
         );
     }
 
