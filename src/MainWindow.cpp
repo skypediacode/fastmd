@@ -823,7 +823,7 @@ void MainWindow::openFile()
 {
     QStringList paths = QFileDialog::getOpenFileNames(
         this, tr("Open Files"),
-        QString(),
+        m_lastOpenFolder,
         tr("Markdown (*.md *.markdown *.txt);;All Files (*)"));
 
     for (const QString& p : paths)
@@ -852,6 +852,7 @@ void MainWindow::openFilePath(const QString& path)
     if (addTabFromFile(path, true, true, true, nullptr) < 0)
         return;
 
+    m_lastOpenFolder = QFileInfo(path).absolutePath();
     updateWindowTitle();
     syncCurrentTabUi();
     updateWorkspaceTreeRoot();
@@ -1810,6 +1811,7 @@ void MainWindow::readSettings()
     m_restoreSessionOnStartup = s.value(QStringLiteral("restoreSessionOnStartup"), false).toBool();
     m_defaultSaveFolder = s.value(QStringLiteral("defaultSaveFolder")).toString();
     m_lastSaveFolder    = s.value(QStringLiteral("lastSaveFolder")).toString();
+    m_lastOpenFolder    = s.value(QStringLiteral("lastOpenFolder")).toString();
 
     m_sessionTabs.clear();
     const int sessionCount = s.beginReadArray(QStringLiteral("session/tabs"));
@@ -2017,6 +2019,7 @@ void MainWindow::writeSettings()
     s.setValue(QStringLiteral("restoreSessionOnStartup"), m_restoreSessionOnStartup);
     s.setValue(QStringLiteral("defaultSaveFolder"), m_defaultSaveFolder);
     s.setValue(QStringLiteral("lastSaveFolder"),    m_lastSaveFolder);
+    s.setValue(QStringLiteral("lastOpenFolder"),    m_lastOpenFolder);
     if (m_mainSplitter && m_workspacePanel && m_workspacePanel->isVisible())
         s.setValue(QStringLiteral("workspaceSplitterState"), m_mainSplitter->saveState());
     if (m_activeEditor) {

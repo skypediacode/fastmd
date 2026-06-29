@@ -161,6 +161,7 @@ private:
     bool                m_restoreSessionOnStartup = false;
     QString             m_defaultSaveFolder;
     QString             m_lastSaveFolder;
+    QString             m_lastOpenFolder;
     QNetworkAccessManager* m_networkManager = nullptr;
 
     struct SessionTabState {
