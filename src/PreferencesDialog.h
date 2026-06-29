@@ -4,6 +4,7 @@
 
 class QCheckBox;
 class QLabel;
+class QLineEdit;
 class QPushButton;
 class QTabWidget;
 
@@ -12,8 +13,11 @@ class PreferencesDialog : public QDialog {
 public:
     explicit PreferencesDialog(QWidget* parent = nullptr);
 
-    bool restoreSessionOnStartup() const;
-    void setRestoreSessionOnStartup(bool enable);
+    bool    restoreSessionOnStartup() const;
+    void    setRestoreSessionOnStartup(bool enable);
+
+    QString defaultSaveFolder() const;
+    void    setDefaultSaveFolder(const QString& path);
 
 private:
     void setupGeneralTab(QWidget* tab);
@@ -23,6 +27,7 @@ private:
 
     QTabWidget*  m_tabWidget = nullptr;
     QCheckBox*   m_restoreSessionCheckbox = nullptr;
+    QLineEdit*   m_defaultSaveFolderEdit = nullptr;
     QPushButton* m_associateFilesButton = nullptr;
     QLabel*      m_fileAssociationStatusLabel = nullptr;
 };

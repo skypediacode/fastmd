@@ -867,9 +867,18 @@ bool MainWindow::saveDocument(int tabIndex, bool forceDialog)
         const QString defaultExt = pg->model->editorMode() == EditorMode::PlainText
             ? QStringLiteral(".txt")
             : QStringLiteral(".md");
+        QString initialDir;
+        if (!m_defaultSaveFolder.isEmpty())
+            initialDir = m_defaultSaveFolder;
+        else if (!m_lastSaveFolder.isEmpty())
+            initialDir = m_lastSaveFolder;
+        const QString initialPath = path.isEmpty()
+            ? (initialDir.isEmpty() ? QString() : initialDir + QStringLiteral("/"))
+              + pg->model->displayName() + defaultExt
+            : path;
         path = QFileDialog::getSaveFileName(
             this, tr("Save File"),
-            path.isEmpty() ? pg->model->displayName() + defaultExt : path,
+            initialPath,
             tr("Text/Markdown (*.txt *.md *.markdown);;All Files (*)"));
         if (path.isEmpty()) return false;
     }
@@ -913,6 +922,7 @@ bool MainWindow::saveDocument(int tabIndex, bool forceDialog)
 
     pg->model->setFilePath(path);
     pg->editor->setDocumentPath(path);
+    m_lastSaveFolder = QFileInfo(path).absolutePath();
     pg->model->setDirty(false);
     m_tabs->refreshTitle(tabIndex);
     addToRecent(path);
@@ -992,8 +1002,10 @@ void MainWindow::editPdfPageSetup()
 void MainWindow::openPreferences()
 {
     PreferencesDialog dlg(this);
+    dlg.setDefaultSaveFolder(m_defaultSaveFolder);
     if (dlg.exec() == QDialog::Accepted) {
         m_restoreSessionOnStartup = dlg.restoreSessionOnStartup();
+        m_defaultSaveFolder = dlg.defaultSaveFolder();
     }
 }
 
@@ -1671,6 +1683,8 @@ void MainWindow::readSettings()
     m_markdownPreviewVisible = s.value(QStringLiteral("previewVisible"), true).toBool();
     m_workspaceTreeVisible = s.value(QStringLiteral("workspaceTreeVisible"), false).toBool();
     m_restoreSessionOnStartup = s.value(QStringLiteral("restoreSessionOnStartup"), false).toBool();
+    m_defaultSaveFolder = s.value(QStringLiteral("defaultSaveFolder")).toString();
+    m_lastSaveFolder    = s.value(QStringLiteral("lastSaveFolder")).toString();
 
     m_sessionTabs.clear();
     const int sessionCount = s.beginReadArray(QStringLiteral("session/tabs"));
@@ -1876,6 +1890,8 @@ void MainWindow::writeSettings()
     s.setValue(QStringLiteral("previewVisible"), m_markdownPreviewVisible);
     s.setValue(QStringLiteral("workspaceTreeVisible"), m_workspaceTreeVisible);
     s.setValue(QStringLiteral("restoreSessionOnStartup"), m_restoreSessionOnStartup);
+    s.setValue(QStringLiteral("defaultSaveFolder"), m_defaultSaveFolder);
+    s.setValue(QStringLiteral("lastSaveFolder"),    m_lastSaveFolder);
     if (m_mainSplitter && m_workspacePanel && m_workspacePanel->isVisible())
         s.setValue(QStringLiteral("workspaceSplitterState"), m_mainSplitter->saveState());
     if (m_activeEditor) {

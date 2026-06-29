@@ -9,7 +9,8 @@ All notable changes to this project will be documented in this file.
 - **LaTeX Math Rendering:** Render LaTeX math expressions with bundled KaTeX in browser preview and exports
 - **Clear Recent Files Action:** New separator and clear action in the Recent Files toolbar menu
 - **Save All Action:** Save all modified files at once using the Ctrl+Shift+S keyboard shortcut
-- **Math Inline & Block Math button**: add two toolbar buttons for inline math and block math
+- **Inline & Block Math Toolbar Buttons:** Two new toolbar buttons to insert inline math (`$...$`, Ctrl+Shift+M) and block math (`$$...$$`, Ctrl+Shift+B)
+- **Default Save Folder:** New Preferences option to set a fixed default folder for the Save dialog; falls back to the last-used save location across sessions when not configured
 
 ### Changed
 

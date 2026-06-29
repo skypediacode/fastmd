@@ -158,6 +158,8 @@ private:
     QStringList         m_workspaceExpandedPaths;
     bool                m_workspaceTreeVisible = false;
     bool                m_restoreSessionOnStartup = false;
+    QString             m_defaultSaveFolder;
+    QString             m_lastSaveFolder;
     QNetworkAccessManager* m_networkManager = nullptr;
 
     struct SessionTabState {

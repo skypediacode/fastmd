@@ -5,9 +5,11 @@
 #include <QCoreApplication>
 #include <QDir>
 #include <QDialogButtonBox>
+#include <QFileDialog>
 #include <QFont>
 #include <QHBoxLayout>
 #include <QLabel>
+#include <QLineEdit>
 #include <QMessageBox>
 #include <QPushButton>
 #include <QSettings>
@@ -105,20 +107,70 @@ void PreferencesDialog::setRestoreSessionOnStartup(bool enable)
     m_restoreSessionCheckbox->setChecked(enable);
 }
 
+QString PreferencesDialog::defaultSaveFolder() const
+{
+    return m_defaultSaveFolderEdit->text().trimmed();
+}
+
+void PreferencesDialog::setDefaultSaveFolder(const QString& path)
+{
+    m_defaultSaveFolderEdit->setText(path);
+}
+
 void PreferencesDialog::setupGeneralTab(QWidget* tab)
 {
     auto* layout = new QVBoxLayout(tab);
     layout->setContentsMargins(16, 16, 16, 16);
     layout->setSpacing(16);
 
-    auto* sectionTitle = new QLabel(tr("Startup Options"), tab);
-    QFont titleFont = sectionTitle->font();
+    QFont titleFont;
     titleFont.setBold(true);
-    sectionTitle->setFont(titleFont);
-    layout->addWidget(sectionTitle);
 
+    // Startup section
+    auto* startupGroup = new QVBoxLayout();
+    startupGroup->setSpacing(6);
+    auto* startupTitle = new QLabel(tr("Startup"), tab);
+    startupTitle->setFont(titleFont);
+    startupGroup->addWidget(startupTitle);
     m_restoreSessionCheckbox = new QCheckBox(tr("Restore previous session on startup"), tab);
-    layout->addWidget(m_restoreSessionCheckbox);
+    startupGroup->addWidget(m_restoreSessionCheckbox);
+    layout->addLayout(startupGroup);
+
+    // Files section
+    auto* filesGroup = new QVBoxLayout();
+    filesGroup->setSpacing(6);
+    auto* filesTitle = new QLabel(tr("Files"), tab);
+    filesTitle->setFont(titleFont);
+    filesGroup->addWidget(filesTitle);
+
+    auto* folderGroup = new QVBoxLayout();
+    folderGroup->setSpacing(6);
+
+    auto* folderLabel = new QLabel(tr("Default save folder:"), tab);
+    folderGroup->addWidget(folderLabel);
+
+    auto* folderRow = new QHBoxLayout();
+    folderRow->setSpacing(6);
+    m_defaultSaveFolderEdit = new QLineEdit(tab);
+    m_defaultSaveFolderEdit->setPlaceholderText(tr("(not set — remembers last used location)"));
+    folderRow->addWidget(m_defaultSaveFolderEdit);
+
+    auto* browseButton = new QPushButton(tr("Browse…"), tab);
+    browseButton->setFixedWidth(80);
+    connect(browseButton, &QPushButton::clicked, this, [this]() {
+        const QString current = m_defaultSaveFolderEdit->text().trimmed();
+        const QString chosen = QFileDialog::getExistingDirectory(
+            this, tr("Select Default Save Folder"),
+            current.isEmpty() ? QDir::homePath() : current,
+            QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+        if (!chosen.isEmpty())
+            m_defaultSaveFolderEdit->setText(QDir::toNativeSeparators(chosen));
+    });
+    folderRow->addWidget(browseButton);
+    folderGroup->addLayout(folderRow);
+    filesGroup->addLayout(folderGroup);
+
+    layout->addLayout(filesGroup);
 
     layout->addStretch();
 }
