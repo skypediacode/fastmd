@@ -1080,15 +1080,34 @@ void MainWindow::saveFileAs()
     saveDocument(m_tabs->currentIndex(), true);
 }
 
+QString MainWindow::exportInitialPath(const QString& extension) const
+{
+    TabPage* pg = m_tabs->currentPage();
+    const QString docPath = pg ? pg->model->filePath() : QString();
+
+    // Saved document: same folder, same base name, swapped extension.
+    if (!docPath.isEmpty()) {
+        const QFileInfo fi(docPath);
+        return fi.absolutePath() + QLatin1Char('/') + fi.completeBaseName() + extension;
+    }
+
+    // Unsaved: use the tab title in the default (or last used) export folder.
+    const QString name = pg ? pg->model->displayName() : QStringLiteral("Untitled");
+    QString dir = !m_defaultSaveFolder.isEmpty() ? m_defaultSaveFolder
+                : m_lastExportFolder;
+    return (dir.isEmpty() ? QString() : dir + QLatin1Char('/')) + name + extension;
+}
+
 void MainWindow::doExportHtml()
 {
     if (!m_activeEditor) return;
     const QString markdown = m_activeEditor->toPlainText();
     if (markdown.isEmpty()) return;
     QString path = QFileDialog::getSaveFileName(
-        this, tr("Export HTML"), {},
+        this, tr("Export HTML"), exportInitialPath(QStringLiteral(".html")),
         tr("HTML (*.html *.htm);;All Files (*)"));
     if (path.isEmpty()) return;
+    m_lastExportFolder = QFileInfo(path).absolutePath();
     // Regenerate from raw markdown via the KaTeX path — never the preview body.
     if (!ExportManager::exportHtml(markdown, path, m_theme == QStringLiteral("dark")))
         QMessageBox::warning(this, tr("Export Failed"), tr("Could not write %1").arg(path));
@@ -1100,9 +1119,10 @@ void MainWindow::doExportPdf()
     const QString markdown = m_activeEditor->toPlainText();
     if (markdown.isEmpty()) return;
     QString path = QFileDialog::getSaveFileName(
-        this, tr("Export PDF"), {},
+        this, tr("Export PDF"), exportInitialPath(QStringLiteral(".pdf")),
         tr("PDF (*.pdf);;All Files (*)"));
     if (path.isEmpty()) return;
+    m_lastExportFolder = QFileInfo(path).absolutePath();
 
     TabPage* pg = m_tabs->currentPage();
     QString docPath = pg ? pg->model->filePath() : QString();
@@ -1812,6 +1832,7 @@ void MainWindow::readSettings()
     m_defaultSaveFolder = s.value(QStringLiteral("defaultSaveFolder")).toString();
     m_lastSaveFolder    = s.value(QStringLiteral("lastSaveFolder")).toString();
     m_lastOpenFolder    = s.value(QStringLiteral("lastOpenFolder")).toString();
+    m_lastExportFolder  = s.value(QStringLiteral("lastExportFolder")).toString();
 
     m_sessionTabs.clear();
     const int sessionCount = s.beginReadArray(QStringLiteral("session/tabs"));
@@ -2020,6 +2041,7 @@ void MainWindow::writeSettings()
     s.setValue(QStringLiteral("defaultSaveFolder"), m_defaultSaveFolder);
     s.setValue(QStringLiteral("lastSaveFolder"),    m_lastSaveFolder);
     s.setValue(QStringLiteral("lastOpenFolder"),    m_lastOpenFolder);
+    s.setValue(QStringLiteral("lastExportFolder"),  m_lastExportFolder);
     if (m_mainSplitter && m_workspacePanel && m_workspacePanel->isVisible())
         s.setValue(QStringLiteral("workspaceSplitterState"), m_mainSplitter->saveState());
     if (m_activeEditor) {

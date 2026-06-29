@@ -43,6 +43,10 @@ private slots:
     void saveAll();
     void doExportHtml();
     void doExportPdf();
+    // Suggested path for an export Save dialog. Uses the current document's
+    // folder + base name when saved, otherwise the tab title in the default/last
+    // export folder. `extension` includes the leading dot (e.g. ".pdf").
+    QString exportInitialPath(const QString& extension) const;
     void editPdfPageSetup();
     void openPreferences();
     void doPreviewBrowser();
@@ -162,6 +166,7 @@ private:
     QString             m_defaultSaveFolder;
     QString             m_lastSaveFolder;
     QString             m_lastOpenFolder;
+    QString             m_lastExportFolder;
     QNetworkAccessManager* m_networkManager = nullptr;
 
     struct SessionTabState {
