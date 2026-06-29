@@ -36,6 +36,8 @@ public slots:
     void fmtNumberList();
     void fmtChecklist();
     void fmtTable();
+    void fmtMathInline();
+    void fmtMathBlock();
 
 signals:
     void contentReady();   // emitted after 200 ms debounce

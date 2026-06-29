@@ -548,6 +548,11 @@ void MainWindow::createToolbar()
     // ── Inline code, table, link, image ──────────────────────
     // code=0xE86F  border_all=0xE228  link=0xE157  image=0xE3F4
     addFmtMat(QChar(0xE86F), tr("Inline code"),  QKeySequence(Qt::CTRL | Qt::Key_QuoteLeft), &MarkdownEditor::fmtCode);
+    // ── Math ──────────────────────────────────────────────────
+    // functions=0xE24A  integration=0xF768 (fallback: calculate=0xEA5F)
+    addFmtMat(QChar(0xEA5F), tr("Inline math"),  QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_M), &MarkdownEditor::fmtMathInline);
+    addFmtMat(QChar(0xE24A), tr("Block math"),   QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_B), &MarkdownEditor::fmtMathBlock);
+    
     addFmtMat(QChar(0xE228), tr("Table"),        QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_T), &MarkdownEditor::fmtTable);
     addFmtMat(QChar(0xE157), tr("Link"),         QKeySequence(Qt::CTRL | Qt::Key_K),         &MarkdownEditor::fmtLink);
     addMat(QChar(0xE3F4), tr("Image"), QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_I), this, [this]() {
@@ -557,6 +562,8 @@ void MainWindow::createToolbar()
         }
     }, true);
     m_toolbar->addSeparator();
+
+    // m_toolbar->addSeparator();
 
     // ── Find / Preview ────────────────────────────────────────
     // search=0xE8B6  visibility=0xE8F4  open_in_new=0xE89E

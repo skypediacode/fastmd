@@ -7,7 +7,7 @@ $ErrorActionPreference = "Stop"
 Write-Host "Creating GitHub Release for version $Version..."
 
 $Title = "FastMD $Version"
-$Notes = "Native, lightning-fast Markdown editor for Windows with v1.6.0 improvements: LaTeX math rendering with KaTeX, Clear Recent Files action, Save All action, and enhanced startup performance. Download the portable zip to get started immediately without installation or the installer if you prefer the traditional Windows installation."
+$Notes = "Native, lightning-fast Markdown editor for Windows with v1.6.0 improvements: LaTeX math rendering with KaTeX, Clear Recent Files action, Save All action, two toolbar buttons for inline math and block math,and enhanced startup performance. Download the portable zip to get started immediately without installation or the installer if you prefer the traditional Windows installation."
 
 $ChangelogPath = "CHANGELOG.md"
 if (Test-Path $ChangelogPath) {

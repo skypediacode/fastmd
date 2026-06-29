@@ -401,6 +401,22 @@ void MarkdownEditor::fmtItalic()      { wrapInline(this, QStringLiteral("*")); }
 void MarkdownEditor::fmtStrike()      { wrapInline(this, QStringLiteral("~~")); }
 void MarkdownEditor::fmtCode()        { wrapInline(this, QStringLiteral("`")); }
 
+void MarkdownEditor::fmtMathInline()  { wrapInline(this, QStringLiteral("$")); }
+
+void MarkdownEditor::fmtMathBlock()
+{
+    QTextCursor c = textCursor();
+    c.beginEditBlock();
+    c.movePosition(QTextCursor::StartOfBlock);
+    c.insertText(QStringLiteral("$$\n\n$$\n"));
+    // Place cursor between the $$ delimiters
+    c.movePosition(QTextCursor::StartOfBlock);
+    c.movePosition(QTextCursor::PreviousBlock);
+    c.movePosition(QTextCursor::StartOfBlock);
+    c.endEditBlock();
+    setTextCursor(c);
+}
+
 void MarkdownEditor::fmtLink()
 {
     QTextCursor c = textCursor();
