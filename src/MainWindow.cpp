@@ -693,8 +693,11 @@ void MainWindow::createToolbar()
     // m_toolbar->addSeparator();
 
     // ── Find / Preview ────────────────────────────────────────
-    // search=0xE8B6  visibility=0xE8F4  open_in_new=0xE89E
-    addMat(QChar(0xE8B6), tr("Find / Replace"), QKeySequence::Find, this, &MainWindow::openFind, false);
+    // search=0xE8B6  find_replace=0xE881  visibility=0xE8F4  open_in_new=0xE89E
+    addMat(QChar(0xE8B6), tr("Find"), QKeySequence::Find, this, &MainWindow::openFind, false);
+    // Shortcut shown in the tooltip only; QKeySequence::Replace is already bound
+    // to the Edit ▸ Replace menu action (avoids an ambiguous-shortcut warning).
+    addMat(QChar(0xE881), tr("Find and Replace"), QKeySequence::Replace, this, &MainWindow::openReplace, false);
 
 
     m_actToolbarPreview = new QAction(this);
