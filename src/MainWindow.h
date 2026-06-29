@@ -126,6 +126,7 @@ private:
     QToolButton*  m_openButton   = nullptr;
     QToolButton*  m_recentChevron = nullptr;
     QToolButton*  m_workspaceToggle = nullptr;
+    QToolButton*  m_tableButton    = nullptr;
 
     // ---- widgets ----
     TabWidget*          m_tabs;

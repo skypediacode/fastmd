@@ -63,6 +63,104 @@
 #include <QHBoxLayout>
 #include <QTextBrowser>
 #include <QPushButton>
+#include <QPainter>
+#include <QMouseEvent>
+#include <QShortcut>
+#include <functional>
+
+// ---------------------------------------------------------------------------
+// TableSizePicker — lightweight popup for choosing table dimensions
+// ---------------------------------------------------------------------------
+class TableSizePicker : public QWidget {
+public:
+    explicit TableSizePicker(std::function<void(int, int)> callback, QWidget* parent = nullptr)
+        : QWidget(parent, Qt::Popup | Qt::FramelessWindowHint | Qt::NoDropShadowWindowHint)
+        , m_cb(std::move(callback))
+    {
+        setAttribute(Qt::WA_DeleteOnClose);
+        setMouseTracking(true);
+        updateSize();
+    }
+
+protected:
+    void paintEvent(QPaintEvent*) override
+    {
+        QPainter p(this);
+        p.setRenderHint(QPainter::Antialiasing, false);
+
+        // Background + border
+        p.fillRect(rect(), palette().window());
+        p.setPen(palette().mid().color());
+        p.drawRect(rect().adjusted(0, 0, -1, -1));
+
+        const QColor activeColor  = palette().highlight().color();
+        const QColor activeBorder = activeColor.darker(160);
+        const QColor idleColor    = palette().base().color();
+        const QColor idleBorder   = palette().mid().color();
+
+        for (int r = 0; r < m_maxRows; ++r) {
+            for (int c = 0; c < m_maxCols; ++c) {
+                bool active = (r < m_hovRow) && (c < m_hovCol);
+                p.fillRect(cellRect(r, c), active ? activeColor : idleColor);
+                p.setPen(active ? activeBorder : idleBorder);
+                p.drawRect(cellRect(r, c));
+            }
+        }
+
+        // Label
+        QString label = (m_hovRow > 0 && m_hovCol > 0)
+            ? QString("%1 \xC3\x97 %2 Table").arg(m_hovRow).arg(m_hovCol)
+            : tr("Insert Table");
+        p.setPen(palette().text().color());
+        QRect lr(m_pad, m_pad + m_maxRows * (m_cell + m_gap) - m_gap + 6,
+                 width() - 2 * m_pad, m_labelH);
+        p.drawText(lr, Qt::AlignHCenter | Qt::AlignVCenter, label);
+    }
+
+    void mouseMoveEvent(QMouseEvent* e) override
+    {
+        int row = 0, col = 0;
+        for (int r = 0; r < m_maxRows && row == 0; ++r)
+            for (int c = 0; c < m_maxCols && col == 0; ++c)
+                if (cellRect(r, c).contains(e->pos())) { row = r + 1; col = c + 1; }
+        if (row != m_hovRow || col != m_hovCol) { m_hovRow = row; m_hovCol = col; update(); }
+    }
+
+    void mousePressEvent(QMouseEvent* e) override
+    {
+        if (e->button() == Qt::LeftButton && m_hovRow > 0 && m_hovCol > 0) {
+            auto cb = m_cb;
+            int r = m_hovRow, c = m_hovCol;
+            close();
+            cb(r, c);
+        }
+    }
+
+private:
+    static constexpr int m_maxRows = 8;
+    static constexpr int m_maxCols = 8;
+    static constexpr int m_cell    = 22;
+    static constexpr int m_gap     = 2;
+    static constexpr int m_pad     = 8;
+    static constexpr int m_labelH  = 22;
+
+    QRect cellRect(int row, int col) const
+    {
+        return QRect(m_pad + col * (m_cell + m_gap),
+                     m_pad + row * (m_cell + m_gap),
+                     m_cell, m_cell);
+    }
+
+    void updateSize()
+    {
+        int w = 2 * m_pad + m_maxCols * m_cell + (m_maxCols - 1) * m_gap;
+        int h = 2 * m_pad + m_maxRows * m_cell + (m_maxRows - 1) * m_gap + 6 + m_labelH;
+        setFixedSize(w, h);
+    }
+
+    std::function<void(int, int)> m_cb;
+    int m_hovRow = 0, m_hovCol = 0;
+};
 
 static const int MAX_RECENT = 20;
 
@@ -553,7 +651,32 @@ void MainWindow::createToolbar()
     addFmtMat(QChar(0xEA5F), tr("Inline math"),  QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_M), &MarkdownEditor::fmtMathInline);
     addFmtMat(QChar(0xE24A), tr("Block math"),   QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_B), &MarkdownEditor::fmtMathBlock);
     
-    addFmtMat(QChar(0xE228), tr("Table"),        QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_T), &MarkdownEditor::fmtTable);
+    // Table button — shows a size picker popup
+    {
+        m_tableButton = new QToolButton(m_toolbar);
+        m_tableButton->setToolButtonStyle(Qt::ToolButtonIconOnly);
+        m_tableButton->setIconSize(QSize(24, 24));
+        m_tableButton->setAutoRaise(true);
+        m_tableButton->setToolTip(tip(tr("Table"), QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_T)));
+
+        auto showTablePicker = [this]() {
+            if (!m_activeEditor) return;
+            auto* picker = new TableSizePicker([this](int rows, int cols) {
+                if (m_activeEditor) m_activeEditor->fmtTable(rows, cols);
+            }, m_tableButton);
+            QPoint pos = m_tableButton->mapToGlobal(QPoint(0, m_tableButton->height()));
+            picker->move(pos);
+            picker->show();
+        };
+
+        connect(m_tableButton, &QToolButton::clicked, this, showTablePicker);
+
+        // Keyboard shortcut
+        auto* tableShortcut = new QShortcut(QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_T), this);
+        connect(tableShortcut, &QShortcut::activated, this, showTablePicker);
+
+        m_toolbar->addWidget(m_tableButton);
+    }
     addFmtMat(QChar(0xE157), tr("Link"),         QKeySequence(Qt::CTRL | Qt::Key_K),         &MarkdownEditor::fmtLink);
     addMat(QChar(0xE3F4), tr("Image"), QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_I), this, [this]() {
         if (m_activeEditor) {
@@ -609,6 +732,8 @@ void MainWindow::updateToolbarIcons(bool dark)
         else
             def.action->setIcon(IconHelper::materialIcon(def.code, iconColor, sz));
     }
+    if (m_tableButton)
+        m_tableButton->setIcon(IconHelper::materialIcon(QChar(0xE228), iconColor, sz));
     if (m_openButton)
         m_openButton->setIcon(IconHelper::materialIcon(QChar(0xE2C8), iconColor, sz));
     if (m_recentChevron)

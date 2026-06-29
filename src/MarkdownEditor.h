@@ -35,7 +35,7 @@ public slots:
     void fmtBulletList();
     void fmtNumberList();
     void fmtChecklist();
-    void fmtTable();
+    void fmtTable(int rows = 3, int cols = 3);
     void fmtMathInline();
     void fmtMathBlock();
 

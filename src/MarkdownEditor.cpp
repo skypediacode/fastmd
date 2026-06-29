@@ -512,16 +512,30 @@ void MarkdownEditor::fmtQuote()       { prependLines(this, QStringLiteral("> "))
 void MarkdownEditor::fmtBulletList()  { prependLines(this, QStringLiteral("- ")); }
 void MarkdownEditor::fmtChecklist()   { prependLines(this, QStringLiteral("- [ ] ")); }
 
-void MarkdownEditor::fmtTable()
+void MarkdownEditor::fmtTable(int rows, int cols)
 {
+    rows = qMax(1, rows);
+    cols = qMax(1, cols);
+
+    QString header, separator, dataRow;
+    for (int c = 0; c < cols; ++c) {
+        QString colName = QStringLiteral("Col ") + QString::number(c + 1);
+        header    += QStringLiteral("| ") + colName.leftJustified(9) + QStringLiteral(" ");
+        separator += QStringLiteral("| --------- ");
+        dataRow   += QStringLiteral("| Cell      ");
+    }
+    header    += QStringLiteral("|\n");
+    separator += QStringLiteral("|\n");
+    dataRow   += QStringLiteral("|\n");
+
+    QString table = header + separator;
+    for (int r = 0; r < rows; ++r)
+        table += dataRow;
+
     QTextCursor c = textCursor();
     c.beginEditBlock();
-    // Insert at beginning of current line
     c.movePosition(QTextCursor::StartOfBlock);
-    c.insertText(QStringLiteral(
-        "| Column 1 | Column 2 | Column 3 |\n"
-        "| --------- | --------- | --------- |\n"
-        "| Cell      | Cell      | Cell      |\n"));
+    c.insertText(table);
     c.endEditBlock();
 }
 
