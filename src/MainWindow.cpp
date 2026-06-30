@@ -455,6 +455,8 @@ void MainWindow::createMenus()
     mkAct(file, tr("Export &PDF…"),  QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_P), this, &MainWindow::doExportPdf);
     mkAct(file, tr("PDF Page Set&up…"), {}, this, &MainWindow::editPdfPageSetup);
     file->addSeparator();
+    mkAct(file, tr("&Print"), QKeySequence(Qt::CTRL | Qt::Key_P), this, &MainWindow::printDocument);
+    file->addSeparator();
     mkAct(file, tr("Preferences..."), QKeySequence(Qt::CTRL | Qt::Key_Comma), this, &MainWindow::openPreferences);
     file->addSeparator();
     mkAct(file, tr("E&xit"), QKeySequence::Quit, qApp, &QApplication::closeAllWindows);
@@ -492,7 +494,7 @@ void MainWindow::createMenus()
     m_actTogglePreview = view->addAction(tr("&Preview"), this, &MainWindow::togglePreview);
     m_actTogglePreview->setCheckable(true);
     m_actTogglePreview->setChecked(true);
-    m_actTogglePreview->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_P));
+    m_actTogglePreview->setShortcut(QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_V));
 
     view->addSeparator();
     QAction* actZoomIn = view->addAction(tr("Zoom In"), this, &MainWindow::zoomIn);
@@ -703,7 +705,7 @@ void MainWindow::createToolbar()
     m_actToolbarPreview = new QAction(this);
     m_actToolbarPreview->setCheckable(true);
     m_actToolbarPreview->setChecked(true);
-    m_actToolbarPreview->setToolTip(tip(tr("Toggle preview"), QKeySequence(Qt::CTRL | Qt::Key_P)));
+    m_actToolbarPreview->setToolTip(tip(tr("Toggle preview"), QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_V)));
     // Shortcut omitted here to prevent ambiguous shortcut error with View -> Preview
     connect(m_actToolbarPreview, &QAction::triggered, this, &MainWindow::togglePreview);
     m_toolbar->addAction(m_actToolbarPreview);
@@ -1150,6 +1152,40 @@ void MainWindow::editPdfPageSetup()
 
     m_pdfExportOptions = pdfExportOptionsFromPrinter(printer, m_pdfExportOptions.fontSize);
     writeSettings();
+}
+
+void MainWindow::printDocument()
+{
+    if (!m_activeEditor) return;
+
+    const QString markdown = m_activeEditor->toPlainText();
+
+    // 1. Generate the HTML with KaTeX math rendering enabled
+    bool mathDetected = false;
+    const QString body = ExportManager::markdownToHtml(markdown, MathRenderMode::KatexOutput, &mathDetected);
+    QString fullHtml = ExportManager::buildFullHtml(body, false, 16, true, mathDetected);
+
+    // 2. Inject window.print() script to trigger the browser's native print preview automatically
+    int bodyEndIdx = fullHtml.lastIndexOf(QStringLiteral("</body>"));
+    QString printScript = QStringLiteral("<script>window.onload = function() { window.print(); };</script>\n");
+    if (bodyEndIdx != -1) {
+        fullHtml.insert(bodyEndIdx, printScript);
+    } else {
+        fullHtml.append(printScript);
+    }
+
+    // 3. Write to temporary file
+    QString tempPath = QDir::tempPath() + QStringLiteral("/fastmd_print_preview.html");
+    QFile file(tempPath);
+    if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        QTextStream out(&file);
+        out.setEncoding(QStringConverter::Utf8);
+        out << fullHtml;
+        file.close();
+
+        // 4. Open in the user's default browser
+        QDesktopServices::openUrl(QUrl::fromLocalFile(tempPath));
+    }
 }
 
 void MainWindow::openPreferences()
@@ -1899,7 +1935,10 @@ void MainWindow::readSettings()
         s.value(QStringLiteral("pdf/marginTopMm"), 20.0).toDouble(),
         s.value(QStringLiteral("pdf/marginRightMm"), 20.0).toDouble(),
         s.value(QStringLiteral("pdf/marginBottomMm"), 20.0).toDouble());
-    m_pdfExportOptions.fontSize = s.value(QStringLiteral("pdf/fontSize"), 12).toInt();
+    m_pdfExportOptions.fontSize = s.value(QStringLiteral("pdf/fontSize"), 14).toInt();
+    if (m_pdfExportOptions.fontSize == 12) {
+        m_pdfExportOptions.fontSize = 14;
+    }
     rebuildRecentMenu();
     const QByteArray splitterState = s.value(QStringLiteral("workspaceSplitterState")).toByteArray();
     if (!splitterState.isEmpty() && m_mainSplitter)

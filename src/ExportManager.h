@@ -28,7 +28,7 @@ public:
         QPageSize pageSize = QPageSize(QPageSize::A4);
         QPageLayout::Orientation orientation = QPageLayout::Portrait;
         QMarginsF marginsMm = QMarginsF(20.0, 20.0, 20.0, 20.0);
-        int fontSize = 12;
+        int fontSize = 16;
     };
 
     // Convert Markdown to an HTML body. When mode is KatexOutput, raw LaTeX math

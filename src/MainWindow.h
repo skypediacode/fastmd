@@ -49,6 +49,7 @@ private slots:
     // export folder. `extension` includes the leading dot (e.g. ".pdf").
     QString exportInitialPath(const QString& extension) const;
     void editPdfPageSetup();
+    void printDocument();
     void openPreferences();
     void doPreviewBrowser();
 

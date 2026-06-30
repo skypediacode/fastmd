@@ -466,6 +466,9 @@ static QString buildCss(bool dark, int fontSize, bool isPrint)
     // properties it doesn't understand, which is harmless).
     if (isPrint) {
         css += QStringLiteral(
+            "@media print{"
+            "  body{zoom:87.5%;}"
+            "}"
             "body{line-height:1.5;-webkit-print-color-adjust:exact;print-color-adjust:exact;}"
             "p,li,blockquote{orphans:3;widows:3;}"
             // keep headings attached to the content that follows them
