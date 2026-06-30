@@ -444,7 +444,7 @@ static QString buildCss(bool dark, int fontSize, bool isPrint)
         "pre code{background-color:transparent;color:inherit;font-size:0.9em;padding:0;border-radius:0;}"
         // blockquote
         "blockquote{"
-        "  border-left:4px solid %6;margin-top:16px;margin-bottom:16px;"
+        "  border-left:4px solid %6;margin:16px 0;"
         "  padding:4px 12px;color:%7;font-style:italic;"
         "}"
         "blockquote p{margin:0;}"
