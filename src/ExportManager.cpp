@@ -774,6 +774,31 @@ static bool exportPdfViaBrowser(const QString& bodyHtml, const QString& filePath
 // ---------------------------------------------------------------------------
 bool ExportManager::exportPdf(const QString& markdown, const QString& filePath, const QString& docPath, const PdfExportOptions& options, QWidget* parent)
 {
+    // Check if the destination file is writable/overwritable before proceeding
+    {
+        QFile file(filePath);
+        bool writable = false;
+        if (file.exists()) {
+            if (file.open(QIODevice::ReadWrite)) {
+                file.close();
+                writable = true;
+            }
+        } else {
+            if (file.open(QIODevice::WriteOnly)) {
+                file.close();
+                file.remove();
+                writable = true;
+            }
+        }
+        if (!writable) {
+            if (parent) {
+                QMessageBox::warning(parent, QObject::tr("PDF Export Failed"),
+                                     QObject::tr("Could not write to the destination file. The file may be open or locked by another application."));
+            }
+            return false;
+        }
+    }
+
     bool mathDetected = false;
     const QString katexBody = markdownToHtml(markdown, MathRenderMode::KatexOutput, &mathDetected);
 
