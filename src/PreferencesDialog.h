@@ -16,6 +16,9 @@ public:
     bool    restoreSessionOnStartup() const;
     void    setRestoreSessionOnStartup(bool enable);
 
+    bool    closeAppOnLastTabClose() const;
+    void    setCloseAppOnLastTabClose(bool enable);
+
     QString defaultSaveFolder() const;
     void    setDefaultSaveFolder(const QString& path);
 
@@ -27,6 +30,7 @@ private:
 
     QTabWidget*  m_tabWidget = nullptr;
     QCheckBox*   m_restoreSessionCheckbox = nullptr;
+    QCheckBox*   m_closeAppOnLastTabCloseCheckbox = nullptr;
     QLineEdit*   m_defaultSaveFolderEdit = nullptr;
     QPushButton* m_associateFilesButton = nullptr;
     QLabel*      m_fileAssociationStatusLabel = nullptr;

@@ -229,6 +229,8 @@ void TabWidget::onCurrentChanged(int index)
 {
     if (TabPage* p = pageAt(index))
         emit editorActivated(p->editor, p->preview);
+    else
+        emit editorActivated(nullptr, nullptr);
     QTimer::singleShot(0, this, &TabWidget::updateTabBarLayout);
 }
 

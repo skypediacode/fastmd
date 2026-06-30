@@ -167,6 +167,7 @@ private:
     QStringList         m_workspaceExpandedPaths;
     bool                m_workspaceTreeVisible = false;
     bool                m_restoreSessionOnStartup = false;
+    bool                m_closeAppOnLastTabClose = true;
     QString             m_defaultSaveFolder;
     QString             m_lastSaveFolder;
     QString             m_lastOpenFolder;

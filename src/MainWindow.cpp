@@ -1155,10 +1155,14 @@ void MainWindow::editPdfPageSetup()
 void MainWindow::openPreferences()
 {
     PreferencesDialog dlg(this);
+    dlg.setRestoreSessionOnStartup(m_restoreSessionOnStartup);
+    dlg.setCloseAppOnLastTabClose(m_closeAppOnLastTabClose);
     dlg.setDefaultSaveFolder(m_defaultSaveFolder);
     if (dlg.exec() == QDialog::Accepted) {
         m_restoreSessionOnStartup = dlg.restoreSessionOnStartup();
+        m_closeAppOnLastTabClose = dlg.closeAppOnLastTabClose();
         m_defaultSaveFolder = dlg.defaultSaveFolder();
+        writeSettings();
     }
 }
 
@@ -1533,8 +1537,12 @@ void MainWindow::onTabCloseRequested(int index)
     if (!confirmClose(index)) return;
     m_tabs->closeTabAt(index);
     if (m_tabs->count() == 0) {
-        close();
-        return;
+        if (m_closeAppOnLastTabClose) {
+            close();
+            return;
+        } else {
+            newFile();
+        }
     }
     updateWindowTitle();
     updateWorkspaceTreeRoot();
@@ -1846,6 +1854,7 @@ void MainWindow::readSettings()
     m_markdownPreviewVisible = s.value(QStringLiteral("previewVisible"), true).toBool();
     m_workspaceTreeVisible = s.value(QStringLiteral("workspaceTreeVisible"), false).toBool();
     m_restoreSessionOnStartup = s.value(QStringLiteral("restoreSessionOnStartup"), false).toBool();
+    m_closeAppOnLastTabClose = s.value(QStringLiteral("closeAppOnLastTabClose"), true).toBool();
     m_defaultSaveFolder = s.value(QStringLiteral("defaultSaveFolder")).toString();
     m_lastSaveFolder    = s.value(QStringLiteral("lastSaveFolder")).toString();
     m_lastOpenFolder    = s.value(QStringLiteral("lastOpenFolder")).toString();
@@ -2055,6 +2064,7 @@ void MainWindow::writeSettings()
     s.setValue(QStringLiteral("previewVisible"), m_markdownPreviewVisible);
     s.setValue(QStringLiteral("workspaceTreeVisible"), m_workspaceTreeVisible);
     s.setValue(QStringLiteral("restoreSessionOnStartup"), m_restoreSessionOnStartup);
+    s.setValue(QStringLiteral("closeAppOnLastTabClose"), m_closeAppOnLastTabClose);
     s.setValue(QStringLiteral("defaultSaveFolder"), m_defaultSaveFolder);
     s.setValue(QStringLiteral("lastSaveFolder"),    m_lastSaveFolder);
     s.setValue(QStringLiteral("lastOpenFolder"),    m_lastOpenFolder);

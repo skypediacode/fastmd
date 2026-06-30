@@ -87,11 +87,13 @@ PreferencesDialog::PreferencesDialog(QWidget* parent)
 
     QSettings s;
     m_restoreSessionCheckbox->setChecked(s.value(QStringLiteral("restoreSessionOnStartup"), false).toBool());
+    m_closeAppOnLastTabCloseCheckbox->setChecked(s.value(QStringLiteral("closeAppOnLastTabClose"), true).toBool());
     updateFileAssociationUi();
 
     connect(buttonBox, &QDialogButtonBox::accepted, this, [this]() {
         QSettings s;
         s.setValue(QStringLiteral("restoreSessionOnStartup"), m_restoreSessionCheckbox->isChecked());
+        s.setValue(QStringLiteral("closeAppOnLastTabClose"), m_closeAppOnLastTabCloseCheckbox->isChecked());
         accept();
     });
     connect(buttonBox, &QDialogButtonBox::rejected, this, &QDialog::reject);
@@ -105,6 +107,16 @@ bool PreferencesDialog::restoreSessionOnStartup() const
 void PreferencesDialog::setRestoreSessionOnStartup(bool enable)
 {
     m_restoreSessionCheckbox->setChecked(enable);
+}
+
+bool PreferencesDialog::closeAppOnLastTabClose() const
+{
+    return m_closeAppOnLastTabCloseCheckbox->isChecked();
+}
+
+void PreferencesDialog::setCloseAppOnLastTabClose(bool enable)
+{
+    m_closeAppOnLastTabCloseCheckbox->setChecked(enable);
 }
 
 QString PreferencesDialog::defaultSaveFolder() const
@@ -135,6 +147,17 @@ void PreferencesDialog::setupGeneralTab(QWidget* tab)
     m_restoreSessionCheckbox = new QCheckBox(tr("Restore previous session on startup"), tab);
     startupGroup->addWidget(m_restoreSessionCheckbox);
     layout->addLayout(startupGroup);
+
+    // Tabs section
+    auto* tabsGroup = new QVBoxLayout();
+    tabsGroup->setSpacing(6);
+    auto* tabsTitle = new QLabel(tr("Tabs"), tab);
+    tabsTitle->setFont(titleFont);
+    tabsGroup->addWidget(tabsTitle);
+    m_closeAppOnLastTabCloseCheckbox = new QCheckBox(tr("Close the application when the last tab is closed"), tab);
+    m_closeAppOnLastTabCloseCheckbox->setToolTip(tr("If disabled, closing the last tab will replace it with a new document instead of closing the application."));
+    tabsGroup->addWidget(m_closeAppOnLastTabCloseCheckbox);
+    layout->addLayout(tabsGroup);
 
     // Files section
     auto* filesGroup = new QVBoxLayout();
