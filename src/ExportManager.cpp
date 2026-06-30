@@ -481,10 +481,11 @@ static QString buildCss(bool dark, int fontSize, bool isPrint)
             "white-space:pre-wrap;overflow-wrap:break-word;}"
             // wrap long inline code / links instead of overflowing the page
             "code{white-space:pre-wrap;overflow-wrap:anywhere;}"
-            "a{overflow-wrap:anywhere;}"
-            // inline code accent so it reads as code, not an error (darkened from
-            // markdown-pdf.css #C9AE75 for print contrast); code blocks keep fg
-            ":not(pre) > code{color:#9a6700;}"
+            // links: clean GitHub-like blue, underlined for clear visibility in print/PDF
+            "a{color:#0969da;text-decoration:underline;overflow-wrap:anywhere;}"
+            "a code{color:inherit;}"
+            // inline code: black text with a light gray background
+            ":not(pre) > code{color:#000000;background-color:#f0f0f0;padding:0.2em 0.4em;border-radius:4px;}"
             // blockquote: subtle neutral tint with a blue accent rule
             "blockquote{background:rgba(127,127,127,0.1);border-left-color:rgba(0,122,204,0.6);"
             "font-style:normal;border-radius:0 3px 3px 0;}"
