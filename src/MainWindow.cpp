@@ -27,6 +27,7 @@
 #include <QDropEvent>
 #include <QMimeData>
 #include <QFileSystemWatcher>
+#include <QProcess>
 #include <QApplication>
 #include <QDesktopServices>
 #include <QUrl>
@@ -160,6 +161,89 @@ private:
 
     std::function<void(int, int)> m_cb;
     int m_hovRow = 0, m_hovCol = 0;
+};
+
+class ExportSuccessDialog : public QDialog {
+public:
+    ExportSuccessDialog(const QString& filePath, QWidget* parent)
+        : QDialog(parent)
+        , m_filePath(filePath)
+    {
+        setWindowTitle(tr("Export PDF"));
+        setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
+
+        auto* mainLayout = new QVBoxLayout(this);
+        mainLayout->setContentsMargins(20, 20, 20, 16);
+        mainLayout->setSpacing(16);
+
+        auto* topLayout = new QHBoxLayout();
+        topLayout->setContentsMargins(0, 0, 0, 0);
+        topLayout->setSpacing(12);
+        topLayout->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+
+        // Icon
+        auto* iconLabel = new QLabel(this);
+        QIcon icon = IconHelper::materialIcon(QChar(0xE86C), QColor("#4CAF50"));
+        iconLabel->setPixmap(icon.pixmap(32, 32));
+        topLayout->addWidget(iconLabel);
+
+        // Text
+        auto* textLabel = new QLabel(tr("PDF exported successfully."), this);
+        textLabel->setWordWrap(false);
+        topLayout->addWidget(textLabel);
+
+        mainLayout->addLayout(topLayout);
+
+        // Buttons
+        auto* btnLayout = new QHBoxLayout();
+        btnLayout->setSpacing(8);
+        btnLayout->setAlignment(Qt::AlignCenter);
+
+        auto* openPdfBtn = new QPushButton(tr("Open PDF"), this);
+        openPdfBtn->setDefault(true);
+        openPdfBtn->setFixedWidth(96);
+
+        auto* openFolderBtn = new QPushButton(tr("Open Folder"), this);
+        openFolderBtn->setFixedWidth(96);
+
+        auto* closeBtn = new QPushButton(tr("Close"), this);
+        closeBtn->setFixedWidth(96);
+
+        btnLayout->addWidget(openPdfBtn);
+        btnLayout->addWidget(openFolderBtn);
+        btnLayout->addWidget(closeBtn);
+        
+        mainLayout->addLayout(btnLayout);
+
+        setLayout(mainLayout);
+        adjustSize();
+        setFixedSize(size());
+
+        connect(openPdfBtn, &QPushButton::clicked, this, &ExportSuccessDialog::onOpenPdf);
+        connect(openFolderBtn, &QPushButton::clicked, this, &ExportSuccessDialog::onOpenFolder);
+        connect(closeBtn, &QPushButton::clicked, this, &QDialog::reject);
+    }
+
+private:
+    void onOpenPdf()
+    {
+        QDesktopServices::openUrl(QUrl::fromLocalFile(m_filePath));
+        accept();
+    }
+
+    void onOpenFolder()
+    {
+#if defined(Q_OS_WIN)
+        QStringList args;
+        args << QStringLiteral("/select,") << QDir::toNativeSeparators(m_filePath);
+        QProcess::startDetached(QStringLiteral("explorer.exe"), args);
+#else
+        QDesktopServices::openUrl(QUrl::fromLocalFile(QFileInfo(m_filePath).absolutePath()));
+#endif
+        accept();
+    }
+
+    QString m_filePath;
 };
 
 static const int MAX_RECENT = 20;
@@ -1137,7 +1221,10 @@ void MainWindow::doExportPdf()
     QString docPath = pg ? pg->model->filePath() : QString();
 
     // exportPdf surfaces its own (specific) error dialogs for the browser path.
-    ExportManager::exportPdf(markdown, path, docPath, m_pdfExportOptions, this);
+    if (ExportManager::exportPdf(markdown, path, docPath, m_pdfExportOptions, this)) {
+        ExportSuccessDialog dlg(path, this);
+        dlg.exec();
+    }
 }
 
 void MainWindow::editPdfPageSetup()
