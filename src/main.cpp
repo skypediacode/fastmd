@@ -16,7 +16,7 @@ int main(int argc, char* argv[])
 
     QApplication app(argc, argv);
     app.setApplicationName("FastMD");
-    app.setApplicationVersion("1.6.1");
+    app.setApplicationVersion("1.6.5");
     app.setOrganizationName("FastMD");
     FASTMD_MARK("QApplication constructed");
 

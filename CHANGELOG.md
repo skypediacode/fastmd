@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.6.5] - 2026-07-01
+
+### Added
+
+- **Browser-Driven Printing:** Print documents via browser preview with `Ctrl+P`, enabling standard page layouts and offline KaTeX rendering.
+- **Keep Open Preference:** Option under Preferences -> General to prevent the application from closing when the last tab is closed (automatically spawns a new document instead).
+- **Post-Export PDF Dialog:** Non-intrusive dialog after exporting a PDF to immediately open the PDF or show it in its containing folder.
+- **PDF Write Check:** Verifies destination file write permissions before PDF export to prevent silent failures if the file is locked or open in another application.
+
+### Changed
+
+- **Shortcut Adjustment:** Reassigned the Markdown Preview Toggle shortcut to `Ctrl+Shift+V` to avoid conflict with the print shortcut (`Ctrl+P`).
+- **Improved Font Scale for Printing:** Print stylesheet scales body text to 87.5% (approx. 14px) and automatically migrates legacy 12px print/PDF settings to 14px.
+- **Compact Editor Mode Button:** Reduced the width of the Switch Editor Mode button on the toolbar for a cleaner layout.
+- **Enhanced PDF Styling:** Improved styling of links (GitHub-like blue, underlined) and inline code (black text on a light gray background with padding and rounded corners) in exported PDFs.
+
 ## [1.6.1] - 2026-06-29
 
 ### Added

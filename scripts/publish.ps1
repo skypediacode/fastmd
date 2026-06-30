@@ -1,5 +1,5 @@
 param (
-    [string]$Version = "v1.6.1"
+    [string]$Version = "v1.6.5"
 )
 
 $ErrorActionPreference = "Stop"
@@ -7,7 +7,7 @@ $ErrorActionPreference = "Stop"
 Write-Host "Creating GitHub Release for version $Version..."
 
 $Title = "FastMD $Version"
-$Notes = "Native, lightning-fast Markdown editor for Windows with v1.6.1 improvements: table size picker for toolbar insertions, separate Find and Replace toolbar actions, smarter export defaults, and improved browser-backed PDF output. Download the portable zip to get started immediately without installation or the installer if you prefer the traditional Windows installation."
+$Notes = "Native, lightning-fast Markdown editor for Windows with v1.6.5 improvements: browser-driven printing, preview toggle shortcut updated to Ctrl+Shift+V, preference to keep app open on last tab close, a new post-export PDF success dialog, improved link and inline code styling in PDF exports, and write permission checks to avoid PDF export failures. Download the portable zip to get started immediately without installation or the installer if you prefer the traditional Windows installation."
 
 $ChangelogPath = "CHANGELOG.md"
 if (Test-Path $ChangelogPath) {
@@ -71,12 +71,17 @@ if ($ReleaseExists) {
         Write-Host "Failed to update release notes." -ForegroundColor Red
     }
 } else {
-    $Command = "gh release create $Version `"$FileListStr`" --title `"$Title`" --notes `"$Notes`""
-    Write-Host "Executing: $Command"
+    $noteFile = [System.IO.Path]::GetTempFileName()
+    [System.IO.File]::WriteAllText($noteFile, $Notes)
+    $Command = "gh release create $Version `"$FileListStr`" --title `"$Title`" --notes-file `"$noteFile`""
+    Write-Host "Executing: gh release create $Version `"$FileListStr`" --title `"$Title`" --notes-file ... (using temporary file)"
     cmd.exe /c $Command
-    if ($LASTEXITCODE -eq 0) {
+    $exitCode = $LASTEXITCODE
+    Remove-Item $noteFile -Force
+    if ($exitCode -eq 0) {
         Write-Host "Release $Version published successfully!" -ForegroundColor Green
     } else {
         Write-Host "Failed to publish release. See error above." -ForegroundColor Red
     }
 }
+
