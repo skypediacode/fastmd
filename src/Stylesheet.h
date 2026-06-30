@@ -106,8 +106,8 @@ QToolButton:checked {
     border-color: rgba(0,120,212,0.30);
 }
 QToolButton[modeToggle="true"] {
-    min-width: 150px;
-    max-width: 150px;
+    min-width: 108px;
+    max-width: 108px;
     padding: 4px 12px;
     font-weight: 600;
     font-size: 16px;
@@ -324,8 +324,8 @@ QToolButton:checked {
     border-color: rgba(0,120,212,0.45);
 }
 QToolButton[modeToggle="true"] {
-    min-width: 150px;
-    max-width: 150px;
+    min-width: 130px;
+    max-width: 130px;
     padding: 4px 12px;
     font-weight: 600;
     font-size: 16px;

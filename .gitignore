@@ -24,3 +24,7 @@ config/
 screenshots/
 .agent-review*
 CONTEXT.md
+editor-firstpaint-benchmark.csv
+editor-startup-benchmark.csv
+Measure-EditorFirstPaint.ps1
+Measure-EditorStartup.ps1
