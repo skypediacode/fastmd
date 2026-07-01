@@ -629,7 +629,7 @@ void MainWindow::createMenus()
     help->addSeparator();
     help->addAction(tr("About FastMD"), this, [this] {
         QMessageBox::about(this, tr("About FastMD"),
-            tr("<p style=\"margin: 0; margin-bottom: 4px;\"><b>FastMD</b> v1.7.0</p>"
+            tr("<p style=\"margin: 0; margin-bottom: 4px;\"><b>FastMD</b> v1.7.1</p>"
                "<p style=\"margin: 0; margin-bottom: 6px;\">A lightweight Markdown Text Editor built with C++20 and Qt 6.</p>"
                "<p style=\"margin: 0; margin-bottom: 4px;\">Copyright &copy; 2026 Skypedia</p>"
                "<p style=\"margin: 0;\">Licensed under the MIT License. This software is provided "

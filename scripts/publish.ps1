@@ -1,5 +1,5 @@
 param (
-    [string]$Version = "v1.7.0"
+    [string]$Version = "v1.7.1"
 )
 
 $ErrorActionPreference = "Stop"
@@ -7,7 +7,7 @@ $ErrorActionPreference = "Stop"
 Write-Host "Creating GitHub Release for version $Version..."
 
 $Title = "FastMD $Version"
-$Notes = "Native, lightning-fast Markdown editor for Windows with v1.7.0 improvements: Outline Navigator, Export DOCX via Pandoc, paste image support, and opening exported HTML immediately. Download the portable zip to get started immediately without installation or the installer if you prefer the traditional Windows installation."
+$Notes = "Native, lightning-fast Markdown editor for Windows with v1.7.1 improvements: DOCX task list preservation, a tabbed Find and Replace dialog, and a dedicated Print toolbar action. Download the portable zip to get started immediately without installation or the installer if you prefer the traditional Windows installation."
 
 $ChangelogPath = "CHANGELOG.md"
 if (Test-Path $ChangelogPath) {

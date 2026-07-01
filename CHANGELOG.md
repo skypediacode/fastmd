@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.7.1] - 2026-07-01
+
+### Changed
+
+- **DOCX Task Lists:** Improved DOCX export so Markdown task lists render as readable checkbox markers in Word.
+- **Find and Replace UI:** Refined the Find/Replace dialog into tabbed Find and Replace modes with clearer labels.
+- **Toolbar Print Action:** Added a dedicated Print button to the toolbar alongside the existing print command.
+
 ## [1.7.0] - 2026-07-01
 
 ### Added
