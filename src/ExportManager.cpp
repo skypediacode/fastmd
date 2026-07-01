@@ -284,6 +284,75 @@ static QString preprocessMath(const QString& markdown, MathRenderMode mode, QStr
     return out;
 }
 
+static QString preprocessTaskListsForDocx(const QString& markdown)
+{
+    static const QRegularExpression taskListRe(
+        QStringLiteral(R"(^([ \t]*(?:>[ \t]*)*)([-+*]|\d+[.)])([ \t]+)\[([ xX])\]([ \t]+)(.*)$)"));
+
+    QStringList lines = markdown.split(QLatin1Char('\n'));
+    bool inFence = false;
+    QChar fenceChar;
+
+    for (QString& line : lines) {
+        int pos = 0;
+        while (pos < line.size() && (line.at(pos) == QLatin1Char(' ') || line.at(pos) == QLatin1Char('\t')))
+            ++pos;
+
+        int fenceCount = 0;
+        if (pos < line.size() && (line.at(pos) == QLatin1Char('`') || line.at(pos) == QLatin1Char('~'))) {
+            fenceChar = line.at(pos);
+            while (pos + fenceCount < line.size() && line.at(pos + fenceCount) == fenceChar)
+                ++fenceCount;
+        }
+
+        if (fenceCount >= 3) {
+            if (!inFence) {
+                inFence = true;
+            } else if (line.at(pos) == fenceChar) {
+                inFence = false;
+            }
+            continue;
+        }
+
+        if (inFence)
+            continue;
+
+        const QRegularExpressionMatch match = taskListRe.match(line);
+        if (!match.hasMatch())
+            continue;
+
+        const QString marker = (match.captured(4).compare(QStringLiteral("x"), Qt::CaseInsensitive) == 0)
+            ? QStringLiteral("☑")
+            : QStringLiteral("☐");
+
+        line = match.captured(1) + marker + QStringLiteral(" ") + match.captured(6) + QStringLiteral("  ");
+    }
+
+    return lines.join(QLatin1Char('\n'));
+}
+
+static QString normalizeTaskListHtml(QString html)
+{
+    static const QRegularExpression checkedInputRe(
+        QStringLiteral(R"re(<input\b(?=[^>]*\btype\s*=\s*"checkbox")(?=[^>]*\bchecked\b)[^>]*>)re"),
+        QRegularExpression::CaseInsensitiveOption);
+    static const QRegularExpression uncheckedInputRe(
+        QStringLiteral(R"re(<input\b(?=[^>]*\btype\s*=\s*"checkbox")[^>]*>)re"),
+        QRegularExpression::CaseInsensitiveOption);
+    static const QRegularExpression taskListUlRe(
+        QStringLiteral(R"re(<(ul|ol)([^>]*)class="([^"]*\btask-list\b[^"]*)"([^>]*)>)re"),
+        QRegularExpression::CaseInsensitiveOption);
+    static const QRegularExpression taskListLiRe(
+        QStringLiteral(R"re(<li([^>]*)class="([^"]*\btask-list-item\b[^"]*)"([^>]*)>)re"),
+        QRegularExpression::CaseInsensitiveOption);
+
+    html.replace(checkedInputRe, QStringLiteral("<span class=\"task-list-marker\">☑&nbsp;</span>"));
+    html.replace(uncheckedInputRe, QStringLiteral("<span class=\"task-list-marker\">☐&nbsp;</span>"));
+    html.replace(taskListUlRe, QStringLiteral("<\\1\\2class=\"\\3\" data-fastmd-task-list=\"1\"\\4>"));
+    html.replace(taskListLiRe, QStringLiteral("<li\\1class=\"\\2\" data-fastmd-task-item=\"1\"\\3>"));
+    return html;
+}
+
 } // namespace
 
 // ---------------------------------------------------------------------------
@@ -311,6 +380,7 @@ QString ExportManager::markdownToHtml(const QString& markdown, MathRenderMode mo
     md_html(utf8.constData(), static_cast<MD_SIZE>(utf8.size()), cb, &result, flags, 0);
     for (int i = 0; i < mathSnippets.size(); ++i)
         result.replace(QStringLiteral("@@FASTMD_MATH_%1@@").arg(i), mathSnippets.at(i));
+    result = normalizeTaskListHtml(result);
 
     // Decode URL-encoded paths in src="..." so QTextDocument/QTextBrowser can find local files with spaces
     QRegularExpression srcRe(QStringLiteral("src=\"([^\"]+)\""));
@@ -423,6 +493,9 @@ static QString buildCss(bool dark, int fontSize, bool isPrint)
         "ul,ol{margin-top:0;margin-bottom:0.5em;padding-left:1.5em;}"
         "li{margin-top:0.2em;margin-bottom:0.2em;}"
         "li > p{margin-bottom:0.5em;}"
+        "[data-fastmd-task-list='1']{list-style:none;padding-left:0;margin-left:0;}"
+        "[data-fastmd-task-item='1']{list-style:none;margin-left:0;padding-left:0;}"
+        ".task-list-marker{display:inline-block;min-width:1.35em;}"
         // inline code
         "code{"
         "  font-family:'JetBrains Mono','IBM Plex Mono','Cascadia Code','Cascadia Mono',Consolas,monospace;"
@@ -915,7 +988,7 @@ bool ExportManager::exportDocx(const QString& markdown, const QString& filePath,
         }
         QTextStream out(&f);
         out.setEncoding(QStringConverter::Utf8);
-        out << markdown;
+        out << preprocessTaskListsForDocx(markdown);
     }
 
     QFile::remove(filePath);
