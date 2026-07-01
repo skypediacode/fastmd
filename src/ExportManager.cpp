@@ -868,3 +868,79 @@ bool ExportManager::exportPdf(const QString& markdown, const QString& filePath, 
     }
     return true;
 }
+
+// ---------------------------------------------------------------------------
+QString ExportManager::pandocExecutablePath()
+{
+    // 1. Bundled copy next to the executable (shipped by the installer/portable build).
+    const QString bundled = QCoreApplication::applicationDirPath()
+        + QStringLiteral("/tools/pandoc/pandoc.exe");
+    if (QFileInfo::exists(bundled))
+        return bundled;
+
+    // 2. Fall back to a system-installed "pandoc" on PATH.
+    return QStandardPaths::findExecutable(QStringLiteral("pandoc"));
+}
+
+// ---------------------------------------------------------------------------
+bool ExportManager::exportDocx(const QString& markdown, const QString& filePath, const QString& docPath, QWidget* parent)
+{
+    const QString pandoc = pandocExecutablePath();
+    if (pandoc.isEmpty()) {
+        if (parent) {
+            QMessageBox::warning(parent, QObject::tr("Export Failed"),
+                QObject::tr("Pandoc could not be found.\n\n"
+                            "FastMD looks for a bundled copy at tools/pandoc/pandoc.exe "
+                            "next to the application, or a system installation of pandoc "
+                            "on PATH."));
+        }
+        return false;
+    }
+
+    // Write the raw Markdown to a temp .md file next to the source document (if
+    // any) so relative image paths resolve, then let Pandoc convert it.
+    const QString tempDir = docPath.isEmpty()
+        ? QDir::tempPath()
+        : QFileInfo(docPath).absolutePath();
+    const QString tempMd = QDir(tempDir).filePath(
+        QStringLiteral(".fastmd_docx_%1.md").arg(QFileInfo(filePath).completeBaseName()));
+
+    {
+        QFile f(tempMd);
+        if (!f.open(QIODevice::WriteOnly | QIODevice::Text)) {
+            if (parent)
+                QMessageBox::warning(parent, QObject::tr("Export Failed"),
+                                     QObject::tr("Could not create a temporary file for DOCX export."));
+            return false;
+        }
+        QTextStream out(&f);
+        out.setEncoding(QStringConverter::Utf8);
+        out << markdown;
+    }
+
+    QFile::remove(filePath);
+
+    QProcess proc;
+    QStringList args;
+    args << QDir::toNativeSeparators(tempMd)
+         << QStringLiteral("-f") << QStringLiteral("gfm")
+         << QStringLiteral("-o") << QDir::toNativeSeparators(filePath);
+
+    proc.start(pandoc, args);
+    bool ok = proc.waitForStarted(10000);
+    if (ok)
+        ok = proc.waitForFinished(60000);
+
+    const bool produced = QFileInfo::exists(filePath) && QFileInfo(filePath).size() > 0;
+
+    QFile::remove(tempMd);
+
+    if (!ok || !produced) {
+        if (parent)
+            QMessageBox::warning(parent, QObject::tr("Export Failed"),
+                                 QObject::tr("Pandoc failed to generate the DOCX file.\n\n%1")
+                                     .arg(QString::fromLocal8Bit(proc.readAllStandardError()).trimmed()));
+        return false;
+    }
+    return true;
+}

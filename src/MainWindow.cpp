@@ -7,6 +7,7 @@
 #include "FindReplaceDialog.h"
 #include "PreferencesDialog.h"
 #include "ExportManager.h"
+#include "LicensesDialog.h"
 #include "DocumentModel.h"
 #include <QDateTime>
 #include "Stylesheet.h"
@@ -551,6 +552,7 @@ void MainWindow::createMenus()
     file->addSeparator();
 
     mkAct(file, tr("Export &HTML…"), QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_H), this, &MainWindow::doExportHtml);
+    mkAct(file, tr("Export &DOCX…"), QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_D), this, &MainWindow::doExportDocx);
     mkAct(file, tr("Export &PDF…"),  QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_P), this, &MainWindow::doExportPdf);
     mkAct(file, tr("PDF Page Set&up…"), {}, this, &MainWindow::editPdfPageSetup);
     file->addSeparator();
@@ -620,7 +622,11 @@ void MainWindow::createMenus()
     QMenu* help = menuBar()->addMenu(tr("&Help"));
     help->addAction(tr("Check for updates ..."), this, &MainWindow::checkForUpdates);
     help->addSeparator();
-    help->addAction(tr("About Qt"), qApp, &QApplication::aboutQt);
+    help->addAction(tr("Open Source Licenses..."), this, [this] {
+        LicensesDialog dlg(this);
+        dlg.exec();
+    });
+    help->addSeparator();
     help->addAction(tr("About FastMD"), this, [this] {
         QMessageBox::about(this, tr("About FastMD"),
             tr("<p style=\"margin: 0; margin-bottom: 4px;\"><b>FastMD</b> v1.6.5</p>"
@@ -746,6 +752,7 @@ void MainWindow::createToolbar()
     // addMat(QChar(0xE18F), tr("Save All"),  QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_S), this, &MainWindow::saveAll, false);
     addMat(QChar(0xE80B), tr("Export HTML"), QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_H), this, &MainWindow::doExportHtml, false);
     addMat(QChar(0xE415), tr("Export PDF"),  QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_P), this, &MainWindow::doExportPdf, false);
+    addMat(QChar(0xE24D), tr("Export DOCX"), QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_D), this, &MainWindow::doExportDocx, false);
     addMat(QChar(0xE89E), tr("Preview in Browser"), QKeySequence(Qt::CTRL | Qt::ALT | Qt::Key_P), this, &MainWindow::doPreviewBrowser, true);
     m_toolbar->addSeparator();
 
@@ -1273,6 +1280,27 @@ void MainWindow::doExportPdf()
     // exportPdf surfaces its own (specific) error dialogs for the browser path.
     if (ExportManager::exportPdf(markdown, path, docPath, m_pdfExportOptions, this)) {
         ExportSuccessDialog dlg(path, QStringLiteral("PDF"), this);
+        dlg.exec();
+    }
+}
+
+void MainWindow::doExportDocx()
+{
+    if (!m_activeEditor) return;
+    const QString markdown = m_activeEditor->toPlainText();
+    if (markdown.isEmpty()) return;
+    QString path = QFileDialog::getSaveFileName(
+        this, tr("Export DOCX"), exportInitialPath(QStringLiteral(".docx")),
+        tr("Word Document (*.docx);;All Files (*)"));
+    if (path.isEmpty()) return;
+    m_lastExportFolder = QFileInfo(path).absolutePath();
+
+    TabPage* pg = m_tabs->currentPage();
+    QString docPath = pg ? pg->model->filePath() : QString();
+
+    // exportDocx surfaces its own error dialogs (e.g. Pandoc not found).
+    if (ExportManager::exportDocx(markdown, path, docPath, this)) {
+        ExportSuccessDialog dlg(path, QStringLiteral("DOCX"), this);
         dlg.exec();
     }
 }

@@ -26,6 +26,33 @@ Copy-Item "LICENSE" -Destination $DistDir
 Write-Host "Bundling KaTeX assets..."
 Copy-Item "resources\katex" -Destination $DistDir -Recurse
 
+# 3c. Bundle Pandoc (external tool for Export DOCX; not linked as a library).
+# pandoc.exe is not checked into git (see tools/pandoc/NOTICE.txt) - download the
+# official Windows binary here and cache it in tools\pandoc so repeat packaging
+# runs don't re-download. Bump $PandocVersion to update.
+$PandocVersion = "3.10"
+$PandocExe = "tools\pandoc\pandoc.exe"
+
+if (!(Test-Path $PandocExe)) {
+    Write-Host "Downloading Pandoc $PandocVersion..."
+    $PandocZip = "tools\pandoc\pandoc-$PandocVersion.zip"
+    $PandocUrl = "https://github.com/jgm/pandoc/releases/download/$PandocVersion/pandoc-$PandocVersion-windows-x86_64.zip"
+    Invoke-WebRequest -Uri $PandocUrl -OutFile $PandocZip
+
+    $PandocExtractDir = "tools\pandoc\_extract"
+    Expand-Archive -Path $PandocZip -DestinationPath $PandocExtractDir -Force
+    Copy-Item "$PandocExtractDir\pandoc-$PandocVersion\pandoc.exe" -Destination $PandocExe
+
+    Remove-Item $PandocZip -Force
+    Remove-Item $PandocExtractDir -Recurse -Force
+} else {
+    Write-Host "Using cached Pandoc binary at $PandocExe..."
+}
+
+Write-Host "Bundling Pandoc..."
+New-Item -ItemType Directory -Path "$DistDir\tools\pandoc" -Force | Out-Null
+Copy-Item "tools\pandoc\*" -Destination "$DistDir\tools\pandoc" -Recurse
+
 # 4. Zip it up for the Portable Release
 Write-Host "Compressing into FastMD-Portable.zip..."
 Compress-Archive -Path "$DistDir\*" -DestinationPath "dist\FastMD-Portable.zip" -Force

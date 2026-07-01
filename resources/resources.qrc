@@ -5,5 +5,10 @@
     <file alias="fonts/MaterialIcons-Regular.ttf">fonts/MaterialIcons-Regular.ttf</file>
     <file alias="fonts/MaterialIconsOutlined-Regular.otf">fonts/MaterialIconsOutlined-Regular.otf</file>
     <file alias="icons/checkmark.svg">icons/checkmark.svg</file>
+    <file alias="licenses/qt-LGPL-3.0.txt">licenses/qt-LGPL-3.0.txt</file>
+    <file alias="licenses/pandoc-GPL-2.0.txt">licenses/pandoc-GPL-2.0.txt</file>
+    <file alias="licenses/md4c-MIT.txt">licenses/md4c-MIT.txt</file>
+    <file alias="licenses/katex-MIT.txt">licenses/katex-MIT.txt</file>
+    <file alias="licenses/fastmd-MIT.txt">licenses/fastmd-MIT.txt</file>
   </qresource>
 </RCC>

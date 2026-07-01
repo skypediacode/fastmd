@@ -31,6 +31,7 @@ set(SOURCES
     src/FindReplaceDialog.cpp
     src/PreferencesDialog.cpp
     src/ExportManager.cpp
+    src/LicensesDialog.cpp
     resources/resources.qrc
 )
 
@@ -65,6 +66,16 @@ add_custom_command(TARGET FastMD POST_BUILD
             "${CMAKE_SOURCE_DIR}/resources/katex"
             "$<TARGET_FILE_DIR:FastMD>/katex"
     COMMENT "Bundling KaTeX assets"
+)
+
+# Bundle Pandoc (external tool, invoked via QProcess for "Export DOCX"; never
+# linked as a library) next to the executable. tools/pandoc/pandoc.exe itself
+# is not checked into source control - see tools/pandoc/NOTICE.txt.
+add_custom_command(TARGET FastMD POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+            "${CMAKE_SOURCE_DIR}/tools/pandoc"
+            "$<TARGET_FILE_DIR:FastMD>/tools/pandoc"
+    COMMENT "Bundling Pandoc"
 )
 
 # Deploy Qt DLLs next to the executable on Windows

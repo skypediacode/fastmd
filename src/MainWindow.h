@@ -45,6 +45,7 @@ private slots:
     void saveAll();
     void doExportHtml();
     void doExportPdf();
+    void doExportDocx();
     // Suggested path for an export Save dialog. Uses the current document's
     // folder + base name when saved, otherwise the tab title in the default/last
     // export folder. `extension` includes the leading dot (e.g. ".pdf").

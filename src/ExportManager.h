@@ -50,6 +50,15 @@ public:
     static bool exportHtml(const QString& markdown, const QString& filePath, bool darkMode = false);
     static bool exportPdf(const QString& markdown, const QString& filePath, const QString& docPath, const PdfExportOptions& options, QWidget* parent = nullptr);
 
+    // Export Markdown to DOCX via an external Pandoc process (never linked as a
+    // library). Shows its own error dialogs via `parent` on failure.
+    static bool exportDocx(const QString& markdown, const QString& filePath, const QString& docPath, QWidget* parent = nullptr);
+
+    // Absolute path to the bundled Pandoc executable
+    // (<app_dir>/tools/pandoc/pandoc.exe), or the system "pandoc" found on PATH.
+    // Returns an empty string if neither is available.
+    static QString pandocExecutablePath();
+
     // Absolute path to the bundled KaTeX asset directory (next to the executable),
     // or an empty string if the assets are missing.
     static QString katexAssetsDir();
