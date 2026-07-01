@@ -136,6 +136,47 @@ void MarkdownEditor::resizeEvent(QResizeEvent* e)
     repositionLineNumberArea();
 }
 
+void MarkdownEditor::paintEvent(QPaintEvent* e)
+{
+    QPlainTextEdit::paintEvent(e);
+
+    QPainter painter(viewport());
+    painter.setClipRect(e->rect());
+
+    const QColor lineCol  = m_dark ? QColor(0x55, 0x88, 0xaa) : QColor(0x88, 0xa8, 0xc0);
+    const QColor bgCol    = m_dark ? QColor(0x1e, 0x1e, 0x1e) : Qt::white;
+    const QColor textCol  = m_dark ? QColor(0x66, 0x99, 0xbb) : QColor(0x77, 0x99, 0xaa);
+
+    QTextBlock block = firstVisibleBlock();
+    const QPointF offset = contentOffset();
+
+    while (block.isValid()) {
+        const QRectF geom = blockBoundingGeometry(block).translated(offset);
+        if (geom.top() > e->rect().bottom()) break;
+
+        if (block.text().contains(QLatin1String("break-after: page"))) {
+            const QRect r(0, (int)geom.top(), viewport()->width(), (int)geom.height());
+            painter.fillRect(r, bgCol);
+
+            const int y = r.center().y();
+            painter.setPen(QPen(lineCol, 1, Qt::DashLine));
+            painter.drawLine(r.left(), y, r.right(), y);
+
+            const QString label = QStringLiteral("Page Break");
+            QFont f = font();
+            f.setItalic(true);
+            painter.setFont(f);
+            const QFontMetrics fm(f);
+            const int lw = fm.horizontalAdvance(label) + 16;
+            const int lx = (r.width() - lw) / 2;
+            painter.fillRect(lx, r.top(), lw, r.height(), bgCol);
+            painter.setPen(textCol);
+            painter.drawText(QRect(lx, r.top(), lw, r.height()), Qt::AlignCenter, label);
+        }
+        block = block.next();
+    }
+}
+
 void MarkdownEditor::wheelEvent(QWheelEvent* e)
 {
     if (e->modifiers() & Qt::ControlModifier) {
@@ -402,6 +443,20 @@ void MarkdownEditor::fmtStrike()      { wrapInline(this, QStringLiteral("~~")); 
 void MarkdownEditor::fmtCode()        { wrapInline(this, QStringLiteral("`")); }
 
 void MarkdownEditor::fmtMathInline()  { wrapInline(this, QStringLiteral("$")); }
+
+void MarkdownEditor::fmtPageBreak()
+{
+    QTextCursor c = textCursor();
+    c.beginEditBlock();
+    // Move to end of current line, then insert the page-break div on its own line.
+    c.movePosition(QTextCursor::EndOfBlock);
+    const bool atLineStart = c.positionInBlock() == 0;
+    if (!atLineStart)
+        c.insertText(QStringLiteral("\n"));
+    c.insertText(QStringLiteral("<div style=\"break-after: page;\"></div>\n"));
+    c.endEditBlock();
+    setTextCursor(c);
+}
 
 void MarkdownEditor::fmtMathBlock()
 {

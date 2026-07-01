@@ -43,7 +43,7 @@ void PreviewWidget::refresh()
 {
     int pos = verticalScrollBar()->value();
     m_refreshing = true;
-    setHtml(ExportManager::buildFullHtml(m_bodyHtml, m_dark, m_baseFontSize));
+    setHtml(ExportManager::buildFullHtml(m_bodyHtml, m_dark, m_baseFontSize, false, false, true));
     verticalScrollBar()->setValue(pos);
     m_refreshing = false;
 }

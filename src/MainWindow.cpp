@@ -774,6 +774,10 @@ void MainWindow::createToolbar()
                 m_activeEditor->fmtImage(pg ? pg->model->filePath() : QString());
             }
         }, true));
+    m_formatActions.append(
+        addMat(QChar(0xE8EE), tr("Page Break"), QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_Return), this, [this]() {
+            if (m_activeEditor) m_activeEditor->fmtPageBreak();
+        }, true));
     m_toolbar->addSeparator();
 
     // m_toolbar->addSeparator();

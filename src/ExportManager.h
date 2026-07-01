@@ -42,7 +42,8 @@ public:
     // local KaTeX CSS/JS are referenced and auto-render is invoked on load.
     static QString buildFullHtml(const QString& bodyHtml, bool dark,
                                  int fontSize = FastMdDefaults::PreviewFontSize,
-                                 bool isPrint = false, bool injectKatex = false);
+                                 bool isPrint = false, bool injectKatex = false,
+                                 bool isPreview = false);
 
     // Export paths regenerate HTML from raw Markdown using KatexOutput so that
     // browser/export output never reuses the Unicode-converted preview body.

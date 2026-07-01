@@ -412,8 +412,8 @@ static QString buildCss(bool dark, int fontSize, bool isPrint)
         "}"
         // headings
         "h1,h2,h3,h4,h5,h6{margin-top:28px;font-weight:700;line-height:1.2;color:%2;}"
-        "h1{margin-bottom:24px;border-bottom:1px solid %10;padding-bottom:0.25em;}"
-        "h2{margin-bottom:20px;border-bottom:1px solid %10;padding-bottom:0.2em;}"
+        "h1{margin-bottom:20px;border-bottom:1px solid %10;padding-bottom:0.25em;}"
+        "h2{margin-bottom:18px;border-bottom:1px solid %10;padding-bottom:0.2em;}"
         "h3{margin-bottom:16px;}"
         "h4{margin-bottom:13px;}"
         "h5{margin-bottom:10px;}"
@@ -458,7 +458,7 @@ static QString buildCss(bool dark, int fontSize, bool isPrint)
         "tr:nth-child(2n){background-color:%5;}"
         // misc
         "img{max-width:100%;}"
-        "hr{border:none;border-bottom:2px solid %9;margin-top:24px;margin-bottom:24px;}"
+        "hr{border:none;border-bottom:2px solid %9;margin-top:24px;margin-bottom:20px;}"
     ).arg(bg, fg, codeBg, codeFg, preBg, bqBdr, bqFg, link, border, h1Bdr).arg(actualFontSize).arg(fontSizeUnit).arg(marginStyle);
 
     // Print-only refinements. These rely on real CSS support, so they only take
@@ -489,8 +489,6 @@ static QString buildCss(bool dark, int fontSize, bool isPrint)
             // blockquote: subtle neutral tint with a blue accent rule
             "blockquote{background:rgba(127,127,127,0.1);border-left-color:rgba(0,122,204,0.6);"
             "font-style:normal;border-radius:0 3px 3px 0;}"
-            // manual page break helper: <div class=\"page\"></div>
-            ".page{page-break-after:always;break-after:page;}"
         );
     }
 
@@ -498,7 +496,7 @@ static QString buildCss(bool dark, int fontSize, bool isPrint)
 }
 
 // ---------------------------------------------------------------------------
-QString ExportManager::buildFullHtml(const QString& bodyHtml, bool dark, int fontSize, bool isPrint, bool injectKatex)
+QString ExportManager::buildFullHtml(const QString& bodyHtml, bool dark, int fontSize, bool isPrint, bool injectKatex, bool isPreview)
 {
     // Cache the CSS — it only changes when (dark, fontSize, isPrint) change.
     struct CssCache { bool dark; int fontSize; bool isPrint; QString css; };
@@ -541,9 +539,9 @@ QString ExportManager::buildFullHtml(const QString& bodyHtml, bool dark, int fon
     QString finalBody = bodyHtml;
 
     finalBody.replace(rxH[1],
-        QStringLiteral("<table width=\"100%\" style=\"border-collapse:collapse; width:100%; margin-top:26px; margin-bottom:24px;\"><tr><td style=\"font-size:%1px; font-weight:700; line-height:1.2; color:%2; border:none; border-bottom:1px solid %3; padding:0 0 0px 0;\">\\1</td></tr></table>").arg(h1Size, fg, h1Bdr));
+        QStringLiteral("<table width=\"100%\" style=\"border-collapse:collapse; width:100%; margin-top:26px; margin-bottom:20px;\"><tr><td style=\"font-size:%1px; font-weight:700; line-height:1.2; color:%2; border:none; padding:0;\">\\1</td></tr></table>").arg(h1Size, fg));
     finalBody.replace(rxH[2],
-        QStringLiteral("<table width=\"100%\" style=\"border-collapse:collapse; width:100%; margin-top:22px; margin-bottom:20px;\"><tr><td style=\"font-size:%1px; font-weight:700; line-height:1.2; color:%2; border:none; border-bottom:1px solid %3; padding:0 0 0px 0;\">\\1</td></tr></table>").arg(h2Size, fg, h1Bdr));
+        QStringLiteral("<table width=\"100%\" style=\"border-collapse:collapse; width:100%; margin-top:22px; margin-bottom:18px;\"><tr><td style=\"font-size:%1px; font-weight:700; line-height:1.2; color:%2; border:none; padding:0;\">\\1</td></tr></table>").arg(h2Size, fg));
     finalBody.replace(rxH[3], QStringLiteral("<div style=\"font-size:%1px; margin-top:19px; margin-bottom:16px; font-weight:700; line-height:1.2; color:%2;\">\\1</div>").arg(h3Size, fg));
     finalBody.replace(rxH[4], QStringLiteral("<div style=\"font-size:%1px; margin-top:16px; margin-bottom:13px; font-weight:700; line-height:1.2; color:%2;\">\\1</div>").arg(h4Size, fg));
     finalBody.replace(rxH[5], QStringLiteral("<div style=\"font-size:%1px; margin-top:14px; margin-bottom:10px; font-weight:700; line-height:1.2; color:%2;\">\\1</div>").arg(h5Size, fg));
@@ -553,6 +551,39 @@ QString ExportManager::buildFullHtml(const QString& bodyHtml, bool dark, int fon
     finalBody.replace(QStringLiteral("<pre><code"),
         QStringLiteral("<table width=\"100%\" style=\"margin-top:16px; margin-bottom:16px; border-collapse:separate; page-break-inside:avoid;\"><tr><td bgcolor=\"%1\" style=\"background-color:%1; padding:12px 14px; border:1px solid %2; border-radius:6px;\"><pre style=\"margin:0; background-color:%1; border:none; white-space:pre-wrap; word-break:break-word; overflow-wrap:anywhere;\"><code").arg(preBg, h1Bdr));
     finalBody.replace(QStringLiteral("</code></pre>"), QStringLiteral("</code></pre></td></tr></table>"));
+
+    // In the in-app preview, replace the bare page-break div with a Word-style
+    // visual separator. In exports (HTML / PDF) the div is left as-is so no
+    // visible marker appears — only the actual page break fires in PDF.
+    static const QString kPageBreakDiv = QStringLiteral("<div style=\"break-after: page;\"></div>");
+    if (isPreview) {
+        // Use a table with "Page Break" in the middle cell.
+        // The left and right cells contain a 1px high table to simulate a line.
+        // This avoids layout-busting issues in QTextBrowser caused by long strings
+        // of dashed characters and unsupported table-layout:fixed.
+        // Colors match the editor paintEvent palette for visual consistency.
+        const QString textHex = dark ? QStringLiteral("#6699bb") : QStringLiteral("#7799aa");
+        const QString visual =
+            QStringLiteral(
+                "<table width=\"100%\" cellspacing=\"0\" cellpadding=\"0\" border=\"0\""
+                " style=\"margin:20px 0; border:none;\">"
+                "<tr valign=\"middle\" style=\"border:none;\">"
+                "<td width=\"50%\" style=\"border:none; padding:0;\">"
+                "<table width=\"100%\" cellspacing=\"0\" cellpadding=\"0\" border=\"0\" style=\"border:none;\">"
+                "<tr style=\"border:none;\"><td bgcolor=\"%1\" height=\"1\" style=\"border:none; padding:0; font-size:1px; line-height:1px;\"></td></tr>"
+                "</table>"
+                "</td>"
+                "<td style=\"padding:0 10px;white-space:nowrap;text-align:center;"
+                "color:%1;font-style:italic;font-size:16px; border:none;\">Page Break</td>"
+                "<td width=\"50%\" style=\"border:none; padding:0;\">"
+                "<table width=\"100%\" cellspacing=\"0\" cellpadding=\"0\" border=\"0\" style=\"border:none;\">"
+                "<tr style=\"border:none;\"><td bgcolor=\"%1\" height=\"1\" style=\"border:none; padding:0; font-size:1px; line-height:1px;\"></td></tr>"
+                "</table>"
+                "</td>"
+                "</tr></table>")
+            .arg(textHex);
+        finalBody.replace(kPageBreakDiv, visual);
+    }
 
     // Only reference KaTeX assets when math is actually present, so the default
     // in-app preview path stays free of any KaTeX injection.

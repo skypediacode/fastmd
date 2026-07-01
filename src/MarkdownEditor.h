@@ -38,6 +38,7 @@ public slots:
     void fmtTable(int rows = 3, int cols = 3);
     void fmtMathInline();
     void fmtMathBlock();
+    void fmtPageBreak();
 
 signals:
     void contentReady();   // emitted after 200 ms debounce
@@ -45,6 +46,7 @@ signals:
     void lineNumberWidthChanged(int width);
 
 protected:
+    void paintEvent(QPaintEvent* event) override;
     void resizeEvent(QResizeEvent* event) override;
     void keyPressEvent(QKeyEvent* event) override;
     void wheelEvent(QWheelEvent* event) override;

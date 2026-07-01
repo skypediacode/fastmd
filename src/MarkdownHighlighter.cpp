@@ -136,6 +136,16 @@ void MarkdownHighlighter::buildRules()
         addRule(QStringLiteral("^([-*_]\\s?){3,}$"), f);
     }
 
+    // page break marker  <div style="break-after: page;"></div>
+    // (the editor paintEvent draws over this line, but keep a format so the
+    //  block is not rendered with default text colour if paint ordering differs)
+    {
+        QTextCharFormat f;
+        f.setForeground(m_dark ? QColor(0x55, 0x88, 0xaa) : QColor(0x88, 0xa8, 0xc0));
+        f.setFontItalic(true);
+        addRule(QStringLiteral("^<div style=\"break-after: page;\"></div>$"), f);
+    }
+
     // strikethrough  ~~text~~
     {
         QTextCharFormat f;
