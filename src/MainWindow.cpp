@@ -724,7 +724,7 @@ void MainWindow::createToolbar()
     };
 
     // ── File ops ─────────────────────────────────────────────
-    // note_add=0xE89C  folder_open=0xE2C8  save=0xE161 picture_as_pdf=0xE415 public=0xE80B
+    // note_add=0xE89C  folder_open=0xE2C8  save=0xE161 print=0xE8AD picture_as_pdf=0xE415 public=0xE80B
     addMat(QChar(0xE89C), tr("New"), QKeySequence::New, this, &MainWindow::newFile, false);
 
     // Open button + chevron as paired actions
@@ -749,6 +749,7 @@ void MainWindow::createToolbar()
         }
     }
     addMat(QChar(0xE161), tr("Save"),      QKeySequence::Save,                            this, &MainWindow::saveFile, false);
+    addMat(QChar(0xE8AD), tr("Print"),     QKeySequence(),                                 this, &MainWindow::printDocument, false);
     // addMat(QChar(0xE18F), tr("Save All"),  QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_S), this, &MainWindow::saveAll, false);
     addMat(QChar(0xE80B), tr("Export HTML"), QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_H), this, &MainWindow::doExportHtml, false);
     addMat(QChar(0xE415), tr("Export PDF"),  QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_P), this, &MainWindow::doExportPdf, false);
