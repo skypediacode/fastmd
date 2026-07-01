@@ -78,7 +78,13 @@ QToolBar {
     border: none;
     border-bottom: 1px solid #d4d4d4;
     spacing: 1px;
-    padding: 3px 6px;
+    padding: 0px;
+    max-height: 38px;
+}
+QToolBar::extension-button {
+    padding: 0px;
+    min-width: 56px;
+    min-height: 28px;
 }
 QToolBar::separator {
     width: 1px;
@@ -296,7 +302,16 @@ QToolBar {
     border: none;
     border-bottom: 1px solid #1a1a1a;
     spacing: 1px;
-    padding: 3px 6px;
+    padding: 0px;
+    max-height: 38px;
+}
+QToolBar::extension-button {
+    width: 0px;
+    height: 0px;
+    margin: 0px;
+    padding: 0px;
+    border: none;
+    image: none;
 }
 QToolBar::separator {
     width: 1px;

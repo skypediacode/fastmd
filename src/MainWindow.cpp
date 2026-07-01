@@ -38,6 +38,10 @@
 #include <QPalette>
 #include <QStyle>
 #include <QRegularExpression>
+#include <QVBoxLayout>
+#include <QHBoxLayout>
+#include <QMenu>
+#include <QToolButton>
 #include <QSizePolicy>
 #include <QHBoxLayout>
 #include <QToolButton>
@@ -499,7 +503,6 @@ void MainWindow::createWorkspacePanel()
     m_mainSplitter->setStretchFactor(0, 0);
     m_mainSplitter->setStretchFactor(1, 1);
     m_mainSplitter->setSizes({ 220, 980 });
-    setCentralWidget(m_mainSplitter);
 }
 
 // ---------------------------------------------------------------------------
@@ -619,12 +622,46 @@ void MainWindow::createMenus()
 // ---------------------------------------------------------------------------
 void MainWindow::createToolbar()
 {
-    m_toolbar = addToolBar(tr("Main"));
+    auto* rootWidget = new QWidget(this);
+    auto* rootLayout = new QVBoxLayout(rootWidget);
+    rootLayout->setContentsMargins(0, 0, 0, 0);
+    rootLayout->setSpacing(0);
+    setCentralWidget(rootWidget);
+
+    auto* tbContainer = new QWidget(rootWidget);
+    tbContainer->setFixedHeight(38);
+    auto* tbLayout = new QHBoxLayout(tbContainer);
+    tbLayout->setContentsMargins(0, 0, 12, 0); // 12px padding on the right!
+    tbLayout->setSpacing(0);
+    rootLayout->addWidget(tbContainer, 0);
+
+    m_mainSplitter->setParent(rootWidget);
+    rootLayout->addWidget(m_mainSplitter, 1);
+
+    m_toolbar = new QToolBar(tr("Main"), tbContainer);
     m_toolbar->setMovable(false);
     m_toolbar->setFloatable(false);
     m_toolbar->setContextMenuPolicy(Qt::PreventContextMenu);
     m_toolbar->setIconSize(QSize(24, 24));
     m_toolbar->setToolButtonStyle(Qt::ToolButtonIconOnly);
+    m_toolbar->setContentsMargins(6, 3, 0, 3);
+    
+    // Fully customize the native extension button for perfect centering
+    for (auto* child : m_toolbar->children()) {
+        if (qstrcmp(child->metaObject()->className(), "QToolBarExtension") == 0) {
+            if (auto* btn = qobject_cast<QToolButton*>(child)) {
+                m_overflowBtn = btn;
+                btn->setIcon(IconHelper::materialIcon(QChar(0xE5D3), QColor(0x44, 0x44, 0x44), 24));
+                btn->setFixedSize(32, 32);
+                btn->setStyleSheet(QStringLiteral(
+                    "QToolButton { border: none; background: transparent; padding: 0px; margin: 0px; }"
+                    "QToolButton:hover { background: rgba(0,0,0,0.08); border-radius: 3px; }"
+                ));
+            }
+        }
+    }
+
+    tbLayout->addWidget(m_toolbar, 1);
 
     // Tooltip helper
     auto tip = [](const QString& t, QKeySequence sc) -> QString {
@@ -672,36 +709,26 @@ void MainWindow::createToolbar()
     // note_add=0xE89C  folder_open=0xE2C8  save=0xE161 picture_as_pdf=0xE415 public=0xE80B
     addMat(QChar(0xE89C), tr("New"), QKeySequence::New, this, &MainWindow::newFile, false);
 
-    // Open button + chevron as a paired widget (avoids QToolButton stylesheet hacks)
+    // Open button + chevron as paired actions
     {
-        auto* container = new QWidget(m_toolbar);
-        auto* hbox = new QHBoxLayout(container);
-        hbox->setContentsMargins(0, 0, 0, 0);
-        hbox->setSpacing(0);
+        auto* actOpen = addMat(QChar(0xE2C8), tr("Open"), QKeySequence::Open, this, &MainWindow::openFile, false);
+        m_openButton = qobject_cast<QToolButton*>(m_toolbar->widgetForAction(actOpen));
+        if (m_openButton) {
+            m_openButton->setStyleSheet("QToolButton { border-top-right-radius: 0px; border-bottom-right-radius: 0px; padding-right: 2px; }");
+        }
 
-        m_openButton = new QToolButton(container);
-        m_openButton->setToolButtonStyle(Qt::ToolButtonIconOnly);
-        m_openButton->setIconSize(QSize(24, 24));
-        m_openButton->setAutoRaise(true);
-        m_openButton->setToolTip(tip(tr("Open"), QKeySequence::Open));
-        m_openButton->setStyleSheet("QToolButton { border-top-right-radius: 0px; border-bottom-right-radius: 0px; padding-right: 2px; }");
-        connect(m_openButton, &QToolButton::clicked, this, &MainWindow::openFile);
-        hbox->addWidget(m_openButton);
-
-        m_recentChevron = new QToolButton(container);
-        m_recentChevron->setToolButtonStyle(Qt::ToolButtonIconOnly);
-        m_recentChevron->setIconSize(QSize(20, 20));
-        m_recentChevron->setAutoRaise(true);
-        m_recentChevron->setFixedWidth(24);
-        m_recentChevron->setStyleSheet("QToolButton { border-top-left-radius: 0px; border-bottom-left-radius: 0px; min-width: 24px; padding-left: 2px; padding-right: 2px; }");
-        m_recentChevron->setToolTip(tr("Recent Files"));
-        connect(m_recentChevron, &QToolButton::clicked, this, [this]() {
-            m_recentMenu->popup(
-                m_recentChevron->mapToGlobal(QPoint(0, m_recentChevron->height())));
-        });
-        hbox->addWidget(m_recentChevron);
-
-        m_toolbar->addWidget(container);
+        auto* actRecent = addMat(QChar(0xE5C5), tr("Recent Files"), QKeySequence(), this, [this]() {
+            if (m_recentChevron && m_recentChevron->isVisible()) {
+                m_recentMenu->popup(m_recentChevron->mapToGlobal(QPoint(0, m_recentChevron->height())));
+            } else {
+                m_recentMenu->popup(QCursor::pos());
+            }
+        }, false);
+        m_recentChevron = qobject_cast<QToolButton*>(m_toolbar->widgetForAction(actRecent));
+        if (m_recentChevron) {
+            m_recentChevron->setFixedWidth(24);
+            m_recentChevron->setStyleSheet("QToolButton { border-top-left-radius: 0px; border-bottom-left-radius: 0px; min-width: 24px; padding-left: 2px; padding-right: 2px; }");
+        }
     }
     addMat(QChar(0xE161), tr("Save"),      QKeySequence::Save,                            this, &MainWindow::saveFile, false);
     // addMat(QChar(0xE18F), tr("Save All"),  QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_S), this, &MainWindow::saveAll, false);
@@ -742,29 +769,21 @@ void MainWindow::createToolbar()
     
     // Table button — shows a size picker popup
     {
-        m_tableButton = new QToolButton(m_toolbar);
-        m_tableButton->setToolButtonStyle(Qt::ToolButtonIconOnly);
-        m_tableButton->setIconSize(QSize(24, 24));
-        m_tableButton->setAutoRaise(true);
-        m_tableButton->setToolTip(tip(tr("Table"), QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_T)));
-
-        auto showTablePicker = [this]() {
+        auto* actTable = addMat(QChar(0xE228), tr("Table"), QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_T), this, [this]() {
             if (!m_activeEditor) return;
             auto* picker = new TableSizePicker([this](int rows, int cols) {
                 if (m_activeEditor) m_activeEditor->fmtTable(rows, cols);
-            }, m_tableButton);
-            QPoint pos = m_tableButton->mapToGlobal(QPoint(0, m_tableButton->height()));
+            }, this);
+            QPoint pos = QCursor::pos();
+            if (m_tableButton && m_tableButton->isVisible()) {
+                pos = m_tableButton->mapToGlobal(QPoint(0, m_tableButton->height()));
+            }
             picker->move(pos);
             picker->show();
-        };
-
-        connect(m_tableButton, &QToolButton::clicked, this, showTablePicker);
-
-        // Keyboard shortcut
-        m_tableShortcut = new QShortcut(QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_T), this);
-        connect(m_tableShortcut, &QShortcut::activated, this, showTablePicker);
-
-        m_toolbar->addWidget(m_tableButton);
+        }, true);
+        
+        m_formatActions.append(actTable);
+        m_tableButton = qobject_cast<QToolButton*>(m_toolbar->widgetForAction(actTable));
     }
     addFmtMat(QChar(0xE157), tr("Link"),         QKeySequence(Qt::CTRL | Qt::Key_K),         &MarkdownEditor::fmtLink);
     m_formatActions.append(
@@ -793,6 +812,7 @@ void MainWindow::createToolbar()
     m_actToolbarPreview = new QAction(this);
     m_actToolbarPreview->setCheckable(true);
     m_actToolbarPreview->setChecked(true);
+    m_actToolbarPreview->setText(tr("Toggle Preview"));
     m_actToolbarPreview->setToolTip(tip(tr("Toggle preview"), QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_V)));
     // Shortcut omitted here to prevent ambiguous shortcut error with View -> Preview
     connect(m_actToolbarPreview, &QAction::triggered, this, &MainWindow::togglePreview);
@@ -833,6 +853,12 @@ void MainWindow::updateToolbarIcons(bool dark)
         m_tableButton->setIcon(IconHelper::materialIcon(QChar(0xE228), iconColor, sz));
     if (m_openButton)
         m_openButton->setIcon(IconHelper::materialIcon(QChar(0xE2C8), iconColor, sz));
+    if (m_overflowBtn) {
+        m_overflowBtn->setIcon(IconHelper::materialIcon(QChar(0xE5D3), iconColor, sz));
+        m_overflowBtn->setStyleSheet(dark 
+            ? QStringLiteral("QToolButton { border: none; background: transparent; padding: 0px; margin: 0px; } QToolButton:hover { background: rgba(255,255,255,0.1); border-radius: 3px; }")
+            : QStringLiteral("QToolButton { border: none; background: transparent; padding: 0px; margin: 0px; } QToolButton:hover { background: rgba(0,0,0,0.08); border-radius: 3px; }"));
+    }
     if (m_recentChevron)
         m_recentChevron->setIcon(IconHelper::materialIcon(QChar(0xE5C5), iconColor, 20));
     if (m_workspaceToggle) {
@@ -1574,8 +1600,7 @@ void MainWindow::syncCurrentTabUi()
     }
     if (m_tableButton)
         m_tableButton->setEnabled(markdown);
-    if (m_tableShortcut)
-        m_tableShortcut->setEnabled(markdown);
+
 
     if (m_activeEditor)
         m_activeEditor->setMarkdownMode(markdown);
@@ -1919,6 +1944,9 @@ void MainWindow::updateWorkspaceToggleIcon()
     m_workspaceToggle->setIcon(IconHelper::materialIcon(code, iconColor, 20));
 }
 
+// ---------------------------------------------------------------------------
+// Document text changes
+// ---------------------------------------------------------------------------
 // ---------------------------------------------------------------------------
 // Drag and drop
 // ---------------------------------------------------------------------------

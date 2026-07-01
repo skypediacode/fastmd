@@ -129,11 +129,11 @@ private:
     };
     QList<TbIcon> m_tbIcons;
     QToolBar*     m_toolbar      = nullptr;
+    QToolButton*  m_overflowBtn  = nullptr;
     QToolButton*  m_openButton   = nullptr;
     QToolButton*  m_recentChevron = nullptr;
     QToolButton*  m_workspaceToggle = nullptr;
     QToolButton*  m_tableButton    = nullptr;
-    QShortcut*    m_tableShortcut  = nullptr;
     // Markdown-syntax-inserting actions, disabled in Plain Text mode.
     QList<QAction*> m_formatActions;
 
