@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.7.0] - 2026-07-01
+
+### Added
+
+- **Outline Navigator:** Anchor a small desktop-style Outline edge button to the upper-right edge of the preview. Displays a tree representing the Markdown document's heading hierarchy (`#`–`######`) with filtering support, current editor cursor position highlighting, and synchronized scroll-to-heading.
+- **Export DOCX via Pandoc:** Wire up Export DOCX in the File menu, toolbar, and `Ctrl+Shift+D`. Pandoc is executed as an external process, falling back to PATH if the bundled executable is not found.
+- **Paste Image Support:** Allow pasting bitmap images from clipboard or file Explorer. Automatically save files to an `images/` directory next to the saved Markdown file, or a temporary folder for unsaved documents (which are migrated automatically upon save).
+- **Open Exported HTML Dialog:** Added a non-intrusive confirmation dialog after exporting HTML to immediately open the HTML in the browser.
+- **Open Source Licenses Dialog:** Replaced the Help menu's "About Qt" with a consolidated "Open Source Licenses..." dialog showing licensing details for FastMD, Qt, Pandoc, md4c, and KaTeX.
+
+### Fixed
+
+- **Toolbar Sizing:** Prevented toolbar from wrapping and fixed native overflow menu behavior.
+
 ## [1.6.5] - 2026-07-01
 
 ### Added
