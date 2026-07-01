@@ -165,11 +165,11 @@ private:
 
 class ExportSuccessDialog : public QDialog {
 public:
-    ExportSuccessDialog(const QString& filePath, QWidget* parent)
+    ExportSuccessDialog(const QString& filePath, const QString& typeName, QWidget* parent)
         : QDialog(parent)
         , m_filePath(filePath)
     {
-        setWindowTitle(tr("Export PDF"));
+        setWindowTitle(tr("Export %1").arg(typeName));
         setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
 
         auto* mainLayout = new QVBoxLayout(this);
@@ -188,7 +188,7 @@ public:
         topLayout->addWidget(iconLabel);
 
         // Text
-        auto* textLabel = new QLabel(tr("PDF exported successfully."), this);
+        auto* textLabel = new QLabel(tr("%1 exported successfully.").arg(typeName), this);
         textLabel->setWordWrap(false);
         topLayout->addWidget(textLabel);
 
@@ -199,9 +199,9 @@ public:
         btnLayout->setSpacing(8);
         btnLayout->setAlignment(Qt::AlignCenter);
 
-        auto* openPdfBtn = new QPushButton(tr("Open PDF"), this);
-        openPdfBtn->setDefault(true);
-        openPdfBtn->setFixedWidth(96);
+        auto* openBtn = new QPushButton(tr("Open %1").arg(typeName), this);
+        openBtn->setDefault(true);
+        openBtn->setFixedWidth(96);
 
         auto* openFolderBtn = new QPushButton(tr("Open Folder"), this);
         openFolderBtn->setFixedWidth(96);
@@ -209,7 +209,7 @@ public:
         auto* closeBtn = new QPushButton(tr("Close"), this);
         closeBtn->setFixedWidth(96);
 
-        btnLayout->addWidget(openPdfBtn);
+        btnLayout->addWidget(openBtn);
         btnLayout->addWidget(openFolderBtn);
         btnLayout->addWidget(closeBtn);
         
@@ -219,13 +219,13 @@ public:
         adjustSize();
         setFixedSize(size());
 
-        connect(openPdfBtn, &QPushButton::clicked, this, &ExportSuccessDialog::onOpenPdf);
+        connect(openBtn, &QPushButton::clicked, this, &ExportSuccessDialog::onOpenFile);
         connect(openFolderBtn, &QPushButton::clicked, this, &ExportSuccessDialog::onOpenFolder);
         connect(closeBtn, &QPushButton::clicked, this, &QDialog::reject);
     }
 
 private:
-    void onOpenPdf()
+    void onOpenFile()
     {
         QDesktopServices::openUrl(QUrl::fromLocalFile(m_filePath));
         accept();
@@ -1210,8 +1210,12 @@ void MainWindow::doExportHtml()
     if (path.isEmpty()) return;
     m_lastExportFolder = QFileInfo(path).absolutePath();
     // Regenerate from raw markdown via the KaTeX path — never the preview body.
-    if (!ExportManager::exportHtml(markdown, path, m_theme == QStringLiteral("dark")))
+    if (!ExportManager::exportHtml(markdown, path, m_theme == QStringLiteral("dark"))) {
         QMessageBox::warning(this, tr("Export Failed"), tr("Could not write %1").arg(path));
+    } else {
+        ExportSuccessDialog dlg(path, QStringLiteral("HTML"), this);
+        dlg.exec();
+    }
 }
 
 void MainWindow::doExportPdf()
@@ -1230,7 +1234,7 @@ void MainWindow::doExportPdf()
 
     // exportPdf surfaces its own (specific) error dialogs for the browser path.
     if (ExportManager::exportPdf(markdown, path, docPath, m_pdfExportOptions, this)) {
-        ExportSuccessDialog dlg(path, this);
+        ExportSuccessDialog dlg(path, QStringLiteral("PDF"), this);
         dlg.exec();
     }
 }
