@@ -8,8 +8,10 @@
 #include "PreferencesDialog.h"
 #include "ExportManager.h"
 #include "DocumentModel.h"
+#include <QDateTime>
 #include "Stylesheet.h"
 #include "IconHelper.h"
+#include "OutlinePopup.h"
 
 #include <QMenuBar>
 #include <QToolBar>
@@ -420,8 +422,18 @@ MainWindow::MainWindow(QWidget* parent)
     applyTheme(m_theme);
     FASTMD_MARK("  ctor: applyTheme");
 
+    m_outlinePopup = new OutlinePopup(this);
+    connect(m_outlinePopup, &OutlinePopup::popupHidden, this, [this]() {
+        if (TabPage* page = m_tabs->currentPage()) {
+            if (page->preview && page->preview->outlineButton()) {
+                page->preview->outlineButton()->setPopupOpen(false);
+            }
+        }
+    });
+
     connect(m_tabs, &TabWidget::editorActivated, this, &MainWindow::onEditorActivated);
     connect(m_tabs, &TabWidget::tabClosed,       this, &MainWindow::onTabCloseRequested);
+    connect(m_tabs, &TabWidget::outlineRequested,this, &MainWindow::showOutlinePopup);
     connect(m_watcher, &QFileSystemWatcher::fileChanged, this, &MainWindow::onFileChanged);
 
     setAcceptDrops(true);
@@ -1942,6 +1954,40 @@ void MainWindow::updateWorkspaceToggleIcon()
     QColor iconColor = dark ? QColor(0xcc, 0xcc, 0xcc) : QColor(0x44, 0x44, 0x44);
     const QChar code = m_workspaceTreeVisible ? QChar(0xE2C8) : QChar(0xE2C7);
     m_workspaceToggle->setIcon(IconHelper::materialIcon(code, iconColor, 20));
+}
+
+
+void MainWindow::showOutlinePopup()
+{
+    if (!m_outlinePopup) return;
+    
+    if (m_outlinePopup->isVisible()) {
+        m_outlinePopup->hide();
+        return;
+    }
+
+    qint64 lastHideTime = m_outlinePopup->property("lastHideTime").toLongLong();
+    if (QDateTime::currentMSecsSinceEpoch() - lastHideTime < 100) {
+        return; // Prevents immediate reopen if the button click closed the Qt::Popup
+    }
+
+    TabPage* page = m_tabs->currentPage();
+    if (!page || !page->editor || !page->model || !page->preview) return;
+
+    m_outlinePopup->setEditor(page->editor, page->model);
+
+    // Position it just below the outline button
+    auto* btn = page->preview->outlineButton();
+    if (btn) {
+        QPoint pos = btn->mapToGlobal(QPoint(0, btn->height() + 4));
+        // Adjust if it goes off screen
+        pos.setX(pos.x() - m_outlinePopup->width() + btn->width());
+        m_outlinePopup->move(pos);
+        btn->setPopupOpen(true);
+    }
+
+    m_outlinePopup->show();
+    m_outlinePopup->raise();
 }
 
 // ---------------------------------------------------------------------------

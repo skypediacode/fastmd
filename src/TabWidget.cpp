@@ -138,6 +138,10 @@ int TabWidget::addNewTab(const QString& filePath, bool activate)
             pb->setValue(static_cast<int>(
                 static_cast<double>(value) / eb->maximum() * pb->maximum()));
     });
+    
+    if (page->preview->outlineButton()) {
+        connect(page->preview->outlineButton(), &QToolButton::clicked, this, &TabWidget::outlineRequested);
+    }
 
     m_pages.append(page);
     int idx = addTab(page->splitter, page->model->displayName());

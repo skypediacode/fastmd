@@ -23,6 +23,7 @@ class QShortcut;
 class QWidget;
 class QSplitter;
 class QNetworkAccessManager;
+class OutlinePopup;
 
 class MainWindow : public QMainWindow {
     Q_OBJECT
@@ -60,6 +61,7 @@ private slots:
 
     // View
     void togglePreview();
+    void showOutlinePopup();
     void setEditorMode(bool markdown);
     void setTheme(const QString& theme);
     void zoomIn();
@@ -133,6 +135,7 @@ private:
     QToolButton*  m_openButton   = nullptr;
     QToolButton*  m_recentChevron = nullptr;
     QToolButton*  m_workspaceToggle = nullptr;
+    OutlinePopup* m_outlinePopup = nullptr;
     QToolButton*  m_tableButton    = nullptr;
     // Markdown-syntax-inserting actions, disabled in Plain Text mode.
     QList<QAction*> m_formatActions;

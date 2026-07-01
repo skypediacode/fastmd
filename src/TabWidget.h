@@ -89,6 +89,7 @@ protected:
 signals:
     void editorActivated(MarkdownEditor* editor, PreviewWidget* preview);
     void tabClosed(int index);
+    void outlineRequested();
 
 private slots:
     void onCurrentChanged(int index);

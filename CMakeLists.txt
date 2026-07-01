@@ -26,6 +26,7 @@ set(SOURCES
     src/MarkdownEditor.cpp
     src/MarkdownHighlighter.cpp
     src/PreviewWidget.cpp
+    src/OutlinePopup.cpp
     src/TabWidget.cpp
     src/FindReplaceDialog.cpp
     src/PreferencesDialog.cpp

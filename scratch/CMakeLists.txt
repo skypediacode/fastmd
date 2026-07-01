@@ -1,0 +1,5 @@
+cmake_minimum_required(VERSION 3.16)
+project(test_tb)
+find_package(Qt6 COMPONENTS Widgets REQUIRED)
+add_executable(test_tb test_tb.cpp)
+target_link_libraries(test_tb PRIVATE Qt6::Widgets)
