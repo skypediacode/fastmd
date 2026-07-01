@@ -7,6 +7,7 @@ class QCheckBox;
 class QPushButton;
 class QLabel;
 class QGridLayout;
+class QTabBar;
 class MarkdownEditor;
 
 class FindReplaceDialog : public QDialog {
@@ -28,12 +29,13 @@ private:
     QTextDocument::FindFlags buildFlags() const;
     void                     showStatus(const QString& msg);
     void                     focusFindField();
-    void                     setReplaceMode(bool enabled);
+    void                     applyModeUi();
     void                     markSearchDirty();
     bool                     shouldRestartSearch(const QString& term, QTextDocument::FindFlags flags) const;
     QTextCursor              makeSearchCursor(bool backward) const;
     bool                     runFind(const QString& term, QTextDocument::FindFlags flags, bool backward);
 
+    QTabBar*        m_modeTabs;
     QLineEdit*     m_findEdit;
     QLineEdit*     m_replaceEdit;
     QCheckBox*     m_caseSensitive;

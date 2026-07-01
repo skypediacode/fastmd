@@ -8,6 +8,7 @@
 #include <QCheckBox>
 #include <QPushButton>
 #include <QLabel>
+#include <QTabBar>
 #include <QTextDocument>
 #include <QTextCursor>
 #include <QShortcut>
@@ -17,16 +18,23 @@
 FindReplaceDialog::FindReplaceDialog(QWidget* parent)
     : QDialog(parent, Qt::Dialog | Qt::WindowTitleHint | Qt::WindowCloseButtonHint)
 {
-    setWindowTitle(tr("Find / Replace"));
+    setWindowTitle(tr("Find and Replace"));
     setMinimumWidth(460);
     setSizeGripEnabled(false);
+
+    m_modeTabs = new QTabBar;
+    m_modeTabs->addTab(tr("Find"));
+    m_modeTabs->addTab(tr("Replace"));
+    m_modeTabs->setExpanding(false);
+    m_modeTabs->setDocumentMode(true);
+    m_modeTabs->setDrawBase(false);
 
     auto* grid = new QGridLayout;
     grid->setContentsMargins(0, 0, 0, 0);
     grid->setHorizontalSpacing(10);
     grid->setVerticalSpacing(10);
 
-    grid->addWidget(new QLabel(tr("Find:")),    0, 0);
+    grid->addWidget(new QLabel(tr("Find what:")), 0, 0);
     m_findEdit = new QLineEdit;
     grid->addWidget(m_findEdit, 0, 1);
 
@@ -34,7 +42,7 @@ FindReplaceDialog::FindReplaceDialog(QWidget* parent)
     auto* rl = new QHBoxLayout(m_replaceRow);
     rl->setContentsMargins(0, 0, 0, 0);
     rl->setSpacing(10);
-    rl->addWidget(new QLabel(tr("Replace:")));
+    rl->addWidget(new QLabel(tr("Replace with:")));
     m_replaceEdit = new QLineEdit;
     rl->addWidget(m_replaceEdit);
     grid->addWidget(m_replaceRow, 1, 0, 1, 2);
@@ -76,11 +84,16 @@ FindReplaceDialog::FindReplaceDialog(QWidget* parent)
     auto* root = new QVBoxLayout(this);
     root->setContentsMargins(14, 14, 14, 14);
     root->setSpacing(12);
+    root->addWidget(m_modeTabs);
     root->addLayout(grid);
     root->addLayout(optRow);
     root->addWidget(buttonPanel);
     root->addWidget(m_status);
 
+    connect(m_modeTabs,      &QTabBar::currentChanged, this, [this](int index) {
+        m_replaceMode = (index == 1);
+        applyModeUi();
+    });
     connect(m_btnFindNext,   &QPushButton::clicked, this, &FindReplaceDialog::findNext);
     connect(m_btnFindPrev,   &QPushButton::clicked, this, &FindReplaceDialog::findPrev);
     connect(m_btnReplace,    &QPushButton::clicked, this, &FindReplaceDialog::replaceOne);
@@ -95,7 +108,9 @@ FindReplaceDialog::FindReplaceDialog(QWidget* parent)
     auto* esc = new QShortcut(QKeySequence::Cancel, this);
     connect(esc, &QShortcut::activated, this, &QDialog::hide);
 
-    setReplaceMode(false);
+    m_modeTabs->setCurrentIndex(0);
+    m_replaceMode = false;
+    applyModeUi();
 }
 
 void FindReplaceDialog::setEditor(MarkdownEditor* editor)
@@ -105,7 +120,7 @@ void FindReplaceDialog::setEditor(MarkdownEditor* editor)
 
 void FindReplaceDialog::openFind()
 {
-    setReplaceMode(false);
+    m_modeTabs->setCurrentIndex(0);
     markSearchDirty();
     show();
     raise();
@@ -115,7 +130,7 @@ void FindReplaceDialog::openFind()
 
 void FindReplaceDialog::openReplace()
 {
-    setReplaceMode(true);
+    m_modeTabs->setCurrentIndex(1);
     markSearchDirty();
     show();
     raise();
@@ -146,34 +161,32 @@ void FindReplaceDialog::focusFindField()
     });
 }
 
-void FindReplaceDialog::setReplaceMode(bool enabled)
+void FindReplaceDialog::applyModeUi()
 {
-    m_replaceMode = enabled;
-    m_replaceRow->setVisible(enabled);
-    m_btnReplace->setVisible(enabled);
-    m_btnReplaceAll->setVisible(enabled);
+    m_replaceRow->setVisible(m_replaceMode);
+    m_btnReplace->setVisible(m_replaceMode);
+    m_btnReplaceAll->setVisible(m_replaceMode);
     m_buttonGrid->removeWidget(m_btnFindNext);
     m_buttonGrid->removeWidget(m_btnFindPrev);
     m_buttonGrid->removeWidget(m_btnReplace);
     m_buttonGrid->removeWidget(m_btnReplaceAll);
     m_buttonGrid->addWidget(m_btnFindNext, 0, 0);
     m_buttonGrid->addWidget(m_btnFindPrev, 0, 1);
-    if (enabled) {
+    if (m_replaceMode) {
         m_buttonGrid->addWidget(m_btnReplace, 1, 0);
         m_buttonGrid->addWidget(m_btnReplaceAll, 1, 1);
         m_buttonGrid->setVerticalSpacing(10);
     } else {
         m_buttonGrid->setVerticalSpacing(0);
     }
-    m_btnFindNext->setDefault(!enabled);
-    m_btnFindNext->setAutoDefault(!enabled);
+    m_btnFindNext->setDefault(!m_replaceMode);
+    m_btnFindNext->setAutoDefault(!m_replaceMode);
     m_btnFindPrev->setDefault(false);
     m_btnFindPrev->setAutoDefault(false);
-    m_btnReplace->setDefault(enabled);
-    m_btnReplace->setAutoDefault(enabled);
+    m_btnReplace->setDefault(m_replaceMode);
+    m_btnReplace->setAutoDefault(m_replaceMode);
     m_btnReplaceAll->setDefault(false);
     m_btnReplaceAll->setAutoDefault(false);
-    setWindowTitle(enabled ? tr("Find / Replace") : tr("Find"));
     adjustSize();
 }
 
