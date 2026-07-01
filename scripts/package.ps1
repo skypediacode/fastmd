@@ -59,4 +59,4 @@ Compress-Archive -Path "$DistDir\*" -DestinationPath "dist\FastMD-Portable.zip" 
 
 Write-Host ""
 Write-Host "SUCCESS! Your portable release is ready at: dist\FastMD-Portable.zip"
-Write-Host "To build the Setup Installer, open 'fastmd.iss' in Inno Setup and click Compile."
+Write-Host "To build the Setup Installer and publish a release, run 'scripts\release.ps1'."
