@@ -15,6 +15,8 @@
 #include <QRegularExpression>
 #include <QFontDatabase>
 #include <QMimeData>
+#include <QDateTime>
+#include <QUuid>
 
 namespace {
 constexpr int kEditorTopPadding = 4;
@@ -194,6 +196,9 @@ void MarkdownEditor::wheelEvent(QWheelEvent* e)
 
 bool MarkdownEditor::canInsertFromMimeData(const QMimeData* source) const
 {
+    if (source && source->hasImage())
+        return true;
+
     if (source && source->hasText())
         return true;
 
@@ -210,23 +215,126 @@ bool MarkdownEditor::canInsertFromMimeData(const QMimeData* source) const
 
 void MarkdownEditor::insertFromMimeData(const QMimeData* source)
 {
-    if (source && source->hasUrls()) {
-        QStringList imagePaths;
+    if (!source) return;
+
+    bool isImage = source->hasImage();
+    QStringList imagePaths;
+    
+    if (source->hasUrls()) {
         const QList<QUrl> urls = source->urls();
         for (const QUrl& url : urls) {
             if (url.isLocalFile() && isImageFilePath(url.toLocalFile())) {
                 imagePaths.append(url.toLocalFile());
             }
         }
+    }
 
-        // If the user pasted image files ONLY (no text), insert the images
-        if (!imagePaths.isEmpty() && (!source->hasText() || source->text().trimmed().isEmpty() || source->text().startsWith("file://"))) {
-            insertDroppedImages(imagePaths);
-            return;
+    if (isImage || (!imagePaths.isEmpty() && (!source->hasText() || source->text().trimmed().isEmpty() || source->text().startsWith("file://")))) {
+        QString destDir;
+        bool isTemp = m_documentPath.isEmpty();
+        if (isTemp) {
+            destDir = QDir::tempPath() + QStringLiteral("/FastMD_Images");
+        } else {
+            destDir = QFileInfo(m_documentPath).absolutePath() + QStringLiteral("/images");
         }
+
+        QDir dir(destDir);
+        if (!dir.exists()) {
+            dir.mkpath(QStringLiteral("."));
+        }
+
+        QTextCursor c = textCursor();
+        c.beginEditBlock();
+
+        if (!imagePaths.isEmpty()) {
+            for (int i = 0; i < imagePaths.size(); ++i) {
+                QString srcPath = imagePaths.at(i);
+                QFileInfo fi(srcPath);
+                QString baseName = fi.completeBaseName();
+                QString suffix = fi.suffix();
+                if (suffix.isEmpty()) suffix = QStringLiteral("png");
+                QString uniqueName = baseName + QStringLiteral("_") + QUuid::createUuid().toString(QUuid::WithoutBraces).left(8) + QStringLiteral(".") + suffix;
+                QString destPath = destDir + QStringLiteral("/") + uniqueName;
+                
+                QFile::copy(srcPath, destPath);
+                
+                if (isTemp) m_tempImages.append(destPath);
+
+                QString outPath = isTemp ? destPath : QStringLiteral("images/") + uniqueName;
+                if (outPath.contains(' ') || outPath.contains('[') || outPath.contains(']'))
+                    outPath = QStringLiteral("<") + outPath + QStringLiteral(">");
+
+                c.insertText(QStringLiteral("![](") + outPath + QStringLiteral(")"));
+                if (i + 1 < imagePaths.size())
+                    c.insertText(QStringLiteral("\n"));
+            }
+        } else if (isImage) {
+            QImage image = qvariant_cast<QImage>(source->imageData());
+            if (!image.isNull()) {
+                QString uniqueName = QStringLiteral("image_") + QUuid::createUuid().toString(QUuid::WithoutBraces).left(8) + QStringLiteral(".png");
+                QString destPath = destDir + QStringLiteral("/") + uniqueName;
+                image.save(destPath, "PNG");
+                
+                if (isTemp) m_tempImages.append(destPath);
+
+                QString outPath = isTemp ? destPath : QStringLiteral("images/") + uniqueName;
+                if (outPath.contains(' ') || outPath.contains('[') || outPath.contains(']'))
+                    outPath = QStringLiteral("<") + outPath + QStringLiteral(">");
+
+                c.insertText(QStringLiteral("![](") + outPath + QStringLiteral(")"));
+            }
+        }
+
+        c.endEditBlock();
+        setTextCursor(c);
+        return;
     }
 
     QPlainTextEdit::insertFromMimeData(source);
+}
+
+void MarkdownEditor::commitTemporaryImages(const QString& newDocPath)
+{
+    if (m_tempImages.isEmpty() || newDocPath.isEmpty())
+        return;
+
+    QString destDir = QFileInfo(newDocPath).absolutePath() + QStringLiteral("/images");
+    QDir dir(destDir);
+    if (!dir.exists()) {
+        dir.mkpath(QStringLiteral("."));
+    }
+
+    QTextCursor c = textCursor();
+    c.beginEditBlock();
+
+    for (const QString& tempPath : m_tempImages) {
+        if (!QFile::exists(tempPath)) continue;
+
+        QFileInfo fi(tempPath);
+        QString uniqueName = fi.fileName();
+        QString destPath = destDir + QStringLiteral("/") + uniqueName;
+
+        QFile::copy(tempPath, destPath);
+        
+        QString oldLink = tempPath;
+        if (oldLink.contains(' ') || oldLink.contains('[') || oldLink.contains(']'))
+            oldLink = QStringLiteral("<") + oldLink + QStringLiteral(">");
+            
+        QString newLink = QStringLiteral("images/") + uniqueName;
+        if (newLink.contains(' ') || newLink.contains('[') || newLink.contains(']'))
+            newLink = QStringLiteral("<") + newLink + QStringLiteral(">");
+
+        QTextCursor searchCursor(document());
+        while (!searchCursor.isNull() && !searchCursor.atEnd()) {
+            searchCursor = document()->find(oldLink, searchCursor);
+            if (!searchCursor.isNull()) {
+                searchCursor.insertText(newLink);
+            }
+        }
+    }
+    
+    c.endEditBlock();
+    m_tempImages.clear();
 }
 
 void MarkdownEditor::zoomIn(int range)

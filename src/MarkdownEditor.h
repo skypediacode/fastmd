@@ -19,6 +19,8 @@ public:
     void paintLineNumbers(QPaintEvent* event);
     int  lineNumberWidth() const;
 
+    void commitTemporaryImages(const QString& newDocPath);
+
 public slots:
     void zoomIn(int range = 1);
     void zoomOut(int range = 1);
@@ -70,6 +72,7 @@ private:
     QString             m_documentPath;
     bool                m_dark = false;
     bool                m_markdownMode = true;
+    QStringList         m_tempImages;
 };
 
 

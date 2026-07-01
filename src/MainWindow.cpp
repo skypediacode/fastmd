@@ -1118,6 +1118,10 @@ bool MainWindow::saveDocument(int tabIndex, bool forceDialog)
         return false;
     }
 
+    if (oldPath.isEmpty() && !path.isEmpty()) {
+        pg->editor->commitTemporaryImages(path);
+    }
+
     QString text = pg->editor->toPlainText();
     if (pg->model->editorMode() == EditorMode::Markdown)
         text = normalizeMarkdownSpacing(text);
