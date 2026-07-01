@@ -752,7 +752,7 @@ void MainWindow::createToolbar()
     // addMat(QChar(0xE18F), tr("Save All"),  QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_S), this, &MainWindow::saveAll, false);
     addMat(QChar(0xE80B), tr("Export HTML"), QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_H), this, &MainWindow::doExportHtml, false);
     addMat(QChar(0xE415), tr("Export PDF"),  QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_P), this, &MainWindow::doExportPdf, false);
-    addMat(QChar(0xE24D), tr("Export DOCX"), QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_D), this, &MainWindow::doExportDocx, false);
+    addMat(QChar(0xE873), tr("Export DOCX"), QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_D), this, &MainWindow::doExportDocx, false);
     addMat(QChar(0xE89E), tr("Preview in Browser"), QKeySequence(Qt::CTRL | Qt::ALT | Qt::Key_P), this, &MainWindow::doPreviewBrowser, true);
     m_toolbar->addSeparator();
 
@@ -812,8 +812,8 @@ void MainWindow::createToolbar()
                 m_activeEditor->fmtImage(pg ? pg->model->filePath() : QString());
             }
         }, true));
-    m_formatActions.append(
-        addMat(QChar(0xE8EE), tr("Page Break"), QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_Return), this, [this]() {
+        m_formatActions.append(
+        addMat(QChar(0xEACA), tr("Page Break"), QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_Return), this, [this]() {
             if (m_activeEditor) m_activeEditor->fmtPageBreak();
         }, true));
     m_toolbar->addSeparator();
