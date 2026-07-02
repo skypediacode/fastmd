@@ -845,7 +845,8 @@ void MainWindow::createToolbar()
     m_actModeToggle->setCheckable(true);
     m_actModeToggle->setChecked(true);
     m_actModeToggle->setText(tr("Markdown"));
-    m_actModeToggle->setToolTip(tip(tr("Switch editor mode"), QKeySequence()));
+    m_actModeToggle->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_Slash));
+    m_actModeToggle->setToolTip(tip(tr("Switch editor mode"), m_actModeToggle->shortcut()));
     connect(m_actModeToggle, &QAction::triggered, this, &MainWindow::setEditorMode);
     m_toolbar->addAction(m_actModeToggle);
     m_tbIcons.append({m_actModeToggle, false, QChar(0xE873), {}});
