@@ -6,6 +6,7 @@
 #include <QTextDocument>
 #include <QPageSize>
 #include <QRegularExpression>
+#include <QSet>
 #include <QStringList>
 #include <QUrl>
 #include <QFileInfo>
@@ -41,6 +42,27 @@ static int consumeBalanced(const QString& text, int openPos, QChar openCh, QChar
 
 static QString renderMathInline(const QString& expr);
 
+// Reads one LaTeX macro argument starting at pos: a {balanced} group, a single
+// backslash command (\alpha), or a single bare character (as in \frac12,
+// \sqrt3). Returns the position after the argument, or -1 if none available.
+static int readMathArg(const QString& expr, int pos, QString* out)
+{
+    if (pos >= expr.size())
+        return -1;
+    const QChar ch = expr.at(pos);
+    if (ch == '{')
+        return consumeBalanced(expr, pos, '{', '}', out);
+    if (ch == '\\' && pos + 1 < expr.size()) {
+        int p = pos + 1;
+        while (p < expr.size() && expr.at(p).isLetter())
+            ++p;
+        *out = expr.mid(pos, p - pos);
+        return p;
+    }
+    *out = QString(ch);
+    return pos + 1;
+}
+
 static QString renderMathToken(const QString& expr, const char* tag)
 {
     return QStringLiteral("<%1>%2</%1>").arg(QLatin1StringView(tag), renderMathInline(expr));
@@ -62,39 +84,91 @@ static QString renderMathInline(const QString& expr)
                 continue;
             }
 
+            // Spacing macros (\ , \, \; \: \!) render as a plain space.
+            if (QStringLiteral(" ,;:!").contains(next)) {
+                html += QChar(' ');
+                i += 2;
+                continue;
+            }
+
             if (next.isLetter()) {
-                int pos = i + 1;
-                while (pos < expr.size() && expr.at(pos).isLetter()) {
-                    ++pos;
+                static const QSet<QString> knownCommands = {
+                    QStringLiteral("frac"), QStringLiteral("sqrt"), QStringLiteral("quad"), QStringLiteral("qquad"),
+                    QStringLiteral("alpha"), QStringLiteral("beta"), QStringLiteral("gamma"), QStringLiteral("delta"),
+                    QStringLiteral("epsilon"), QStringLiteral("zeta"), QStringLiteral("eta"), QStringLiteral("theta"),
+                    QStringLiteral("iota"), QStringLiteral("kappa"), QStringLiteral("lambda"), QStringLiteral("mu"),
+                    QStringLiteral("nu"), QStringLiteral("xi"), QStringLiteral("omicron"), QStringLiteral("pi"),
+                    QStringLiteral("rho"), QStringLiteral("sigma"), QStringLiteral("tau"), QStringLiteral("upsilon"),
+                    QStringLiteral("phi"), QStringLiteral("chi"), QStringLiteral("psi"), QStringLiteral("omega"),
+                    QStringLiteral("Alpha"), QStringLiteral("Beta"), QStringLiteral("Gamma"), QStringLiteral("Delta"),
+                    QStringLiteral("Epsilon"), QStringLiteral("Zeta"), QStringLiteral("Eta"), QStringLiteral("Theta"),
+                    QStringLiteral("Iota"), QStringLiteral("Kappa"), QStringLiteral("Lambda"), QStringLiteral("Mu"),
+                    QStringLiteral("Nu"), QStringLiteral("Xi"), QStringLiteral("Omicron"), QStringLiteral("Pi"),
+                    QStringLiteral("Rho"), QStringLiteral("Sigma"), QStringLiteral("Tau"), QStringLiteral("Upsilon"),
+                    QStringLiteral("Phi"), QStringLiteral("Chi"), QStringLiteral("Psi"), QStringLiteral("Omega"),
+                    QStringLiteral("sum"), QStringLiteral("int"), QStringLiteral("infty"), QStringLiteral("approx"),
+                    QStringLiteral("neq"), QStringLiteral("pm"), QStringLiteral("cdot"), QStringLiteral("times"),
+                    QStringLiteral("div"), QStringLiteral("leq"), QStringLiteral("geq"), QStringLiteral("rightarrow"),
+                    QStringLiteral("leftarrow"), QStringLiteral("Rightarrow"), QStringLiteral("Leftarrow"),
+                    QStringLiteral("in"), QStringLiteral("notin"), QStringLiteral("subset"), QStringLiteral("propto"),
+                    QStringLiteral("partial"), QStringLiteral("nabla"), QStringLiteral("sin"), QStringLiteral("cos"),
+                    QStringLiteral("tan"), QStringLiteral("log"), QStringLiteral("ln"), QStringLiteral("lim"),
+                    QStringLiteral("exp"), QStringLiteral("le"), QStringLiteral("ge"), QStringLiteral("to"),
+                    QStringLiteral("gets"), QStringLiteral("ell"), QStringLiteral("forall"), QStringLiteral("exists"),
+                    QStringLiteral("empty"), QStringLiteral("cup"), QStringLiteral("cap"), QStringLiteral("wedge"),
+                    QStringLiteral("vee"), QStringLiteral("equiv"), QStringLiteral("cong"), QStringLiteral("sim"),
+                    QStringLiteral("circ"), QStringLiteral("angle"),
+                };
+
+                int maxPos = i + 1;
+                while (maxPos < expr.size() && expr.at(maxPos).isLetter()) {
+                    ++maxPos;
                 }
+                // Greedily consuming every following letter breaks commands that
+                // are immediately followed by a bare-argument letter, e.g.
+                // \fracmn would otherwise be read as the single unknown command
+                // "fracmn". Prefer the longest known command name instead.
+                int pos = i + 1;
+                for (int end = maxPos; end > i + 1; --end) {
+                    if (knownCommands.contains(expr.mid(i + 1, end - (i + 1)))) {
+                        pos = end;
+                        break;
+                    }
+                }
+                if (pos == i + 1)
+                    pos = maxPos;
                 QString cmd = expr.mid(i + 1, pos - (i + 1));
 
                 if (cmd == QStringLiteral("frac")) {
-                    if (pos < expr.size() && expr.at(pos) == '{') {
-                        QString num;
-                        int afterNum = consumeBalanced(expr, pos, '{', '}', &num);
-                        if (afterNum > 0 && afterNum < expr.size() && expr.at(afterNum) == '{') {
-                            QString den;
-                            int afterDen = consumeBalanced(expr, afterNum, '{', '}', &den);
-                            if (afterDen > 0) {
-                                html += QStringLiteral("<sup>%1</sup>/<sub>%2</sub>")
-                                            .arg(renderMathInline(num), renderMathInline(den));
-                                i = afterDen;
-                                continue;
-                            }
-                        }
-                    }
-                } else if (cmd == QStringLiteral("sqrt")) {
-                    if (pos < expr.size() && expr.at(pos) == '{') {
-                        QString inner;
-                        int afterInner = consumeBalanced(expr, pos, '{', '}', &inner);
-                        if (afterInner > 0) {
-                            html += QStringLiteral("&radic;<span style=\"text-decoration:overline;\">%1</span>")
-                                        .arg(renderMathInline(inner));
-                            i = afterInner;
+                    QString num;
+                    int afterNum = readMathArg(expr, pos, &num);
+                    if (afterNum > 0) {
+                        QString den;
+                        int afterDen = readMathArg(expr, afterNum, &den);
+                        if (afterDen > 0) {
+                            html += QStringLiteral("<sup>%1</sup>/<sub>%2</sub>")
+                                        .arg(renderMathInline(num), renderMathInline(den));
+                            i = afterDen;
                             continue;
                         }
                     }
+                } else if (cmd == QStringLiteral("sqrt")) {
+                    QString inner;
+                    int afterInner = readMathArg(expr, pos, &inner);
+                    if (afterInner > 0) {
+                        html += QStringLiteral("&radic;<span style=\"text-decoration:overline;\">%1</span>")
+                                    .arg(renderMathInline(inner));
+                        i = afterInner;
+                        continue;
+                    }
+                } else if (cmd == QStringLiteral("quad")) {
+                    html += QStringLiteral("&emsp;");
+                    i = pos;
+                    continue;
+                } else if (cmd == QStringLiteral("qquad")) {
+                    html += QStringLiteral("&emsp;&emsp;");
+                    i = pos;
+                    continue;
                 } else {
                     static const QHash<QString, QString> syms = {
                         {QStringLiteral("alpha"), QStringLiteral("&alpha;")}, {QStringLiteral("beta"), QStringLiteral("&beta;")}, {QStringLiteral("gamma"), QStringLiteral("&gamma;")},
@@ -162,6 +236,18 @@ static QString renderMathInline(const QString& expr)
             }
         }
 
+        // Bare grouping braces (e.g. the "{,}" decimal-comma idiom) carry no
+        // markup of their own — render the contents and drop the braces.
+        if (ch == '{') {
+            QString inner;
+            int after = consumeBalanced(expr, i, '{', '}', &inner);
+            if (after > 0) {
+                html += renderMathInline(inner);
+                i = after;
+                continue;
+            }
+        }
+
         html += QString(ch).toHtmlEscaped();
         ++i;
     }
@@ -171,7 +257,11 @@ static QString renderMathInline(const QString& expr)
 
 static QString renderMathBlock(const QString& expr)
 {
-    return QStringLiteral("<div class=\"math-block\">%1</div>").arg(renderMathInline(expr));
+    // Centering (CSS text-align:center, the align="center" attribute, or a
+    // centered <td>) makes QTextBrowser's HTML engine render the whole block
+    // blank, so the math body is left-aligned with an indent instead.
+    return QStringLiteral("<div style=\"margin-top:16px;margin-bottom:16px;margin-left:24px;\">"
+                           "%1</div>").arg(renderMathInline(expr.trimmed()));
 }
 
 // Build the snippet that replaces a detected math span.
@@ -378,8 +468,23 @@ QString ExportManager::markdownToHtml(const QString& markdown, MathRenderMode mo
 
     unsigned flags = MD_FLAG_TABLES | MD_FLAG_STRIKETHROUGH | MD_FLAG_TASKLISTS;
     md_html(utf8.constData(), static_cast<MD_SIZE>(utf8.size()), cb, &result, flags, 0);
-    for (int i = 0; i < mathSnippets.size(); ++i)
-        result.replace(QStringLiteral("@@FASTMD_MATH_%1@@").arg(i), mathSnippets.at(i));
+    for (int i = 0; i < mathSnippets.size(); ++i) {
+        const QString token = QStringLiteral("@@FASTMD_MATH_%1@@").arg(i);
+        const QString& snippet = mathSnippets.at(i);
+        // A standalone $$...$$ block renders to a block-level element (table),
+        // which md4c wraps in its own <p>. QTextBrowser's limited HTML engine
+        // can't render a block element nested inside a <p>, so unwrap it.
+        if (snippet.startsWith(QStringLiteral("<table"))) {
+            static const QRegularExpression wrappedP(
+                QStringLiteral("<p>\\s*%1\\s*</p>"));
+            QRegularExpression re(wrappedP.pattern().arg(QRegularExpression::escape(token)));
+            if (result.contains(re)) {
+                result.replace(re, snippet);
+                continue;
+            }
+        }
+        result.replace(token, snippet);
+    }
     result = normalizeTaskListHtml(result);
 
     // Decode URL-encoded paths in src="..." so QTextDocument/QTextBrowser can find local files with spaces
@@ -503,9 +608,7 @@ static QString buildCss(bool dark, int fontSize, bool isPrint)
         "  background-color:%3;color:%4;"
         "  padding:0.3em 0.3em;border-radius:4px;"
         "}"
-        ".math-inline,.math-block{font-family:'Cambria Math','Times New Roman',serif;}"
-        ".math-inline{font-size:1.05em;}"
-        ".math-block{margin-top:16px;margin-bottom:16px;text-align:center;font-size:1.1em;}"
+        ".math-inline{font-family:'Cambria Math','Times New Roman',serif;font-size:1.05em;}"
         // fenced code block
         ".code-block{"
         "  background-color:%5;"
