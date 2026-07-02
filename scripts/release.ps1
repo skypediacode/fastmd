@@ -1,5 +1,5 @@
 param(
-    [string]$Version = "v1.7.1",
+    [string]$Version = "v1.7.2",
     [string]$Config = "Release",
     [switch]$Clean,
     [string]$IsccPath = "C:\Program Files\Inno Setup 7\ISCC.exe"
