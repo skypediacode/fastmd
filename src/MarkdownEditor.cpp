@@ -17,6 +17,8 @@
 #include <QMimeData>
 #include <QDateTime>
 #include <QUuid>
+#include <QApplication>
+#include <QClipboard>
 
 namespace {
 constexpr int kEditorTopPadding = 4;
@@ -432,8 +434,22 @@ void MarkdownEditor::paintLineNumbers(QPaintEvent* event)
 }
 
 // ---------------------------------------------------------------------------
+void MarkdownEditor::copy()
+{
+    QTextCursor cur = textCursor();
+    if (!cur.hasSelection())
+        return;
+    QString text = cur.selectedText().replace(QChar(0x2029), QLatin1Char('\n'));
+    QApplication::clipboard()->setText(text);
+}
+
 void MarkdownEditor::keyPressEvent(QKeyEvent* event)
 {
+    if (event->matches(QKeySequence::Copy)) {
+        copy();
+        return;
+    }
+
     if (event->key() == Qt::Key_Return || event->key() == Qt::Key_Enter) {
         if (handleSmartList(event))
             return;

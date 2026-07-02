@@ -586,7 +586,7 @@ void MainWindow::createMenus()
     wireEdit(actUndo,  &QPlainTextEdit::undo);
     wireEdit(actRedo,  &QPlainTextEdit::redo);
     wireEdit(actCut,   &QPlainTextEdit::cut);
-    wireEdit(actCopy,  &QPlainTextEdit::copy);
+    wireEdit(actCopy,  &MarkdownEditor::copy);
     wireEdit(actPaste, &QPlainTextEdit::paste);
 
     // ---- View ----

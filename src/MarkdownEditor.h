@@ -22,6 +22,7 @@ public:
     void commitTemporaryImages(const QString& newDocPath);
 
 public slots:
+    void copy();
     void zoomIn(int range = 1);
     void zoomOut(int range = 1);
     void fmtBold();
