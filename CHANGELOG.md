@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.7.2] - 2026-07-02
+
+### Changed
+
+- **LaTeX Math Rendering:** Expanded inline math rendering with support for spacing macros (`\ `, `\,`, `\;`, `\:`, `\!`) and comprehensive set of LaTeX commands including Greek letters, mathematical operators, and symbols. Improved command parsing to correctly handle macro arguments and ambiguous command boundaries.
+
+### Fixed
+
+- **Copy Behavior:** Fixed QPlainTextEdit's default copy to prevent placing HTML-formatted content on the clipboard, which caused extra paragraph margins to render as blank lines in applications that prefer the HTML flavor.
+
 ## [1.7.1] - 2026-07-01
 
 ### Changed

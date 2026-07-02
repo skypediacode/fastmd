@@ -18,7 +18,7 @@ LicensesDialog::LicensesDialog(QWidget* parent)
     resize(680, 460);
 
     m_components = {
-        { QStringLiteral("FastMD"), QStringLiteral("1.7.1"), QStringLiteral("MIT License"),
+        { QStringLiteral("FastMD"), QStringLiteral("1.7.2"), QStringLiteral("MIT License"),
           QStringLiteral("https://github.com/skypediacode/fastmd"),
           QStringLiteral(":/licenses/fastmd-MIT.txt") },
         { QStringLiteral("Qt"), QString::fromLatin1(qVersion()), QStringLiteral("GNU Lesser General Public License v3.0"),
