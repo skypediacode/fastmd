@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="FastMD - The lightning-fast, native Markdown and Text Editor for Windows built with C++20 and Qt 6. Instant startup, low memory footprint, and distraction-free writing.">
+  <title>FastMD — The Native, Blazing Fast Markdown Editor</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <link rel="icon" type="image/svg+xml" href="assets/logo.svg">
+</head>
+<body>
+  <!-- Decorative background mesh -->
+  <div class="bg-decor"></div>
+  <div class="bg-decor-2"></div>
+
+  <!-- Header & Navigation -->
+  <header>
+    <div class="nav-container">
+      <a href="index.html" class="logo-link" id="nav-home-logo">
+        <img src="assets/logo.svg" alt="FastMD Logo" class="logo-img">
+        <span>FastMD</span>
+      </a>
+      <ul class="nav-links">
+        <li class="nav-item active"><a href="index.html">Home</a></li>
+        <li class="nav-item"><a href="privacy-policy.html">Privacy Policy</a></li>
+        <li class="nav-item"><a href="terms.html">Terms</a></li>
+        <li class="nav-item"><a href="licenses.html">Licenses</a></li>
+        <li class="nav-item"><a href="https://github.com/skypediacode/fastmd" target="_blank" rel="noopener">GitHub</a></li>
+      </ul>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main>
+    <div class="container">
+      
+      <!-- Hero Section -->
+      <section class="hero">
+        <span class="badge">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="margin-right:4px; vertical-align: middle;">
+            <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+          </svg>
+          Lightweight &amp; Offline
+        </span>
+        <h1>Fast, lightweight Markdown and Text Editor.</h1>
+        <p class="tagline">Built for developers and writers who want instant performance. Written natively in C++20 with Qt 6 widgets and zero Electron bloat.</p>
+        
+        <div class="hero-cta">
+          <a href="https://apps.microsoft.com/store/detail/9N4DSD4WNZ9D?cid=DevShareMCLPCS" class="btn btn-primary" id="btn-download" target="_blank" rel="noopener">
+            <img src="store.png" alt="" aria-hidden="true" class="store-icon">
+            <span class="store-cta-text">Get it from Microsoft Store</span>
+          </a>
+          <a href="https://github.com/skypediacode/fastmd" class="btn btn-secondary" id="btn-github">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/>
+            </svg>
+            Download from GitHub
+          </a>
+        </div>
+      </section>
+
+      <!-- App Interface Preview -->
+      <section class="screenshot-section">
+        <div class="screenshot-wrapper">
+          <img src="assets/screenshot.png" alt="FastMD Live Preview and Markdown Editor Interface" class="screenshot">
+        </div>
+      </section>
+
+      <!-- Features Section -->
+      <section class="features-section">
+        <div class="section-header">
+          <h2>Why Choose FastMD?</h2>
+          <p>We believe your text editor should stay out of your way and launch instantly. Speed and native execution are our core priorities.</p>
+        </div>
+        
+        <div class="features-grid">
+          <div class="feature-card">
+            <div class="feature-icon-wrapper">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+              </svg>
+            </div>
+            <h3>Blazing Fast Performance</h3>
+            <p>The window appears near-instantly — the preview engine initializes asynchronously in the background, so it never blocks startup or typing. Typing latency stays low even on large documents.</p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon-wrapper">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+                <line x1="8" y1="21" x2="16" y2="21"/>
+                <line x1="12" y1="17" x2="12" y2="21"/>
+              </svg>
+            </div>
+            <h3>True Native Desktop App</h3>
+            <p>The editor and UI are built with C++20 and Qt 6 Widgets — no Electron, no Node.js, and no bundled browser. The live preview reuses the Microsoft Edge WebView2 runtime already on Windows, so nothing extra is shipped.</p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon-wrapper">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+              </svg>
+            </div>
+            <h3>Offline and Secure</h3>
+            <p>100% private and offline. No user accounts, no telemetry, no tracking, and no cloud syncing. Your files never leave your computer.</p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon-wrapper">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+                <line x1="16" y1="13" x2="8" y2="13"/>
+                <line x1="16" y1="17" x2="8" y2="17"/>
+                <polyline points="10 9 9 9 8 9"/>
+              </svg>
+            </div>
+            <h3>Advanced Export Pipeline</h3>
+            <p>Unified pipeline using MD4C. Export your work to clean self-contained HTML, print-ready PDFs, or Word DOCX via Pandoc.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- By the Numbers Comparison Table -->
+      <section class="metrics-section">
+        <div class="section-header">
+          <h2>By The Numbers</h2>
+          <p>See how a native C++ and Qt 6 desktop application stacks up against typical Electron-based editors.</p>
+        </div>
+
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Performance Metric</th>
+                <th>Typical Electron Editor</th>
+                <th>FastMD (C++ / Qt)</th>
+                <th>Efficiency Difference</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Base Download Size</strong></td>
+                <td>100 MB – 150 MB</td>
+                <td><strong>~1.5 MB</strong></td>
+                <td>~100x smaller executable</td>
+              </tr>
+              <tr>
+                <td><strong>Bundled browser engine</strong></td>
+                <td>Yes (Chromium per app)</td>
+                <td><strong>None (shared OS WebView2)</strong></td>
+                <td>Nothing extra shipped</td>
+              </tr>
+              <tr>
+                <td><strong>Average Idle RAM Usage</strong></td>
+                <td>500 MB – 1000 MB</td>
+                <td><strong>~250 MB</strong> (incl. shared preview)</td>
+                <td>~2–4x lighter memory footprint</td>
+              </tr>
+              <tr>
+                <td><strong>Cold Startup (window visible)</strong></td>
+                <td>2.0s – 4.0s</td>
+                <td><strong>~0.4–0.5s</strong></td>
+                <td>~5–8x faster launch speed</td>
+              </tr>
+              <tr>
+                <td><strong>Cloud Connections &amp; Telemetry</strong></td>
+                <td>Dozens of background requests</td>
+                <td><strong>None (100% Offline)</strong></td>
+                <td>Zero background data transfer</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-container">
+      <div class="footer-top">
+        <div class="footer-logo">
+          <img src="assets/logo.svg" alt="FastMD Logo" style="width: 24px; height: 24px;">
+          <span>FastMD</span>
+        </div>
+        <ul class="footer-nav">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="privacy-policy.html">Privacy Policy</a></li>
+          <li><a href="terms.html">Terms of Service</a></li>
+          <li><a href="licenses.html">Open Source Licenses</a></li>
+          <li><a href="https://github.com/skypediacode/fastmd" target="_blank" rel="noopener">GitHub</a></li>
+        </ul>
+      </div>
+      <div class="footer-bottom">
+        <p>Copyright &copy; 2026 Skypedia. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>

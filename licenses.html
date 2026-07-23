@@ -1,0 +1,568 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Open Source Licenses for FastMD and its bundled third-party libraries."
+    />
+    <title>Open Source Licenses — FastMD</title>
+    <link rel="stylesheet" href="assets/style.css" />
+    <link rel="icon" type="image/svg+xml" href="assets/logo.svg" />
+  </head>
+  <body>
+    <!-- Decorative background mesh -->
+    <div class="bg-decor"></div>
+    <div class="bg-decor-2"></div>
+
+    <!-- Header & Navigation -->
+    <header>
+      <div class="nav-container">
+        <a href="index.html" class="logo-link" id="nav-home-logo">
+          <img src="assets/logo.svg" alt="FastMD Logo" class="logo-img" />
+          <span>FastMD</span>
+        </a>
+        <ul class="nav-links">
+          <li class="nav-item"><a href="index.html">Home</a></li>
+          <li class="nav-item">
+            <a href="privacy-policy.html">Privacy Policy</a>
+          </li>
+          <li class="nav-item"><a href="terms.html">Terms</a></li>
+          <li class="nav-item active"><a href="licenses.html">Licenses</a></li>
+          <li class="nav-item">
+            <a
+              href="https://github.com/skypediacode/fastmd"
+              target="_blank"
+              rel="noopener"
+              >GitHub</a
+            >
+          </li>
+        </ul>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+      <div class="content-container">
+        <article class="article-header">
+          <h1>Open Source Licenses</h1>
+          <p class="last-updated">
+            FastMD is made possible by these incredible open source projects.
+          </p>
+        </article>
+
+        <div class="article-content">
+          <section>
+            <p>
+              FastMD is built with high-performance native components and third-party libraries.
+              Below you will find the license details for the open-source libraries and tools used in FastMD's build system
+              and runtime packaging.
+            </p>
+          </section>
+
+          <section class="license-grid">
+
+            <!-- Qt License -->
+            <div class="license-card">
+              <div class="license-card-header">
+                <span class="license-name">Qt Framework (Widgets)</span>
+                <span class="license-badge">GNU LGPL v3.0</span>
+              </div>
+              <div class="license-info">
+                <p>
+                  <strong>Purpose:</strong> Cross-platform native GUI widgets
+                  and system events management.
+                </p>
+                <p>
+                  <strong>Homepage:</strong>
+                  <a href="https://www.qt.io" target="_blank" rel="noopener"
+                    >qt.io</a
+                  >
+                </p>
+                <p
+                  style="
+                    margin-top: 0.5rem;
+                    font-size: 0.85rem;
+                    color: var(--text-muted);
+                  "
+                >
+                  Note: FastMD dynamically links to unmodified Qt libraries as
+                  permitted by the LGPL v3.0 license. Users may replace the Qt
+                  shared libraries (DLLs) in their installation directory with
+                  compatible custom versions.
+                </p>
+              </div>
+              <details class="license-details">
+                <summary>View License Text Summary</summary>
+                <div class="license-text-container">
+                  <pre class="license-text">
+                   GNU LESSER GENERAL PUBLIC LICENSE
+                       Version 3, 29 June 2007
+
+ Copyright (C) 2007 Free Software Foundation, Inc. &lt;https://fsf.org/&gt;
+ Everyone is permitted to copy and distribute verbatim copies
+ of this license document, but changing it is not allowed.
+
+  This version of the GNU Lesser General Public License incorporates
+the terms and conditions of version 3 of the GNU General Public
+License, supplemented by the additional permissions listed below.
+
+  0. Additional Definitions.
+
+  As used herein, "this License" refers to version 3 of the GNU Lesser
+General Public License, and the "GNU GPL" refers to version 3 of the GNU
+General Public License.
+
+  "The Library" refers to a covered work governed by this License,
+other than an Application or a Combined Work as defined below.
+
+  An "Application" is any work that makes use of an interface provided
+by the Library, but which is not otherwise based on the Library.
+Defining a subclass of a class defined by the Library is deemed a mode
+of using an interface provided by the Library.
+
+  A "Combined Work" is a work produced by combining or linking an
+Application with the Library.  The particular version of the Library
+with which the Combined Work was made is also called the "Linked
+Version".
+
+  The "Minimal Corresponding Source" for a Combined Work means the
+Corresponding Source for the Combined Work, excluding any source code
+for portions of the Combined Work that, considered in isolation, are
+based on the Application, and not on the Linked Version.
+
+  The "Corresponding Application Code" for a Combined Work means the
+object code and/or source code for the Application, including any data
+and utility programs needed for reproducing the Combined Work from the
+Application, but excluding the System Libraries of the Combined Work.
+
+  [For the full terms of LGPL v3, visit https://www.gnu.org/licenses/lgpl-3.0.html]</pre
+                  >
+                </div>
+              </details>
+            </div>
+
+            <!-- Pandoc License -->
+            <div class="license-card">
+              <div class="license-card-header">
+                <span class="license-name">Pandoc (External CLI Utility)</span>
+                <span class="license-badge">GNU GPL v2.0 (or later)</span>
+              </div>
+              <div class="license-info">
+                <p>
+                  <strong>Purpose:</strong> Invoked locally via QProcess to
+                  perform Word Document (.docx) exports.
+                </p>
+                <p>
+                  <strong>Homepage:</strong>
+                  <a href="https://pandoc.org" target="_blank" rel="noopener"
+                    >pandoc.org</a
+                  >
+                </p>
+                <p
+                  style="
+                    margin-top: 0.5rem;
+                    font-size: 0.85rem;
+                    color: var(--text-muted);
+                  "
+                >
+                  Note: Pandoc is a standalone executable and is never
+                  statically or dynamically linked into FastMD. It is bundled
+                  purely as an external tool next to the application binary. A
+                  copy of the GPL-2.0 license is included. Source code for
+                  Pandoc is available upon request or at
+                  <a
+                    href="https://github.com/jgm/pandoc"
+                    target="_blank"
+                    rel="noopener"
+                    >GitHub</a
+                  >.
+                </p>
+              </div>
+              <details class="license-details">
+                <summary>View License Text Summary</summary>
+                <div class="license-text-container">
+                  <pre class="license-text">
+                    GNU GENERAL PUBLIC LICENSE
+                       Version 2, June 1991
+
+ Copyright (C) 1989, 1991 Free Software Foundation, Inc.
+ 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
+ Everyone is permitted to copy and distribute verbatim copies
+ of this license document, but changing it is not allowed.
+
+                            Preamble
+
+  The licenses for most software are designed to take away your
+freedom to share and change it.  By contrast, the GNU General Public
+License is intended to guarantee your freedom to share and change free
+software--to make sure the software is free for all its users.  This
+General Public License applies to most of the Free Software
+Foundation's software and to any other program whose authors commit to
+using it.  (Some other Free Software Foundation software is covered by
+the GNU Lesser General Public License instead.)  You can apply it to
+your programs, too.
+
+  [For the full terms of GPL v2, visit https://www.gnu.org/licenses/gpl-2.0.html]</pre
+                  >
+                </div>
+              </details>
+            </div>
+
+            <!-- MD4C License -->
+            <div class="license-card">
+              <div class="license-card-header">
+                <span class="license-name">MD4C (Markdown Parser)</span>
+                <span class="license-badge">MIT License</span>
+              </div>
+              <div class="license-info">
+                <p>
+                  <strong>Purpose:</strong> Ultra-fast, CommonMark-compliant C
+                  library used for HTML compilation.
+                </p>
+                <p>
+                  <strong>Homepage:</strong>
+                  <a
+                    href="https://github.com/mity/md4c"
+                    target="_blank"
+                    rel="noopener"
+                    >github.com/mity/md4c</a
+                  >
+                </p>
+              </div>
+              <details class="license-details">
+                <summary>View License Text</summary>
+                <div class="license-text-container">
+                  <pre class="license-text">
+MIT License
+
+Copyright (c) 2016-2024 Martin Mitas
+
+Permission is hereby granted, free of charge, to any person obtaining a
+copy of this software and associated documentation files (the "Software"),
+to deal in the Software without restriction, including without limitation
+the rights to use, copy, modify, merge, publish, distribute, sublicense,
+and/or sell copies of the Software, and to permit persons to whom the
+Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included
+in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+DEALINGS IN THE SOFTWARE.</pre
+                  >
+                </div>
+              </details>
+            </div>
+
+            <!-- KaTeX License -->
+            <div class="license-card">
+              <div class="license-card-header">
+                <span class="license-name">KaTeX (Math Rendering)</span>
+                <span class="license-badge">MIT License</span>
+              </div>
+              <div class="license-info">
+                <p>
+                  <strong>Purpose:</strong> Bundled local library files used to
+                  typeset LaTeX equations in the live preview and in HTML/PDF
+                  exports (fully offline).
+                </p>
+                <p>
+                  <strong>Homepage:</strong>
+                  <a href="https://katex.org" target="_blank" rel="noopener"
+                    >katex.org</a
+                  >
+                </p>
+              </div>
+              <details class="license-details">
+                <summary>View License Text</summary>
+                <div class="license-text-container">
+                  <pre class="license-text">
+MIT License
+
+Copyright (c) 2013-2020 Khan Academy and other contributors
+
+Permission is hereby granted, free of charge, to any person obtaining a
+copy of this software and associated documentation files (the "Software"),
+to deal in the Software without restriction, including without limitation
+the rights to use, copy, modify, merge, publish, distribute, sublicense,
+and/or sell copies of the Software, and to permit persons to whom the
+Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included
+in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+DEALINGS IN THE SOFTWARE.</pre
+                  >
+                </div>
+              </details>
+            </div>
+
+            <!-- highlight.js License -->
+            <div class="license-card">
+              <div class="license-card-header">
+                <span class="license-name"
+                  >highlight.js (Syntax Highlighting)</span
+                >
+                <span class="license-badge">BSD 3-Clause License</span>
+              </div>
+              <div class="license-info">
+                <p>
+                  <strong>Purpose:</strong> Bundled local library used to
+                  syntax-highlight fenced code blocks in the live preview (fully
+                  offline).
+                </p>
+                <p>
+                  <strong>Homepage:</strong>
+                  <a
+                    href="https://highlightjs.org"
+                    target="_blank"
+                    rel="noopener"
+                    >highlightjs.org</a
+                  >
+                </p>
+              </div>
+              <details class="license-details">
+                <summary>View License Text</summary>
+                <div class="license-text-container">
+                  <pre class="license-text">
+BSD 3-Clause License
+
+Copyright (c) 2006, Ivan Sagalaev.
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+* Redistributions of source code must retain the above copyright notice, this
+  list of conditions and the following disclaimer.
+
+* Redistributions in binary form must reproduce the above copyright notice,
+  this list of conditions and the following disclaimer in the documentation
+  and/or other materials provided with the distribution.
+
+* Neither the name of the copyright holder nor the names of its contributors
+  may be used to endorse or promote products derived from this software
+  without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</pre
+                  >
+                </div>
+              </details>
+            </div>
+
+            <!-- Mermaid License -->
+            <div class="license-card">
+              <div class="license-card-header">
+                <span class="license-name">Mermaid (Diagram Rendering)</span>
+                <span class="license-badge">MIT License</span>
+              </div>
+              <div class="license-info">
+                <p>
+                  <strong>Purpose:</strong> Bundled local library used to render
+                  <code>mermaid</code> fenced code blocks (flowcharts, sequence,
+                  class, state, ER, Gantt, pie, git graph, journey, mindmap,
+                  timeline, quadrant, and requirement diagrams) as diagrams in
+                  the live preview (fully offline).
+                </p>
+                <p>
+                  <strong>Homepage:</strong>
+                  <a
+                    href="https://mermaid.js.org"
+                    target="_blank"
+                    rel="noopener"
+                    >mermaid.js.org</a
+                  >
+                </p>
+              </div>
+              <details class="license-details">
+                <summary>View License Text</summary>
+                <div class="license-text-container">
+                  <pre class="license-text">
+The MIT License (MIT)
+
+Copyright (c) 2014 - 2022 Knut Sveidqvist
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.</pre
+                  >
+                </div>
+              </details>
+            </div>
+
+                        <!-- Material Icons License -->
+            <div class="license-card">
+              <div class="license-card-header">
+                <span class="license-name">Material Icons</span>
+                <span class="license-badge">Apache License 2.0</span>
+              </div>
+              <div class="license-info">
+                <p>
+                  <strong>Purpose:</strong> Embedded icon font file used to
+                  render clean toolbar button glyphs.
+                </p>
+                <p>
+                  <strong>Homepage:</strong>
+                  <a
+                    href="https://fonts.google.com/icons"
+                    target="_blank"
+                    rel="noopener"
+                    >fonts.google.com/icons</a
+                  >
+                </p>
+              </div>
+              <details class="license-details">
+                <summary>View License Text Summary</summary>
+                <div class="license-text-container">
+                  <pre class="license-text">
+                                 Apache License
+                           Version 2.0, January 2004
+                        https://www.apache.org/licenses/
+
+   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
+
+   1. Definitions.
+
+      "License" shall mean the terms and conditions for use, reproduction,
+      and distribution as defined by Sections 1 through 9 of this document.
+
+      "Licensor" shall mean the copyright owner or entity authorized by
+      the copyright owner that is granting the License.
+
+      [For the full terms of Apache License 2.0, visit https://www.apache.org/licenses/LICENSE-2.0]</pre
+                  >
+                </div>
+              </details>
+            </div>
+
+            <!-- Microsoft Edge WebView2 -->
+            <div class="license-card">
+              <div class="license-card-header">
+                <span class="license-name">Microsoft Edge WebView2</span>
+                <span class="license-badge">Microsoft SDK Terms</span>
+              </div>
+              <div class="license-info">
+                <p>
+                  <strong>Purpose:</strong> The Markdown preview is rendered by
+                  the Evergreen Microsoft Edge WebView2 Runtime — a shared
+                  component of Windows. FastMD links the WebView2 SDK's static
+                  loader; no browser engine is bundled or redistributed by
+                  FastMD.
+                </p>
+                <p>
+                  <strong>Homepage:</strong>
+                  <a
+                    href="https://developer.microsoft.com/microsoft-edge/webview2/"
+                    target="_blank"
+                    rel="noopener"
+                    >developer.microsoft.com/microsoft-edge/webview2</a
+                  >
+                </p>
+              </div>
+              <details class="license-details">
+                <summary>View License Summary</summary>
+                <div class="license-text-container">
+                  <pre class="license-text">
+The WebView2 SDK is provided by Microsoft under the Microsoft Software License
+Terms for the Microsoft Edge WebView2 SDK. The WebView2 Runtime is a component
+of the operating system and is not redistributed by FastMD.
+
+For the full terms, see:
+https://aka.ms/webview2/license</pre
+                  >
+                </div>
+              </details>
+            </div>
+
+            <!-- PLACEHOLDER FOR FUTURE LIBRARIES
+          <div class="license-card">
+            <div class="license-card-header">
+              <span class="license-name">Library Name</span>
+              <span class="license-badge">License Type</span>
+            </div>
+            <div class="license-info">
+              <p><strong>Purpose:</strong> Brief explanation of what the library is used for in the project.</p>
+              <p><strong>Homepage:</strong> <a href="#" target="_blank" rel="noopener">Link to library homepage</a></p>
+            </div>
+            <details class="license-details">
+              <summary>View License Text</summary>
+              <div class="license-text-container">
+                <pre class="license-text">Insert license text here...</pre>
+              </div>
+            </details>
+          </div>
+          --></section>
+        </div>
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+      <div class="footer-container">
+        <div class="footer-top">
+          <div class="footer-logo">
+            <img
+              src="assets/logo.svg"
+              alt="FastMD Logo"
+              style="width: 24px; height: 24px"
+            />
+            <span>FastMD</span>
+          </div>
+          <ul class="footer-nav">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="privacy-policy.html">Privacy Policy</a></li>
+            <li><a href="terms.html">Terms of Service</a></li>
+            <li><a href="licenses.html">Open Source Licenses</a></li>
+            <li>
+              <a
+                href="https://github.com/skypediacode/fastmd"
+                target="_blank"
+                rel="noopener"
+                >GitHub</a
+              >
+            </li>
+          </ul>
+        </div>
+        <div class="footer-bottom">
+          <p>Copyright &copy; 2026 Skypedia. All rights reserved.</p>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>
