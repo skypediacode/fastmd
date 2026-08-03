@@ -2,7 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
+## [2.8.6] - 2026-08-04
+
+### Added
+- **Release Notes:** Added a Help > Release Notes dialog backed by the project changelog, with the current release history embedded in the application.
+- **Command Palette Shortcut:** Added the Command Palette shortcut to the Keyboard Shortcuts dialog.
+
+### Changed
+- **Markdown Formatting:** Auto Format Document now repairs numbering in ordered lists while preserving the list's starting number, indentation, delimiter style, and separate list runs.
+- **Workspace Defaults:** New installations now show the Workspace panel by default and sort its entries by file type; existing saved preferences remain unchanged.
+- **Update Experience:** Store updates now explain the possible application shutdown, verify the Store operation's completion state, and offer Restart Now/Later when FastMD remains open.
+- **Terminology and Dialog Polish:** Renamed Document Summary to Document Statistics and fixed uneven Keyboard Shortcuts row spacing.
 
 ## [2.8.5] - 2026-08-03
 
