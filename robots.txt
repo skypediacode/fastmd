@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://skypediacode.github.io/fastmd/sitemap.xml

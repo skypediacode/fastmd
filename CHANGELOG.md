@@ -2,6 +2,56 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2.9.8] - 2026-08-06
+
+### Added
+- **Import as Markdown:** Import Office, OpenDocument, RTF, EPUB, CSV, text-based PDF, and other supported documents through the bundled native AnyDoc converter.
+- **Import Image Handling:** Imported embedded images are preserved as alt text, with a status message when image assets are omitted.
+
+### Changed
+- **Import Workflow:** Imported Markdown is saved beside the source with collision-safe naming and opened as a normal document without a Save As step.
+- **Bundled Tools:** Centralized Pandoc and AnyDoc version and integrity management for repeatable packaging and release builds.
+- **Editor and Menus:** Improved folder-operation and editing shortcuts, added Ctrl+numpad-plus zoom support, removed unintended Markdown editor top margin, and reordered Import as Markdown above Export in the File menu.
+
+## [2.9.7] - 2026-08-06
+
+### Added
+- **Tab Bar New Tab Control:** Added a theme-aware trailing “+” button and an empty-area context menu for creating or reopening tabs.
+- **Full Closed-Tab Restoration:** Reopen Closed Tab now restores tab position, cursor and scroll state, language selection, preview state, and unsaved untitled documents, while avoiding duplicate open files.
+
+### Changed
+- **New Tab Shortcuts:** Added Ctrl+T as an alternate shortcut for New and included all supported New shortcuts in the Keyboard Shortcuts dialog.
+
+## [2.9.6] - 2026-08-05
+
+### Fixed
+- **Command Palette Shortcut:** Restored the F1 shortcut in the main menu and preview so it consistently opens the command palette.
+- **Markdown Preview:** Unlabelled fenced code blocks now remain plain code instead of being auto-detected and shown with a false language badge.
+- **Store Update Dialog:** Fixed overlapping text by reserving the full wrapped height for installation guidance.
+
+## [2.9.5] - 2026-08-05
+
+### Added
+- **Mind Maps:** Added an offline Markmap-powered mind-map presentation for Markdown, with source navigation, fit-to-window, cursor-centered wheel zoom, and interactive standalone HTML export.
+- **Mind Map Exports:** Added source-based SVG, PDF, and DOCX export paths with deterministic headless rendering, KaTeX support, relative-image handling, and cropped DOCX raster output.
+- **SVG Viewer:** Added a read-only WebView2 viewer for SVG files, including native zoom, printing, copying, and external-navigation handling.
+
+### Changed
+- **Preview and Export Reliability:** Preserved mind-map state across edits, fixed source mapping for headings, lists, tables, code, CRLF, and front matter, and made Pandoc report failed conversions and missing resources.
+- **Interaction and UI:** Added a Fit Mind Map command, stabilized wheel zoom behavior, reorganized View menu actions, and fixed initial Workspace header icons.
+
+## [2.9.0] - 2026-08-04
+
+### Changed
+- **Startup Performance:** Deferred Workspace construction and other optional startup work until after first paint, avoided unnecessary syntax setup for blank tabs, and coalesced settings maintenance.
+- **Editor Performance:** Limited fenced-code painting to visible blocks and removed redundant whole-document scans and scroll-sync updates during editing.
+- **Preview Performance:** Reused rendered preview state, reduced repeated feature and math scans, and safely discarded stale asynchronous conversions while keeping preview results current.
+- **Workspace Performance:** Moved filesystem probing off the UI thread and cached extension/filter data used during tree filtering.
+- **Packaging:** Reduced the deployed footprint by excluding unused Qt graphics and compiler runtime DLLs.
+
+### Fixed
+- Preserved preview correctness across tab switches and theme changes, prevented recursive highlighter construction, flushed pending splitter settings when closing, and removed transient math-decoration state.
+
 ## [2.8.6] - 2026-08-04
 
 ### Added
