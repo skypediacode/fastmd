@@ -2,6 +2,113 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.0.4] - 2026-08-12
+
+### Added
+- **Reading Mode:** Added a distraction-free preview layout with F11, a toolbar action, Command Palette support, and in-preview find for rendered Markdown.
+- **Bundled User Guide:** Added Help > User Guide, an offline read-only guide that opens directly in Reading Mode.
+- **Mind Map Toolbar Action:** Added the Mind Map action back to the main toolbar.
+
+### Changed
+- **Reading Mode Activation:** New tabs opened while Reading Mode is active now start directly in the preview without a split-layout flash.
+- **Command Palette:** Removed the redundant View-menu entry while retaining the F1 shortcut and palette functionality.
+- **Toolbar Feedback:** Restored hover feedback for checked toolbar buttons.
+
+## [3.0.3] - 2026-08-12
+
+### Added
+- **User Guide:** Added Help > User Guide, which opens a bundled, offline, read-only Markdown guide in a new tab, in Reading Mode, without changing Reading Mode or panel preferences for other tabs.
+- **GitHub Callouts:** Added Note, Tip, Important, Warning, and Caution insertion commands under Edit > Insert, with selectable templates, selected-text conversion, toolbar/menu actions, and Command Palette entries.
+- **Horizontal Rule Toolbar Command:** Added a toolbar action for inserting Markdown horizontal rules with blank-line separation that avoids Setext heading parsing.
+
+### Fixed
+- **Preview Source Mapping:** Preserved source-line provenance through table-of-contents expansion, math and footnote processing, definition lists, callouts, Mermaid, and fenced-code highlighting so Preview and Go to Source navigate to the correct Markdown lines.
+- **Callout Rendering:** Restored live preview rendering for GitHub callouts when source mapping spans surround their markers.
+
+## [3.0.2] - 2026-08-11
+
+### Added
+- **Document Format Indicators:** Added per-document line-ending and text-encoding indicators to the status bar, with menus for changing the format used on save.
+
+### Changed
+- **Page Break Shortcut:** Ctrl+Enter now works with both the main Enter key and the numeric keypad Enter key.
+- **Update Safety:** Updates now detect unsaved documents, offer Save All or Cancel, use the normal Save As flow for untitled documents, and stop installation when saving is cancelled or fails.
+- **About Dialog:** Adjusted spacing and margins for a more balanced layout.
+
+## [3.0.1] - 2026-08-10
+
+### Added
+- **Go To Outline:** Added a hierarchical Outline tab for searching and navigating document headings.
+- **Shared Heading Model:** Unified heading detection and filtering between Go To and the preview outline.
+
+### Changed
+- **Outline Navigation:** Added cursor-aware heading selection and keyboard navigation for the Outline tab.
+- **Go To Line Dialog:** Improved input-field sizing and alignment across Windows display scales.
+
+## [3.0.0] - 2026-08-10
+
+### Added
+- **Workspace Shortcuts:** Added F8 to toggle the Workspace panel and listed it in the Keyboard Shortcuts dialog.
+- **Workspace Toolbar Actions:** Added toolbar buttons to reveal the current file in Explorer and open its folder in Terminal, using the Workspace root for unsaved documents.
+
+### Fixed
+- **Save and Undo Reliability:** Saving and Auto Save now preserve the editor's exact text and undo/redo history instead of normalizing and replacing the Markdown buffer.
+
+## [2.9.9] - 2026-08-09
+
+### Fixed
+- **Preview Source Navigation:** Double-clicking text in a multi-line paragraph, list item, or heading now flashes the exact Markdown source line instead of the block's first line.
+
+## [2.9.8] - 2026-08-06
+
+### Added
+- **Import as Markdown:** Import Office, OpenDocument, RTF, EPUB, CSV, text-based PDF, and other supported documents through the bundled native AnyDoc converter.
+- **Import Image Handling:** Imported embedded images are preserved as alt text, with a status message when image assets are omitted.
+
+### Changed
+- **Import Workflow:** Imported Markdown is saved beside the source with collision-safe naming and opened as a normal document without a Save As step.
+- **Bundled Tools:** Centralized Pandoc and AnyDoc version and integrity management for repeatable packaging and release builds.
+- **Editor and Menus:** Improved folder-operation and editing shortcuts, added Ctrl+numpad-plus zoom support, removed unintended Markdown editor top margin, and reordered Import as Markdown above Export in the File menu.
+
+## [2.9.7] - 2026-08-06
+
+### Added
+- **Tab Bar New Tab Control:** Added a theme-aware trailing “+” button and an empty-area context menu for creating or reopening tabs.
+- **Full Closed-Tab Restoration:** Reopen Closed Tab now restores tab position, cursor and scroll state, language selection, preview state, and unsaved untitled documents, while avoiding duplicate open files.
+
+### Changed
+- **New Tab Shortcuts:** Added Ctrl+T as an alternate shortcut for New and included all supported New shortcuts in the Keyboard Shortcuts dialog.
+
+## [2.9.6] - 2026-08-05
+
+### Fixed
+- **Command Palette Shortcut:** Restored the F1 shortcut in the main menu and preview so it consistently opens the command palette.
+- **Markdown Preview:** Unlabelled fenced code blocks now remain plain code instead of being auto-detected and shown with a false language badge.
+- **Store Update Dialog:** Fixed overlapping text by reserving the full wrapped height for installation guidance.
+
+## [2.9.5] - 2026-08-05
+
+### Added
+- **Mind Maps:** Added an offline Markmap-powered mind-map presentation for Markdown, with source navigation, fit-to-window, cursor-centered wheel zoom, and interactive standalone HTML export.
+- **Mind Map Exports:** Added source-based SVG, PDF, and DOCX export paths with deterministic headless rendering, KaTeX support, relative-image handling, and cropped DOCX raster output.
+- **SVG Viewer:** Added a read-only WebView2 viewer for SVG files, including native zoom, printing, copying, and external-navigation handling.
+
+### Changed
+- **Preview and Export Reliability:** Preserved mind-map state across edits, fixed source mapping for headings, lists, tables, code, CRLF, and front matter, and made Pandoc report failed conversions and missing resources.
+- **Interaction and UI:** Added a Fit Mind Map command, stabilized wheel zoom behavior, reorganized View menu actions, and fixed initial Workspace header icons.
+
+## [2.9.0] - 2026-08-04
+
+### Changed
+- **Startup Performance:** Deferred Workspace construction and other optional startup work until after first paint, avoided unnecessary syntax setup for blank tabs, and coalesced settings maintenance.
+- **Editor Performance:** Limited fenced-code painting to visible blocks and removed redundant whole-document scans and scroll-sync updates during editing.
+- **Preview Performance:** Reused rendered preview state, reduced repeated feature and math scans, and safely discarded stale asynchronous conversions while keeping preview results current.
+- **Workspace Performance:** Moved filesystem probing off the UI thread and cached extension/filter data used during tree filtering.
+- **Packaging:** Reduced the deployed footprint by excluding unused Qt graphics and compiler runtime DLLs.
+
+### Fixed
+- Preserved preview correctness across tab switches and theme changes, prevented recursive highlighter construction, flushed pending splitter settings when closing, and removed transient math-decoration state.
+
 ## [2.8.6] - 2026-08-04
 
 ### Added
