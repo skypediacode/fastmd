@@ -1,6 +1,186 @@
 # FastMD Changelog
 
-All notable changes to this project will be documented in this file.
+## [3.4.4] - 2026-09-18
+
+### Added
+- Added a collapsible Workspace Outline section that follows the active Markdown document and jumps to headings.
+- Added inline Terminal session renaming with F2 or double-click, plus Shift+F1 Workspace file-search access from native and WebView2 focus surfaces.
+
+### Changed
+- Open Folder's split arrow now opens recent folders directly, with aligned Workspace search-result metrics and improved narrow-panel behavior.
+- Unified Terminal, Workspace Outline, and Source Control Graph header heights and splitter geometry for consistent resizing and borders.
+
+### Fixed
+- Fixed long Workspace root paths from increasing the panel's minimum width.
+- Refined Close All Terminals confirmation so single-session closes are immediate while multi-session closes retain the opt-out confirmation.
+- Fixed inline Terminal rename text clipping and sidebar item cursors outside text-selection interactions.
+
+## [3.4.3] - 2026-09-18
+
+### Added
+- Added inline Terminal session renaming with F2 or double-click, including commit and cancel behavior without changing the underlying process.
+- Added Shift+F1 to reveal and focus Workspace file search from both native and WebView2 focus surfaces.
+
+### Changed
+- Open Folder's split arrow now opens the existing recent-folders menu directly.
+- Aligned Workspace search-result row icons and padding with the main Workspace tree.
+
+### Fixed
+- Prevented long Workspace root paths from increasing the panel's minimum width.
+- Refined Close All Terminals confirmation so a single session closes without a prompt while multi-session closes retain the opt-out preference.
+- Fixed inline Terminal session rename text clipping in compact rows.
+
+## [3.4.2] - 2026-09-18
+
+### Fixed
+- Fixed the Terminal's default cursor appearing as an I-beam outside text-selection interactions.
+- Preserved the user's docked editor/Terminal split ratio when resizing, maximizing, restoring, or reattaching the Terminal.
+
+## [3.4.1] - 2026-09-18
+
+### Added
+- Added a separate Terminal **Hide** action so hiding the panel leaves running sessions intact.
+- Added a **Close All Terminals** action with an opt-out confirmation preference, including safe cancellation of pending startup sessions.
+
+### Changed
+- Improved Store rating prompt reliability by preventing duplicate requests, delaying startup prompts, and limiting repeated postponements.
+- Reduced the minimum window size to keep FastMD usable on narrower screens, including the Command Palette width.
+
+### Fixed
+- Tuned the active editor-line highlight for light and dark themes.
+- Restored the tab-bar bottom border beneath the New Tab button.
+
+## [3.4.0] - 2026-09-16
+
+### Added
+- Added a native, multi-session integrated Terminal powered by Windows ConPTY and xterm.js, with profile selection, per-terminal themes, font-size controls, and direct “Open Folder in Terminal” actions.
+- Added a detachable Terminal window with attach/detach, minimize, maximize, resize, session-list close controls, and Command Palette actions.
+- Added Markdown text highlighting (`==text==`) across the editor, preview, and supported exports.
+- Added an optional export-completion dialog preference.
+
+### Changed
+- Terminal sessions now open detached by default and restore lazily after first paint, preserving startup responsiveness.
+- Improved startup performance by warming font services off the UI thread, avoiding unnecessary preview native-window creation, and using the editor’s primary font family.
+
+### Fixed
+- Improved Terminal reliability for shell exits, failed launches, control-sequence handling, focus, scrolling, detached-window behavior, and saved visibility/layout preferences.
+
+## [3.3.3] - 2026-09-06
+
+### Added
+- Added scoped F5 refresh commands for the Preview and Source Control panel, with discoverable Refresh context-menu entries.
+- Added persisted Changes-list sorting by name, path, or status.
+- Added per-tab Word Wrap support to read-only Source Control diff documents.
+
+### Fixed
+- Fixed background tabs showing stale Preview content after an external file reload.
+
+## [3.3.2] - 2026-09-03
+
+### Fixed
+- Added an **All Supported Files** filter to the Open dialog and made it the default, so Markdown, text, PDF, HTML, and supported image files are visible together.
+- Fixed opening a file from Open, Recent Files, drag-and-drop, navigation, Workspace, or Source Control from silently changing the Workspace root.
+- Fixed long Markdown tables being pushed to a new page during PDF export and printing; tables now split across pages with repeated headers and safer row boundaries.
+- Improved Source Control selected-row status colors and compacted file-action icons for clearer, more consistent contrast.
+
+## [3.3.1] - 2026-09-01
+
+### Fixed
+- Fixed the **Edit with FastMD** Explorer command being hidden when right-clicking empty space in a folder. The command now resolves the browsed folder through Explorer's folder view site when no item is selected.
+
+## [3.3.0] - 2026-09-01
+
+### Added
+- Added native Windows on Arm (Arm64) builds and Microsoft Store packaging, with architecture-specific AnyDoc wrappers and package dependency validation.
+- Added an editable Welcome document for first launch and an automatic What's New tab after updates.
+
+### Fixed
+- Source Control now refreshes after successful saves inside the active repository, while remaining quiet for paths outside it.
+- Improved dark-theme consistency for the title bar, Split Lines dialog, status-bar separators, and Source Control selections.
+
+### Changed
+- Refined startup-tab handling so Welcome and What's New flows do not interfere with explicit file opens.
+- Release builds now stage and validate native dependencies separately for x64 and Arm64.
+
+## [3.2.0] - 2026-08-31
+
+### Added
+- **Source Control:** Added a lazy Workspace Source Control mode with staged and unstaged changes, read-only diff documents, commit history with graph lanes, branch switching, stash and remote management, and cancellable fetch, pull, and push operations.
+- **Spell Check:** Added native spell checking for Markdown and plain text documents, backed by the spelling languages installed in Windows. Off by default, with a Preferences section, an Edit > Spell Check submenu, a clickable status-bar indicator, right-click suggestions with Ignore and Add to Dictionary, and Command Palette commands.
+- **Fix All Misspellings:** Added a document-wide review dialog that groups repeated misspellings, lets each one be re-targeted or excluded, and applies every accepted correction as a single undoable edit.
+- **Editor Line Operations:** Added standalone Markdown numbering, join/split lines, sorting, reversing, duplicate removal, whitespace cleanup, custom split delimiters, and Insert > Content from File.
+
+### Fixed
+- **Async Lifecycle Safety:** Hardened asynchronous export, save, Git, workspace, and file-change operations against stale results, cancellation, tab closure, and shutdown races.
+- **Spell Check Persistence:** The spell check On/Off choice and selected language now survive a restart. They (and the View > Status Bar toggle) were written to settings but not included in the startup snapshot, so every launch read the default and wrote it back.
+- **Status Bar Height:** Restored the compact status bar (40px back to 28px). The toolbar's `min-height` style rule was also reaching the clickable language, line-ending, encoding, and spell indicators, making them taller than the text segments beside them and inflating the whole bar.
+
+### Changed
+- **Bundled Tools:** Updated the bundled Pandoc and AnyDoc tools.
+- **Spell Check Settings:** Opening spell check settings now lands directly on the Editor page of Preferences.
+- **Spell Check Menu:** Renamed `Ignore` to `Ignore Word` and made the first (best) suggestion bold.
+- **Fix All Misspellings:** Enlarged the dialog by ~20%, raised the description, header and row text by 1px, gave the suggestion dropdowns a 32px height with 8px of vertical spacing between rows so adjacent ones no longer touch, and switched the suggestion dropdown to FastMD's standard combo box styling in both light and dark themes.
+
+## [3.1.2] - 2026-08-23
+
+### Added
+- **Unsaved Changes Shortcuts:** Added direct `S`, `D`, and `C` keyboard shortcuts for Save, Discard, and Cancel, with visible mnemonic underlines.
+
+### Changed
+- **Status Bar Popups:** Fixed language, line-ending, and encoding menus so dismissing a popup by clicking its status-bar button does not immediately reopen it.
+- **Format Menu:** Moved Auto Format Document into the dedicated Format menu while preserving its shortcut and shared action behavior.
+
+## [3.1.1] - 2026-08-21
+
+### Added
+- **Notepad Mode:** Added an editor-only layout with F12, Command Palette support, shortcut-dialog visibility, and persistence across launches.
+- **Export Progress:** Added simulated percentage feedback in the status bar while exports run, reaching 100% only when the export completes.
+
+### Changed
+- **View Menu:** Reorganized related layout and view commands, and removed Mind Map and Reading Mode buttons from the main toolbar while retaining their menu, shortcut, and palette access.
+- **Mode Behavior:** Reading Mode and Notepad Mode now coordinate their layout overrides and preserve the user's underlying Workspace, Preview, and splitter preferences.
+
+## [3.1.0] - 2026-08-19
+
+### Added
+- **Markdown Alignment:** Added left, center, right, and justified alignment commands through the new Format menu and toolbar controls.
+- **Store Rating Prompt:** Added an eligibility-gated Microsoft Store rating prompt for packaged installations.
+
+### Changed
+- **Preview Responsiveness:** Rendered changed preview blocks immediately before asynchronously loading and applying highlight.js, KaTeX, and Mermaid decorations.
+- **Export Performance:** Made document exports asynchronous, isolated export work on dedicated thread pools, and added persistent warmed browser infrastructure.
+- **PDF Export:** Routed PDF rendering through FastMD's native WebView2 preview pipeline for visual parity with live preview, with a browser fallback.
+- **Image Resources:** Improved handling of absolute and relative local images in browser preview, printing, and exports.
+- **Auto Save:** Expanded the available automatic-save delay options.
+
+### Fixed
+- Improved export shutdown and recovery behavior, including bounded waits and handling for crashed persistent browser profiles.
+- Improved workspace search and update-flow reliability, and added compatibility and PDF metadata regression coverage.
+
+## [3.0.6] - 2026-08-13
+
+### Added
+**Command Palette Conversions:** Added searchable commands for 
+- Converting document line endings to Windows (CRLF), Unix (LF), or Mac (CR)
+- converting text encoding to UTF-8, UTF-8 with BOM, UTF-16 LE, or UTF-16 BE, Clear Recent Files / Folders
+- Insert Matrix
+- Browse Image
+- Indent / Unindent Selection
+- Copy File Path
+
+### Fixed
+- **Editor Alignment:** Removed the extra code-fence inset and aligned the line-number gutter and fenced-code background with the editor text.
+
+## [3.0.5] - 2026-08-13
+
+### Added
+- **Insert Reference Links:** Added numbered Markdown reference-link insertion with validation, source-safe rendering, and editor guidance.
+- **Preview in Browser:** Added a File-menu and toolbar action for opening the current preview in the default browser.
+- **Preview Link Destinations:** Added native status-bar feedback for hovered preview links.
+
+### Changed
+- **Insert Menu:** Promoted Insert to a top-level menu and reorganized code, links, footnotes, callouts, date/time, and table-of-contents commands into clearer groups.
+- **Toolbar Overflow:** Preserved shortcut labels for toolbar actions in the overflow menu and refined code/link insertion actions.
 
 ## [3.0.4] - 2026-08-12
 
@@ -18,7 +198,7 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 - **User Guide:** Added Help > User Guide, which opens a bundled, offline, read-only Markdown guide in a new tab, in Reading Mode, without changing Reading Mode or panel preferences for other tabs.
-- **GitHub Callouts:** Added Note, Tip, Important, Warning, and Caution insertion commands under Edit > Insert, with selectable templates, selected-text conversion, toolbar/menu actions, and Command Palette entries.
+- **GitHub Callouts:** Added Note, Tip, Important, Warning, and Caution insertion commands under Insert, with selectable templates, selected-text conversion, toolbar/menu actions, and Command Palette entries.
 - **Horizontal Rule Toolbar Command:** Added a toolbar action for inserting Markdown horizontal rules with blank-line separation that avoids Setext heading parsing.
 
 ### Fixed
@@ -160,7 +340,7 @@ All notable changes to this project will be documented in this file.
 ## [2.8.2] - 2026-08-01
 
 ### Added
-- **Markdown Insert Commands:** Added an Edit → Insert submenu for date/time, footnotes, horizontal rules, and page breaks, plus toolbar actions and shortcuts for subscript and superscript; Page Break now shares one action between the menu and toolbar. Insertion commands are disabled in code/plain-text documents.
+- **Markdown Insert Commands:** Added an Insert menu for date/time, footnotes, horizontal rules, and page breaks, plus toolbar actions and shortcuts for subscript and superscript; Page Break now shares one action between the menu and toolbar. Insertion commands are disabled in code/plain-text documents.
 - **Image Viewer Toolbar:** Added a floating, auto-hiding image-viewer toolbar with Zoom Out/In, zoom percentage, Fit to Window, Actual Size (1:1), Rotate 90° Right, and a leftmost Copy Image action. Rotation is view-only.
 - **Safer File Renaming:** Renaming a Workspace item to a name that already exists now prompts for conflict resolution instead of failing silently or overwriting.
 
@@ -308,7 +488,7 @@ All notable changes to this project will be documented in this file.
 - **GitHub-Style Callouts:** Render `NOTE`, `TIP`, `WARNING`, `IMPORTANT`, and `CAUTION` callout blocks consistently across live preview, HTML export, PDF export, and Pandoc exports.
 - **Interactive Preview Checkboxes:** Checkboxes in the live WebView2 preview can now be clicked directly to update mapped task list items in the underlying Markdown source document without displacing the editor cursor.
 - **Extended Markdown Syntax:** Added support for Footnotes (parsing, numbering, popover previews, backlinks), Definition Lists (multiline and multi-definition support), Text Highlights (`==highlight==`), Subscripts (`~sub~`), Superscripts (`^super^`), and Emojis.
-- **Dynamic & Static Table of Contents:** Added `Edit > Insert TOC` to compile and insert a hierarchical Table of Contents at the cursor or replace `[TOC]` / `[[TOC]]` placeholders with live heading anchors.
+- **Dynamic & Static Table of Contents:** Added `Insert > Table of Content` to compile and insert a hierarchical Table of Contents at the cursor or replace `[TOC]` / `[[TOC]]` placeholders with live heading anchors.
 - **Format Document & Selection:** Added conservative Markdown-aware document and selection formatting (`Shift+Alt+F` / Edit menu / Editor context menu).
 - **Mermaid Preview Context Menu:** Added preview context menu for Mermaid diagrams with options to `Copy Image` (PNG), `Copy SVG`, `Save Image As...`, and `Save SVG As...`.
 - **Editor Context Menu & Terminal Access:** Added `Copy File Path`, `Reveal in Explorer`, and `Open Containing Folder in Terminal` (launches Windows Terminal `wt.exe` or Command Prompt `cmd.exe`) to the editor context menu and Workspace tree.
@@ -328,7 +508,7 @@ All notable changes to this project will be documented in this file.
 ## [2.3.0] - 2026-07-19
 
 ### Added
-- **Insert TOC Command:** Added `Edit > Insert TOC` to dynamically compile and insert a hierarchical Table of Contents at the cursor, or automatically replace standalone `[TOC]` or `[[TOC]]` placeholders. Works for both Markdown editor insertion and HTML/PDF exports.
+- **Insert TOC Command:** Added `Insert > Table of Content` to dynamically compile and insert a hierarchical Table of Contents at the cursor, or automatically replace standalone `[TOC]` or `[[TOC]]` placeholders. Works for both Markdown editor insertion and HTML/PDF exports.
 - **PDF Outlines & Bookmarks:** Integrated native PDF outline (bookmarks) generation into the browser-driven PDF export pipeline, mapping document headings (`<h1>`-`<h6>`) directly into standard PDF readers.
 
 ### Changed
