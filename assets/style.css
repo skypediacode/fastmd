@@ -260,10 +260,11 @@ main {
 }
 
 .hero p.tagline {
-  font-size: 1.25rem;
+  font-size: 1.2rem;
   color: var(--text-secondary);
-  max-width: 600px;
+  max-width: 820px;
   margin: 0 auto 2.5rem auto;
+  line-height: 1.6;
 }
 
 .hero-cta {
@@ -773,6 +774,10 @@ pre.license-text {
   
   .hero {
     padding: 1.5rem 0;
+  }
+  
+  .hero-br {
+    display: none;
   }
   
   .hero-cta {
