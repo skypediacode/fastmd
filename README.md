@@ -32,21 +32,31 @@ Just you, your words, and blistering fast performance.
 
 ## ✨ Key Features
 
-### 🎯 Core Capabilities
+### 🌟 Standout Capabilities (What Typical Editors Lack)
 
-- **Markdown Text Editor:** Full CommonMark support with syntax highlighting
-- **Plain Text Mode:** Edit plain text files (.txt, .log, .csv, etc.) with dedicated mode
-- **Live Preview:** Real-time Markdown preview side-by-side with the editor, rendered by the Microsoft Edge WebView2 runtime (browser-grade CSS, tables, task lists, and inline HTML)
-- **Offline LaTeX Math:** Inline and display math typeset with bundled KaTeX — no internet required
-- **Code Syntax Highlighting:** Fenced code blocks highlighted in the preview via bundled highlight.js
-- **Mermaid Diagrams:** ` ```mermaid ` fenced blocks render as diagrams (flowcharts, sequence, class, state, ER, Gantt, pie, git graph, journey, mindmap, timeline, quadrant, requirement) — bundled and fully offline, with a click-to-zoom diagram viewer
-- **Tables:** Insert custom-sized tables from the toolbar using a quick grid picker
-- **HTML & PDF Export:** Generate clean, self-contained HTML or beautifully formatted PDFs with smarter filename defaults
-- **Workspace Tree:** Browse and open files from your project folder
-- **Session Restore:** Automatically restore previous session on startup
-- **File Type Association:** Associate supported file types with FastMD
-- **Check for Updates:** Stay up-to-date with built-in GitHub release checker
-- **Preferences:** Customize editor behavior and startup settings
+- 🧪 **Chemistry Typesetting with `mhchem` & Visual Chemistry Toolbar:** Native `\ce{...}` chemical formula & equation rendering ($\ce{H2O}$, $\ce{SO4^2-}$, reactions $\ce{A -> B}$), paired with a dedicated visual **Chemistry Toolbar** for 1-click insertion of chemical arrows, reaction states, charges, and bond notations.
+- 🧮 **Visual Math Toolbar with Live KaTeX Previews:** Categorized symbol palette (matrices, integrals, fractions, Greek letters, operators, relations) with real KaTeX previews directly on every toolbar button. Supports inline `$…$`, `\(…\)` and display `$$…$$`, `\[…\]` delimiters.
+- 🧠 **Interactive Offline Mind Maps (`F10`):** Instantly render any Markdown document as an interactive mind map. Double-clicking any mind map node jumps to its source line in the editor. Export mind maps directly to self-contained HTML, PDF, DOCX, or SVG.
+- 🎯 **Line-Level Precise Bi-Directional Preview Sync:** Double-click any element in the live preview (including individual lines of multi-line paragraphs, list items, headings, or callouts) to jump directly to the exact source line. Ticking task list checkboxes in the preview automatically rewrites the Markdown source.
+- 🧹 **Auto Format & Table Column Prettifying (`Shift+Alt+F`):** Auto-aligns Markdown table pipes into neat ASCII columns and repairs stale list numbering without affecting output. Includes a visual table size grid picker (`Ctrl+Alt+T`).
+- 📢 **GitHub Callouts & Document Extras:** Native blockquote callouts (`[!NOTE]`, `[!TIP]`, `[!IMPORTANT]`, `[!WARNING]`, `[!CAUTION]`), `[TOC]` dynamic table of contents, Footnotes (`[^1]`), Definition lists (`Term : Def`), PDF page breaks (`Ctrl+Enter`), text highlight (`==text==`), sub/superscript (`H~2~O`, `x^2^`), and YAML front matter metadata auto-enriching HTML/PDF exports.
+- 🖼️ **Native Image, SVG, PDF & HTML Viewers:** Built-in raster image viewer with 1:1 zoom, fit-to-window, pan, and rotation; native SVG viewer; and read-only PDF and HTML preview modes — all without relying on Electron or Qt WebEngine.
+
+### 🖼️ Screenshots & Gallery
+
+Explore high-resolution interface screenshots in our dedicated [Screenshots Showcase](https://skypediacode.github.io/fastmd/screenshots.html) (or `screenshots.html`).
+
+### 🗂️ All-in-One Feature Index (Find Any Feature Instantly)
+
+| Category | Supported Features & Capabilities |
+| :--- | :--- |
+| 🧪 **Math & Science** | LaTeX Math (`$inline$`, `$$display$$`, `\(...\)`, `\[...\]`), KaTeX rendering, `mhchem` chemistry (`\ce{H2O}`, `\ce{SO4^2-}`, reactions), **Visual Math Toolbar** (1-click symbol previews), **Visual Chemistry Toolbar** (arrows, states, charges). |
+| 📊 **Diagrams & Mind Maps** | **Interactive Mind Maps (`F10`)** with node-to-source jump, Mermaid diagrams (`flowchart`, `sequenceDiagram`, `gantt`, `erDiagram`, `classDiagram`), click-to-zoom viewer, export to SVG/PNG. |
+| 🎯 **Live Preview & Sync** | **Line-level bi-directional sync** (double-click preview paragraph/heading/list to jump to source line), interactive preview checkboxes, Reading Mode (`F11`), synchronized scrolling. |
+| 🧹 **Editing & Auto-Format** | **Auto Format Document (`Shift+Alt+F`)** with ASCII table pipe alignment & list numbering repairs, Table grid picker (`Ctrl+Alt+T`), Command Palette (`F1`), 190+ programming language syntax highlighting. |
+| 📢 **Callouts & Rich Text** | GitHub Callouts (`[!NOTE]`, `[!TIP]`, `[!WARNING]`, `[!IMPORTANT]`, `[!CAUTION]`), Footnotes (`[^1]`), Definition lists (`Term : Def`), Text highlight (`==text==`), Sub/Superscript (`H~2~O`, `x^2^`), Dynamic `[TOC]`, PDF Page Breaks (`Ctrl+Enter`), YAML Front Matter. |
+| 📄 **Export & Printing** | PDF export (with heading bookmarks), Word (`.docx`), self-contained HTML (offline CSS/fonts), EPUB, RTF, ODT, LaTeX (`.tex`), mode-aware printing, Page Setup control. |
+| 📂 **Workspace & Viewers** | Workspace file tree (`F8`) with drag-and-drop & search, cross-window tab dragging, session restore, built-in **Image Viewer** (1:1 zoom, pan, rotate 90°), built-in PDF & HTML read-only viewers. |
 
 ### 📊 By The Numbers (FastMD vs. Electron)
 
