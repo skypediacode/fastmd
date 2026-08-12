@@ -2,6 +2,58 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.1.1] - 2026-08-21
+
+### Added
+- **Notepad Mode:** Added an editor-only layout with F12, Command Palette support, shortcut-dialog visibility, and persistence across launches.
+- **Export Progress:** Added simulated percentage feedback in the status bar while exports run, reaching 100% only when the export completes.
+
+### Changed
+- **View Menu:** Reorganized related layout and view commands, and removed Mind Map and Reading Mode buttons from the main toolbar while retaining their menu, shortcut, and palette access.
+- **Mode Behavior:** Reading Mode and Notepad Mode now coordinate their layout overrides and preserve the user's underlying Workspace, Preview, and splitter preferences.
+
+## [3.1.0] - 2026-08-19
+
+### Added
+- **Markdown Alignment:** Added left, center, right, and justified alignment commands through the new Format menu and toolbar controls.
+- **Store Rating Prompt:** Added an eligibility-gated Microsoft Store rating prompt for packaged installations.
+
+### Changed
+- **Preview Responsiveness:** Rendered changed preview blocks immediately before asynchronously loading and applying highlight.js, KaTeX, and Mermaid decorations.
+- **Export Performance:** Made document exports asynchronous, isolated export work on dedicated thread pools, and added persistent warmed browser infrastructure.
+- **PDF Export:** Routed PDF rendering through FastMD's native WebView2 preview pipeline for visual parity with live preview, with a browser fallback.
+- **Image Resources:** Improved handling of absolute and relative local images in browser preview, printing, and exports.
+- **Auto Save:** Expanded the available automatic-save delay options.
+
+### Fixed
+- Improved export shutdown and recovery behavior, including bounded waits and handling for crashed persistent browser profiles.
+- Improved workspace search and update-flow reliability, and added compatibility and PDF metadata regression coverage.
+
+## [3.0.6] - 2026-08-13
+
+### Added
+**Command Palette Conversions:** Added searchable commands for 
+- Converting document line endings to Windows (CRLF), Unix (LF), or Mac (CR)
+- converting text encoding to UTF-8, UTF-8 with BOM, UTF-16 LE, or UTF-16 BE, Clear Recent Files / Folders
+- Insert Matrix
+- Browse Image
+- Indent / Unindent Selection
+- Copy File Path
+
+### Fixed
+- **Editor Alignment:** Removed the extra code-fence inset and aligned the line-number gutter and fenced-code background with the editor text.
+
+## [3.0.5] - 2026-08-13
+
+### Added
+- **Insert Reference Links:** Added numbered Markdown reference-link insertion with validation, source-safe rendering, and editor guidance.
+- **Preview in Browser:** Added a File-menu and toolbar action for opening the current preview in the default browser.
+- **Preview Link Destinations:** Added native status-bar feedback for hovered preview links.
+
+### Changed
+- **Insert Menu:** Promoted Insert to a top-level menu and reorganized code, links, footnotes, callouts, date/time, and table-of-contents commands into clearer groups.
+- **Toolbar Overflow:** Preserved shortcut labels for toolbar actions in the overflow menu and refined code/link insertion actions.
+
 ## [3.0.4] - 2026-08-12
 
 ### Added
@@ -18,7 +70,7 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 - **User Guide:** Added Help > User Guide, which opens a bundled, offline, read-only Markdown guide in a new tab, in Reading Mode, without changing Reading Mode or panel preferences for other tabs.
-- **GitHub Callouts:** Added Note, Tip, Important, Warning, and Caution insertion commands under Edit > Insert, with selectable templates, selected-text conversion, toolbar/menu actions, and Command Palette entries.
+- **GitHub Callouts:** Added Note, Tip, Important, Warning, and Caution insertion commands under Insert, with selectable templates, selected-text conversion, toolbar/menu actions, and Command Palette entries.
 - **Horizontal Rule Toolbar Command:** Added a toolbar action for inserting Markdown horizontal rules with blank-line separation that avoids Setext heading parsing.
 
 ### Fixed
@@ -160,7 +212,7 @@ All notable changes to this project will be documented in this file.
 ## [2.8.2] - 2026-08-01
 
 ### Added
-- **Markdown Insert Commands:** Added an Edit → Insert submenu for date/time, footnotes, horizontal rules, and page breaks, plus toolbar actions and shortcuts for subscript and superscript; Page Break now shares one action between the menu and toolbar. Insertion commands are disabled in code/plain-text documents.
+- **Markdown Insert Commands:** Added an Insert menu for date/time, footnotes, horizontal rules, and page breaks, plus toolbar actions and shortcuts for subscript and superscript; Page Break now shares one action between the menu and toolbar. Insertion commands are disabled in code/plain-text documents.
 - **Image Viewer Toolbar:** Added a floating, auto-hiding image-viewer toolbar with Zoom Out/In, zoom percentage, Fit to Window, Actual Size (1:1), Rotate 90° Right, and a leftmost Copy Image action. Rotation is view-only.
 - **Safer File Renaming:** Renaming a Workspace item to a name that already exists now prompts for conflict resolution instead of failing silently or overwriting.
 
@@ -308,7 +360,7 @@ All notable changes to this project will be documented in this file.
 - **GitHub-Style Callouts:** Render `NOTE`, `TIP`, `WARNING`, `IMPORTANT`, and `CAUTION` callout blocks consistently across live preview, HTML export, PDF export, and Pandoc exports.
 - **Interactive Preview Checkboxes:** Checkboxes in the live WebView2 preview can now be clicked directly to update mapped task list items in the underlying Markdown source document without displacing the editor cursor.
 - **Extended Markdown Syntax:** Added support for Footnotes (parsing, numbering, popover previews, backlinks), Definition Lists (multiline and multi-definition support), Text Highlights (`==highlight==`), Subscripts (`~sub~`), Superscripts (`^super^`), and Emojis.
-- **Dynamic & Static Table of Contents:** Added `Edit > Insert TOC` to compile and insert a hierarchical Table of Contents at the cursor or replace `[TOC]` / `[[TOC]]` placeholders with live heading anchors.
+- **Dynamic & Static Table of Contents:** Added `Insert > Table of Content` to compile and insert a hierarchical Table of Contents at the cursor or replace `[TOC]` / `[[TOC]]` placeholders with live heading anchors.
 - **Format Document & Selection:** Added conservative Markdown-aware document and selection formatting (`Shift+Alt+F` / Edit menu / Editor context menu).
 - **Mermaid Preview Context Menu:** Added preview context menu for Mermaid diagrams with options to `Copy Image` (PNG), `Copy SVG`, `Save Image As...`, and `Save SVG As...`.
 - **Editor Context Menu & Terminal Access:** Added `Copy File Path`, `Reveal in Explorer`, and `Open Containing Folder in Terminal` (launches Windows Terminal `wt.exe` or Command Prompt `cmd.exe`) to the editor context menu and Workspace tree.
@@ -328,7 +380,7 @@ All notable changes to this project will be documented in this file.
 ## [2.3.0] - 2026-07-19
 
 ### Added
-- **Insert TOC Command:** Added `Edit > Insert TOC` to dynamically compile and insert a hierarchical Table of Contents at the cursor, or automatically replace standalone `[TOC]` or `[[TOC]]` placeholders. Works for both Markdown editor insertion and HTML/PDF exports.
+- **Insert TOC Command:** Added `Insert > Table of Content` to dynamically compile and insert a hierarchical Table of Contents at the cursor, or automatically replace standalone `[TOC]` or `[[TOC]]` placeholders. Works for both Markdown editor insertion and HTML/PDF exports.
 - **PDF Outlines & Bookmarks:** Integrated native PDF outline (bookmarks) generation into the browser-driven PDF export pipeline, mapping document headings (`<h1>`-`<h6>`) directly into standard PDF readers.
 
 ### Changed
