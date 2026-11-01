@@ -11,8 +11,10 @@ Its address and `store-installer` release tag stay the same across app versions.
 Version releases (3.7, 3.8, 4.0, and later) go through Microsoft Store. GitHub may
 host corresponding release notes, without new Portable, MSI, or standalone EXE
 assets. The permanent launcher is uploaded once, separately from version releases.
-Existing repository binaries and historical releases are retained as legacy files;
-they are no longer refreshed and do not represent the current Store version.
+The old `FastMD-Setup-Latest.exe` and `FastMD-Portable.zip` files have been removed
+from the repository. Earlier copies remain in Git history. Historical releases
+are unchanged. Use Microsoft Store or the permanent Store launcher for current
+installation; old standalone packages do not represent the current Store version.
 
 This public repository contains website pages, screenshots, product documentation,
 and release notes. The proprietary application source, build tooling, and Store

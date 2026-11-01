@@ -18,8 +18,10 @@ installs the version currently available to your account and device through
 Microsoft Store. Store access is required; it is not an offline application installer.
 
 Future GitHub version releases may contain release notes, without new Portable,
-MSI, or standalone EXE packages. Existing repository binaries and historical
-releases are legacy files and are no longer refreshed. See [release information](RELEASES.md).
+MSI, or standalone EXE packages. The old standalone installer and portable archive
+have been removed from the repository; earlier copies remain in Git history.
+Use Microsoft Store or the permanent Store launcher above for current installation.
+See [release information](RELEASES.md).
 
 ## Write, preview, and share
 
