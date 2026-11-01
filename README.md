@@ -47,7 +47,7 @@ See [release information](RELEASES.md).
 | ![A writing project visualized as an interactive mind map](screenshots/mind-map.png) | ![FastMD command palette with searchable application commands](screenshots/command-palette.png) |
 
 [View full-size screenshots and capture details](https://skypediacode.github.io/fastmd/screenshots.html).
-All five images are real captures of FastMD 3.7.0 on Windows, using the
+All five images are real captures of FastMD on Windows, using the
 [public demo documents](screenshots/samples). No UI has been generated or composited.
 
 ## Native by design
