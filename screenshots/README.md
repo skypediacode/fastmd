@@ -1,7 +1,8 @@
 # Current FastMD screenshots
 
 Captured on November 1, 2026, using Microsoft Store FastMD **3.7.0.0 x64** on
-Windows. Capture size: **1448 × 1061** pixels. The `samples/` directory contains
+Windows. Recaptured by the maintainer with the application maximized.
+Capture size: **3840 × 2088** pixels. The `samples/` directory contains
 all newly authored document content shown in the current gallery.
 
 | File | Real application state |
