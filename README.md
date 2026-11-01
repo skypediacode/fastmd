@@ -1,6 +1,5 @@
 # FastMD: The Lightning-Fast, Native Markdown Text Editor
 
-[![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)](https://github.com/)
 [![Platform: Windows](https://img.shields.io/badge/Platform-Windows-lightgrey.svg)](https://microsoft.com/windows)
 [![Microsoft Store](https://img.shields.io/endpoint?url=https%3A%2F%2Fmicrosoft-store-badge.fly.dev%2Fapi%2Frating%3FstoreId%3D9n4dsd4wnz9d%26market%3DUS&style=flat-square&label=Microsoft+Store&color=blue&logo=Windows)](https://apps.microsoft.com/detail/9n4dsd4wnz9d)
 ![FastMD Screenshot](screenshot.png)
@@ -12,15 +11,16 @@ If you are tired of sluggish, memory-heavy Electron apps and want a Markdown Tex
 ## 🚀 The FastMD Philosophy: Speed Over Bloat
 
 We believe that your writing tool should stay out of your way. Our core philosophy is simple:
-**Speed > Simplicity > Stability > Maintainability > Features.**
+**Correctness and familiar UX first, with typing and startup performance protected.**
 
 To guarantee that typing performance remains inviolable, FastMD relies on strict architectural boundaries. **You will never see the following in FastMD:**
 
 - ❌ Electron, Node.js, or a **bundled** Chromium/browser engine
 - ❌ Qt WebEngine (which would embed Chromium into the app)
 - ❌ Heavy Database backends (SQLite)
-- ❌ Bloated Project Explorers or Sidebars
 - ❌ Cloud sync, AI features, or plugins
+
+A native Workspace panel provides files, search, and Source Control; Git stays outside the editor typing path.
 
 The editor, UI, and startup path are 100% native C++/Qt. The Markdown **preview**
 is rendered by the **Evergreen Microsoft Edge WebView2 runtime** — the browser
@@ -114,9 +114,13 @@ also work in Command Prompt, which does not expand them itself.
 
 ## 📥 Downloads & Installation
 
-- **Microsoft Store:** Get FastMD on the <a href="https://apps.microsoft.com/store/detail/9N4DSD4WNZ9D?cid=DevShareMCLPCS" target="_blank" rel="noopener">Microsoft Store</a>.
-- **Windows Installer:** <a href="FastMD-Setup-Latest.exe" target="_blank" rel="noopener">FastMD-Setup-2.5.2.exe</a> — Standard Windows setup installer package included directly in this repository.
-- **Portable Version:** <a href="FastMD-Portable.zip" target="_blank" rel="noopener">FastMD-Portable.zip</a> — Standalone portable archive (no installation required) included directly in this repository.
+- **[Get FastMD from Microsoft Store](https://apps.microsoft.com/detail/9N4DSD4WNZ9D)** — the primary installation and automatic update channel.
+- **[Download FastMD Installer](https://github.com/skypediacode/fastmd/releases/download/store-installer/FastMD.Installer.exe)** — the permanent Store launcher; installs the version currently available to you through Microsoft Store.
+
+The launcher requires Microsoft Store access. Future version releases on GitHub
+provide release notes without new Portable, MSI, or standalone EXE packages.
+Existing repository binaries and historical releases are legacy downloads and
+are no longer refreshed. See [release and update information](RELEASES.md).
 
 ## ℹ️ About This Repository
 
