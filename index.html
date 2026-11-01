@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="google-site-verification" content="Krds--NU3hxA6FAuJyqUVPiyt--gXIHK9pRckYovwPM" />
-  <meta name="description" content="FastMD - The lightning-fast, native Markdown and Text Editor for Windows built with C++20 and Qt 6. Instant startup, low memory footprint, and distraction-free writing.">
+  <meta name="description" content="FastMD is a native Markdown and text editor for Windows with live preview, math, diagrams, and local exports. Install and update through Microsoft Store.">
   <title>FastMD — A Lightweight, Full-Featured Markdown Editor</title>
 
   <!-- Canonical URL -->
@@ -22,8 +22,8 @@
   <!-- OpenGraph & Site Name Metadata for Search Engines -->
   <meta property="og:site_name" content="FastMD">
   <meta property="og:title" content="FastMD — A Lightweight, Full-Featured Markdown Editor">
-  <meta property="og:description" content="FastMD - The lightning-fast, native Markdown and Text Editor for Windows built with C++20 and Qt 6. Instant startup, low memory footprint, and distraction-free writing.">
-  <meta property="og:image" content="https://skypediacode.github.io/fastmd/assets/screenshot.png">
+  <meta property="og:description" content="FastMD is a native Markdown and text editor for Windows with live preview, math, diagrams, and local exports. Install and update through Microsoft Store.">
+  <meta property="og:image" content="https://skypediacode.github.io/fastmd/assets/social-preview.png">
   <meta property="og:url" content="https://skypediacode.github.io/fastmd/">
   <meta property="og:type" content="website">
 
@@ -31,7 +31,7 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="FastMD — A Lightweight, Full-Featured Markdown Editor">
   <meta name="twitter:description" content="FastMD - The lightning-fast, native Markdown and Text Editor for Windows.">
-  <meta name="twitter:image" content="https://skypediacode.github.io/fastmd/assets/screenshot.png">
+  <meta name="twitter:image" content="https://skypediacode.github.io/fastmd/assets/social-preview.png">
 
   <!-- Stylesheet & Sitemap -->
   <link rel="stylesheet" href="assets/style.css">
@@ -97,7 +97,7 @@
           </a>
           <a href="https://github.com/skypediacode/fastmd/releases/download/store-installer/FastMD.Installer.exe" class="btn btn-secondary" id="btn-github">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-              <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/>
+              <path d="M12 3v12m-5-5 5 5 5-5M4 16v5h16v-5"/>
             </svg>
             Download Store installer
           </a>
@@ -108,7 +108,7 @@
       <!-- App Interface Preview -->
       <section class="screenshot-section">
         <div class="screenshot-wrapper">
-          <img src="assets/screenshot.png" alt="FastMD Live Preview and Markdown Editor Interface" class="screenshot">
+          <img src="screenshots/hero.png" alt="FastMD 3.7.0 Workspace, Markdown source, and live preview" width="1448" height="1061" fetchpriority="high" class="screenshot">
         </div>
       </section>
 
@@ -239,8 +239,8 @@
                 <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
               </svg>
             </div>
-            <h3>Instant Startup &amp; Zero Lag</h3>
-            <p>Launches in under 0.5 seconds with a tiny memory footprint (~250 MB). Native C++20 engine guarantees zero typing latency or stutter, even on 50,000+ line documents.</p>
+            <h3>Native Editor, Focused Writing</h3>
+            <p>The C++20 and Qt Widgets editor keeps typing native. The shared WebView2 preview starts on demand, while large-document conversion runs in the background.</p>
           </div>
 
           <!-- Card 2 -->
@@ -305,8 +305,8 @@
                 <path d="M15 12h6"/>
               </svg>
             </div>
-            <h3>Mind Maps &amp; 100% Offline Security</h3>
-            <p>Press <code>F10</code> for interactive mind maps with node-to-source jump. 100% offline with zero cloud connections, zero telemetry, no user account required, no popups, and no subscription fees.</p>
+            <h3>Mind Maps &amp; Local Documents</h3>
+            <p>Press <code>F10</code> to explore an interactive mind map and jump back to its source. Documents and preview assets stay local; Microsoft Store handles installation and updates.</p>
           </div>
 
         </div>
@@ -315,51 +315,18 @@
       <!-- By the Numbers Comparison Table -->
       <section class="metrics-section">
         <div class="section-header">
-          <h2>By The Numbers</h2>
-          <p>See how a native C++ and Qt 6 desktop application stacks up against typical Electron-based editors.</p>
+          <h2>Native where it matters</h2>
+          <p>A focused Windows application with local document processing.</p>
         </div>
-
         <div class="table-wrapper">
           <table>
-            <thead>
-              <tr>
-                <th>Performance Metric</th>
-                <th>Typical Electron Editor</th>
-                <th>FastMD (C++ / Qt)</th>
-                <th>Efficiency Difference</th>
-              </tr>
-            </thead>
+            <thead><tr><th>Part of FastMD</th><th>How it works</th></tr></thead>
             <tbody>
-              <tr>
-                <td><strong>Base Download Size</strong></td>
-                <td>100 MB – 150 MB</td>
-                <td><strong>~1.5 MB</strong></td>
-                <td>~100x smaller executable</td>
-              </tr>
-              <tr>
-                <td><strong>Bundled browser engine</strong></td>
-                <td>Yes (Chromium per app)</td>
-                <td><strong>None (shared OS WebView2)</strong></td>
-                <td>Nothing extra shipped</td>
-              </tr>
-              <tr>
-                <td><strong>Average Idle RAM Usage</strong></td>
-                <td>500 MB – 1000 MB</td>
-                <td><strong>~250 MB</strong> (incl. shared preview)</td>
-                <td>~2–4x lighter memory footprint</td>
-              </tr>
-              <tr>
-                <td><strong>Cold Startup (window visible)</strong></td>
-                <td>2.0s – 4.0s</td>
-                <td><strong>~0.4–0.5s</strong></td>
-                <td>~5–8x faster launch speed</td>
-              </tr>
-              <tr>
-                <td><strong>Cloud Connections &amp; Telemetry</strong></td>
-                <td>Dozens of background requests</td>
-                <td><strong>None (100% Offline)</strong></td>
-                <td>Zero background data transfer</td>
-              </tr>
+              <tr><td>Editor and interface</td><td>Native C++20 and Qt 6 Widgets</td></tr>
+              <tr><td>Markdown preview</td><td>Shared Microsoft Edge WebView2 runtime, created on demand</td></tr>
+              <tr><td>Math and diagrams</td><td>Bundled offline KaTeX, mhchem, and Mermaid assets</td></tr>
+              <tr><td>Document conversion</td><td>Local rendering and conversion tools</td></tr>
+              <tr><td>Installation and updates</td><td>Microsoft Store, including through the permanent Store launcher</td></tr>
             </tbody>
           </table>
         </div>

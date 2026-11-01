@@ -1,137 +1,91 @@
-# FastMD: The Lightning-Fast, Native Markdown Text Editor
+# FastMD
 
-[![Platform: Windows](https://img.shields.io/badge/Platform-Windows-lightgrey.svg)](https://microsoft.com/windows)
-[![Microsoft Store](https://img.shields.io/endpoint?url=https%3A%2F%2Fmicrosoft-store-badge.fly.dev%2Fapi%2Frating%3FstoreId%3D9n4dsd4wnz9d%26market%3DUS&style=flat-square&label=Microsoft+Store&color=blue&logo=Windows)](https://apps.microsoft.com/detail/9n4dsd4wnz9d)
-![FastMD Screenshot](screenshot.png)
+**A native Markdown and text editor for Windows.** Write in a focused editor,
+see a live preview, and export documents without sending them to a cloud converter.
 
-**FastMD** is an ultra-fast, native, and distraction-free Markdown Text Editor. It is currently available on Windows. Built from the ground up with **C++20** and **Qt 6 Widgets**, FastMD focuses on one thing: providing the absolute best typing performance and a frictionless writing experience.
+[Get FastMD from Microsoft Store](https://apps.microsoft.com/detail/9N4DSD4WNZ9D) ·
+[Download Store installer](https://github.com/skypediacode/fastmd/releases/download/store-installer/FastMD.Installer.exe) ·
+[Website](https://skypediacode.github.io/fastmd/) ·
+[Screenshots](https://skypediacode.github.io/fastmd/screenshots.html)
 
-If you are tired of sluggish, memory-heavy Electron apps and want a Markdown Text Editor that launches instantly and respects your system resources, FastMD is built for you.
+![FastMD 3.7.0 with a native Workspace panel, Markdown source, and live preview](screenshots/hero.png)
 
-## 🚀 The FastMD Philosophy: Speed Over Bloat
+## Install and update
 
-We believe that your writing tool should stay out of your way. Our core philosophy is simple:
-**Correctness and familiar UX first, with typing and startup performance protected.**
+Microsoft Store is the primary installation and automatic update channel.
+The small **FastMD.Installer.exe** download is a permanent Store launcher: it
+installs the version currently available to your account and device through
+Microsoft Store. Store access is required; it is not an offline application installer.
 
-To guarantee that typing performance remains inviolable, FastMD relies on strict architectural boundaries. **You will never see the following in FastMD:**
+Future GitHub version releases may contain release notes, without new Portable,
+MSI, or standalone EXE packages. Existing repository binaries and historical
+releases are legacy files and are no longer refreshed. See [release information](RELEASES.md).
 
-- ❌ Electron, Node.js, or a **bundled** Chromium/browser engine
-- ❌ Qt WebEngine (which would embed Chromium into the app)
-- ❌ Heavy Database backends (SQLite)
-- ❌ Cloud sync, AI features, or plugins
+## Write, preview, and share
 
-A native Workspace panel provides files, search, and Source Control; Git stays outside the editor typing path.
+- **Markdown and code:** syntax highlighting, tabs, a document outline, tables,
+  task lists, callouts, footnotes, and a searchable command palette (`F1`).
+- **Live preview:** rendered Markdown beside your source, synchronized scrolling,
+  and double-click navigation from preview text to its source line.
+- **Math and chemistry:** LaTeX rendered with KaTeX, `mhchem` reactions, and visual
+  symbol toolbars for inserting notation.
+- **Diagrams and mind maps:** offline Mermaid diagrams and an interactive mind
+  map (`F10`) built from your document's headings.
+- **Workspace:** file navigation, search, and Source Control in the Workspace
+  panel. Git operations stay outside the editor typing path.
+- **Export:** PDF with heading bookmarks, Word, HTML, EPUB, RTF, OpenDocument,
+  LaTeX, and plain text. Local viewers open images, SVG, PDF, and HTML in tabs.
 
-The editor, UI, and startup path are 100% native C++/Qt. The Markdown **preview**
-is rendered by the **Evergreen Microsoft Edge WebView2 runtime** — the browser
-engine that already ships with Windows. Nothing is bundled: no Chromium is shipped,
-the executable stays tiny, and the WebView2 process is created lazily and
-asynchronously *after* the window is already on screen, so startup stays instant.
+| Math and chemistry | Mermaid diagrams |
+| --- | --- |
+| ![LaTeX equations and a balanced chemical reaction rendered in FastMD](screenshots/math-chemistry.png) | ![Mermaid flowchart rendered beside its Markdown source](screenshots/mermaid.png) |
 
-Just you, your words, and blistering fast performance.
+| Interactive mind map | Command palette |
+| --- | --- |
+| ![A writing project visualized as an interactive mind map](screenshots/mind-map.png) | ![FastMD command palette with searchable application commands](screenshots/command-palette.png) |
 
-## ✨ Key Features
+[View full-size screenshots and capture details](https://skypediacode.github.io/fastmd/screenshots.html).
+All five images are real captures of FastMD 3.7.0 on Windows, using the
+[public demo documents](screenshots/samples). No UI has been generated or composited.
 
-### 🌟 Standout Capabilities (What Typical Editors Lack)
+## Native by design
 
-- 🧪 **Chemistry Typesetting with `mhchem` & Visual Chemistry Toolbar:** Native `\ce{...}` chemical formula & equation rendering ($\ce{H2O}$, $\ce{SO4^2-}$, reactions $\ce{A -> B}$), paired with a dedicated visual **Chemistry Toolbar** for 1-click insertion of chemical arrows, reaction states, charges, and bond notations.
-- 🧮 **Visual Math Toolbar with Live KaTeX Previews:** Categorized symbol palette (matrices, integrals, fractions, Greek letters, operators, relations) with real KaTeX previews directly on every toolbar button. Supports inline `$…$`, `\(…\)` and display `$$…$$`, `\[…\]` delimiters.
-- 🧠 **Interactive Offline Mind Maps (`F10`):** Instantly render any Markdown document as an interactive mind map. Double-clicking any mind map node jumps to its source line in the editor. Export mind maps directly to self-contained HTML, PDF, DOCX, or SVG.
-- 🎯 **Line-Level Precise Bi-Directional Preview Sync:** Double-click any element in the live preview (including individual lines of multi-line paragraphs, list items, headings, or callouts) to jump directly to the exact source line. Ticking task list checkboxes in the preview automatically rewrites the Markdown source.
-- 🧹 **Auto Format & Table Column Prettifying (`Shift+Alt+F`):** Auto-aligns Markdown table pipes into neat ASCII columns and repairs stale list numbering without affecting output. Includes a visual table size grid picker (`Ctrl+Alt+T`).
-- 📢 **GitHub Callouts & Document Extras:** Native blockquote callouts (`[!NOTE]`, `[!TIP]`, `[!IMPORTANT]`, `[!WARNING]`, `[!CAUTION]`), `[TOC]` dynamic table of contents, Footnotes (`[^1]`), Definition lists (`Term : Def`), PDF page breaks (`Ctrl+Enter`), text highlight (`==text==`), sub/superscript (`H~2~O`, `x^2^`), and YAML front matter metadata auto-enriching HTML/PDF exports.
-- 🖼️ **Native Image, SVG, PDF & HTML Viewers:** Built-in raster image viewer with 1:1 zoom, fit-to-window, pan, and rotation; native SVG viewer; and read-only PDF and HTML preview modes — all without relying on Electron or Qt WebEngine.
+FastMD uses C++20 and Qt 6 Widgets. The editor and application UI are native;
+the Markdown preview uses the shared Evergreen Microsoft Edge WebView2 runtime,
+created lazily. FastMD does not bundle Chromium or use Electron or Qt WebEngine.
 
-### 🖼️ Screenshots & Gallery
+Markdown parsing, preview assets, and document conversion run locally. Microsoft
+Store handles installation and updates. External links and explicit Git operations
+can use the network. See the [privacy policy](https://skypediacode.github.io/fastmd/privacy-policy.html).
 
-Explore high-resolution interface screenshots in our dedicated [Screenshots Showcase](https://skypediacode.github.io/fastmd/screenshots.html) (or `screenshots.html`).
+## Command line
 
-### 🗂️ All-in-One Feature Index (Find Any Feature Instantly)
-
-| Category | Supported Features & Capabilities |
-| :--- | :--- |
-| 🧪 **Math & Science** | LaTeX Math (`$inline$`, `$$display$$`, `\(...\)`, `\[...\]`), KaTeX rendering, `mhchem` chemistry (`\ce{H2O}`, `\ce{SO4^2-}`, reactions), **Visual Math Toolbar** (1-click symbol previews), **Visual Chemistry Toolbar** (arrows, states, charges). |
-| 📊 **Diagrams & Mind Maps** | **Interactive Mind Maps (`F10`)** with node-to-source jump, Mermaid diagrams (`flowchart`, `sequenceDiagram`, `gantt`, `erDiagram`, `classDiagram`), click-to-zoom viewer, export to SVG/PNG. |
-| 🎯 **Live Preview & Sync** | **Line-level bi-directional sync** (double-click preview paragraph/heading/list to jump to source line), interactive preview checkboxes, Reading Mode (`F11`), synchronized scrolling. |
-| 🧹 **Editing & Auto-Format** | **Auto Format Document (`Shift+Alt+F`)** with ASCII table pipe alignment & list numbering repairs, Table grid picker (`Ctrl+Alt+T`), Command Palette (`F1`), 190+ programming language syntax highlighting. |
-| 📢 **Callouts & Rich Text** | GitHub Callouts (`[!NOTE]`, `[!TIP]`, `[!WARNING]`, `[!IMPORTANT]`, `[!CAUTION]`), Footnotes (`[^1]`), Definition lists (`Term : Def`), Text highlight (`==text==`), Sub/Superscript (`H~2~O`, `x^2^`), Dynamic `[TOC]`, PDF Page Breaks (`Ctrl+Enter`), YAML Front Matter. |
-| 📄 **Export & Printing** | PDF export (with heading bookmarks), Word (`.docx`), self-contained HTML (offline CSS/fonts), EPUB, RTF, ODT, LaTeX (`.tex`), mode-aware printing, Page Setup control. |
-| 📂 **Workspace & Viewers** | Workspace file tree (`F8`) with drag-and-drop & search, cross-window tab dragging, session restore, built-in **Image Viewer** (1:1 zoom, pan, rotate 90°), built-in PDF & HTML read-only viewers. |
-
-### 📊 By The Numbers (FastMD vs. Electron)
-
-While Electron editors **bundle** an entire Chromium browser plus a Node.js runtime into every app, FastMD ships neither. The editor is native C++/Qt, and the preview reuses the **shared** Edge WebView2 runtime already present on Windows (created on demand, off the startup path). Here is a rough comparison of what that means for your system:
-
-| Metric                   | Typical Electron Editor | FastMD (C++ / Qt)          | Difference    |
-| ------------------------ | ----------------------- | -------------------------- | ------------- |
-| **Base Executable Size** | 100 MB – 150 MB         | **~2 MB** (no bundled browser) | ~50x+ smaller |
-| **Chromium shipped**     | Yes (per app)           | **No** (shared OS runtime) | —             |
-| **Cold Startup (window visible)** | 2.0s – 4.0s    | **~0.4–0.5s**              | ~5–8x faster  |
-| **Idle RAM Usage**       | 500 MB – 1000 MB        | **~250 MB** (incl. shared WebView2 preview) | ~2–4x lighter |
-
-_Numbers are approximate. FastMD's RAM figure is the whole process tree including the WebView2 preview processes; the native editor core alone is far smaller, and no WebView2 is created until the preview is first shown._
-
-### ⚡ Native Performance & Low Memory Footprint
-
-By leveraging native **C++20** and the **Qt 6 Widgets** framework (rather than QML or Qt WebEngine), FastMD achieves near-instant startup times. The window appears and is fully interactive before the WebView2 preview engine is even initialized — WebView2 is created asynchronously in the background, so it never blocks the editor or startup.
-
-### 📝 Blazing Fast Markdown Parsing
-
-FastMD utilizes the [MD4C](https://github.com/mity/md4c) parser—a highly optimized, CommonMark-compliant C library. Whether you're opening a 10-line note or a 10,000-line manuscript, rendering is instantaneous. Features like tables, strikethroughs, and tasklists are fully supported out of the box.
-
-### 🖨️ Seamless HTML & PDF Export
-
-Exports are regenerated from your raw Markdown through the same MD4C + KaTeX pipeline the preview uses, so what you see closely matches what you export.
-
-- **PDF Export:** Configurable page sizes, margins, fonts, and automatic image scaling.
-- **HTML Export:** Clean, self-contained output perfect for publishing.
-
-### 🎨 Clean, Distraction-Free UI
-
-- **Light & Dark Themes:** Beautifully crafted, high-contrast themes that switch instantly.
-- **Material Icons Toolbar:** A crisp, Notepad++ style lightweight toolbar utilizing embedded Material Icons.
-- **Tabbed Interface:** Effortlessly manage multiple files with an intuitive tabbed workspace.
-
-## Command line (Microsoft Store)
-
-The installation from Microsoft Store registers the `fastmd` App Execution Alias. After installing it,
-launch FastMD from Command Prompt, PowerShell, or Windows Terminal:
+The Store installation registers the `fastmd` App Execution Alias:
 
 ```bat
 fastmd
-fastmd .
 fastmd README.md
 fastmd file1.md file2.md
 fastmd C:\Project
-fastmd . file.md
 fastmd *.md
 ```
 
-Files open as tabs in the existing FastMD window. Folder arguments set the
-Workspace root; when a folder and files are supplied together, the supplied
-folder remains the Workspace root. Wildcards are expanded by FastMD, so they
-also work in Command Prompt, which does not expand them itself.
+Files open as tabs; a folder sets the Workspace root. FastMD expands wildcards,
+including in Command Prompt. Export a Markdown document to PDF from a shell:
 
-## 📥 Downloads & Installation
+```bat
+fastmd notes.md -o notes.pdf
+```
 
-- **[Get FastMD from Microsoft Store](https://apps.microsoft.com/detail/9N4DSD4WNZ9D)** — the primary installation and automatic update channel.
-- **[Download FastMD Installer](https://github.com/skypediacode/fastmd/releases/download/store-installer/FastMD.Installer.exe)** — the permanent Store launcher; installs the version currently available to you through Microsoft Store.
+## About this repository
 
-The launcher requires Microsoft Store access. Future version releases on GitHub
-provide release notes without new Portable, MSI, or standalone EXE packages.
-Existing repository binaries and historical releases are legacy downloads and
-are no longer refreshed. See [release and update information](RELEASES.md).
+This is the official public home for FastMD downloads, product documentation,
+website pages, screenshots, and release information. FastMD is proprietary;
+application source and Store build packages are maintained separately.
 
-## ℹ️ About This Repository
+For a reproducible issue report, include your FastMD version, Windows version,
+steps, and a small example document with private content removed:
+[report an issue](https://github.com/skypediacode/fastmd/issues).
 
-This repository contains the official website pages (GitHub Pages), terms of service, privacy policy, and open-source license documentation for **FastMD**.
-
-> **Note:** The source code for FastMD is closed-source / proprietary.
-
-## 📜 License
-
-See `licenses.html` for third-party open-source component licenses utilized by FastMD.
-
----
-
-_Stop waiting on your editor. Start writing with FastMD._
+See [LICENSE](LICENSE) for the proprietary software notice and
+[third-party notices](https://skypediacode.github.io/fastmd/licenses.html) for component licenses.

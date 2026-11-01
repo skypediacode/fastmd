@@ -1092,3 +1092,17 @@ pre.license-text {
   border-color: var(--primary-color);
 }
 
+
+/* Current application captures: keyboard-accessible gallery and native dialog. */
+.gallery-hero { grid-column: 1 / -1; }
+.gallery-img-wrapper { border: 0; padding: 0; width: 100%; color: inherit; font: inherit; }
+.gallery-img-wrapper:focus-visible, .modal-close:focus-visible { outline: 3px solid var(--primary-color); outline-offset: -3px; }
+.gallery-card-body h2 { font-size: 1.35rem; margin-bottom: 0.75rem; }
+.capture-note { color: var(--text-secondary); margin-top: 2rem; line-height: 1.7; }
+.screenshot { height: auto; }
+.screenshot-dialog { margin: auto; width: min(1400px, 94vw); max-width: 94vw; max-height: 94vh; padding: 2.5rem 1rem 1rem; border: 1px solid var(--border-color); border-radius: 12px; background: var(--bg-secondary); color: var(--text-primary); overflow: auto; }
+.screenshot-dialog::backdrop { background: rgba(0, 0, 0, 0.86); }
+.screenshot-dialog .modal-close { top: 0.25rem; right: 0.5rem; }
+.screenshot-dialog .modal-img { display: block; margin: auto; max-height: 77vh; }
+@media (max-width: 700px) { .nav-links, .footer-nav { flex-wrap: wrap; justify-content: center; gap: 0.7rem 1rem; } .nav-container, .footer-top { flex-wrap: wrap; gap: 1rem; } }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; } }
