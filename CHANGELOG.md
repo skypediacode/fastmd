@@ -5,6 +5,9 @@
 ### Added
 - Added configurable line, paragraph, and list spacing in Preferences ▸ Typography ▸ Document Spacing.
 
+### Fixed
+- Fixed currency amounts being mistaken for inline math in Preview and exports; single-dollar math now follows Markdown flanking and block boundaries.
+
 ### Changed
 - Refined heading typography across Preview, Browser Preview, HTML, print, and PDF, with sizes that follow the selected font size.
 - Reduced Workspace startup stalls by deferring shell icon warm-up and tree construction until after the first window paint.
