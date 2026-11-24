@@ -75,6 +75,9 @@ FetchContent_Declare(
 set(BUILD_MD2HTML_EXECUTABLE OFF CACHE BOOL "" FORCE)
 set(BUILD_TESTING             OFF CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(md4c)
+# Lets a table interrupt a paragraph, as in GFM (upstream needs a blank line).
+include("${CMAKE_SOURCE_DIR}/cmake/PatchMd4c.cmake")
+fastmd_patch_md4c("${CMAKE_SOURCE_DIR}/cmake/patches/md4c-table-interrupts-paragraph.patch")
 
 # Microsoft Edge WebView2 SDK (headers + static loader). The NuGet package is a
 # plain zip; we fetch it at configure time and link the *static* loader so no

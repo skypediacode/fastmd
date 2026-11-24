@@ -471,6 +471,28 @@ int main(int argc, char** argv)
             {"mismatched columns stay text", "- item\n  | a | b |\n  |---|\n  | 1 | 2 |\n", 0, 1},
             {"lazy line stays in item", "- item\n| a | b |\n|---|---|\n", 0, 1},
             {"fenced code untouched", "```\ntext\n| a | b |\n|---|---|\n```\n", 0, 0},
+            {"paragraph line with a pipe", "x | y\n| a | b |\n|---|---|\n", 1, 0},
+            {"list in quote", "> - x\n>   | a | b |\n>   |---|---|\n> - y\n", 1, 2},
+            {"quote in list", "- > x\n  > | a | b |\n  > |---|---|\n- y\n", 1, 2},
+            {"lazy header row", "> x\n| a | b |\n> |---|---|\n", 1, 0},
+            {"lazy delimiter row is text", "> x\n> | a | b |\n|---|---|\n", 0, 0},
+            {"tab indentation", "- x\n\t| a | b |\n\t|---|---|\n- y\n", 1, 2},
+            {"mixed indentation", "- x\n  | a | b |\n   |---|---|\n     | 1 | 2 |\n", 1, 1},
+            {"over-indented delimiter is text", "x\n| a | b |\n    |---|---|\n", 0, 0},
+            {"indented code", "x\n\n    y\n    | a | b |\n    |---|---|\n", 0, 0},
+            {"indented code in list", "- x\n\n      y\n      | a | b |\n      |---|---|\n- z\n", 0, 2},
+            {"fence in list", "- x\n  ```\n  y\n  | a | b |\n  |---|---|\n  ```\n- z\n", 0, 2},
+            {"backticks in tilde fence", "~~~\n```\nx\n| a | b |\n|---|---|\n~~~\n", 0, 0},
+            {"raw HTML block", "<div>\nx\n| a | b |\n|---|---|\n</div>\n", 0, 0},
+            {"raw HTML comment", "<!-- x\n| a | b |\n|---|---|\n-->\n", 0, 0},
+            {"inline HTML paragraph", "<b>x</b>\n| a | b |\n|---|---|\n", 1, 0},
+            {"escaped pipe", "x\n| a \\| b | c |\n|---|---|\n", 1, 0},
+            {"escaped backslash leaves the pipe", "x\n| a \\\\| b | c |\n|---|---|\n", 0, 0},
+            {"escaped pipe in code", "x\n| `a\\|b` | c |\n|---|---|\n", 1, 0},
+            {"bare pipe in code is a boundary", "x\n| `a|b` | c |\n|---|---|\n", 0, 0},
+            {"invalid delimiter", "x\n| a | b |\n|-x-|---|\n", 0, 0},
+            {"empty delimiter cell", "x\n| a | b |\n|---||\n", 0, 0},
+            {"too many delimiters", "x\n| a | b |\n|---|---|---|\n", 0, 0},
             {"no pipe delimiter is a heading", "- item\n  text\n  ---\n", 0, 1},
         };
         const QString quote = ExportManager::markdownToHtml(
@@ -490,6 +512,76 @@ int main(int argc, char** argv)
                               QStringLiteral("table case failed: ") + QLatin1String(c.name) + QLatin1Char('\n') + rendered);
             }
         }
+
+        // A table must not change the list around it: removing it from the
+        // rendered output must leave what the list renders without it.
+        static const QRegularExpression renderedTable(
+            QStringLiteral("(<div class=\"table-wrap\"[^>]*>\\s*)?<table.*?</table>(\\s*</div>)?"),
+            QRegularExpression::DotMatchesEverythingOption);
+        static const QRegularExpression lineAttributes(
+            QStringLiteral(" data-(src|fastmd-task)-(start|end|line)=\"\\d+\""));
+        static const QRegularExpression whitespace(QStringLiteral("\\s+"));
+        const auto listShape = [](QString html) {
+            return html.remove(renderedTable).remove(lineAttributes).remove(whitespace);
+        };
+        struct Shape { const char* name; const char* md; bool loose; };
+        const Shape shapes[] = { // %1 becomes the table, at the marker's indentation
+            {"tight bullets", "- a\n  %1\n- b\n- c\n", false},
+            {"tight, table in the last item", "- a\n- b\n  %1\n", false},
+            {"tight ordered", "3. a\n   %1\n4. b\n", false},
+            {"tight nested", "- a\n  - b\n    %1\n  - c\n- d\n", false},
+            {"tight task list", "- [ ] a\n  %1\n- [x] b\n", false},
+            {"tight list in quote", "> - a\n>   %1\n> - b\n", false},
+            {"tight, two tables", "- a\n  %1\n- b\n  %1\n- c\n", false},
+            {"loose bullets", "- a\n  %1\n\n- b\n\n- c\n", true},
+            {"loose by later items", "- a\n  %1\n- b\n\n- c\n", true},
+            {"loose outer, tight inner", "- a\n\n  - b\n    %1\n  - c\n\n- d\n", true},
+        };
+        for (const Shape& shape : shapes) {
+            QString with, without;
+            for (const QString& line : QString::fromUtf8(shape.md).split(QLatin1Char('\n'))) {
+                const int at = line.indexOf(QStringLiteral("%1"));
+                if (at < 0) {
+                    with += line + QLatin1Char('\n');
+                    without += line + QLatin1Char('\n');
+                    continue;
+                }
+                for (const char* row : {"| a | b |", "|---|---|", "| 1 | 2 |"})
+                    with += line.left(at) + QLatin1String(row) + QLatin1Char('\n');
+            }
+            for (const bool preview : {false, true}) {
+                const auto render = [preview](const QString& md) {
+                    return preview ? ExportManager::markdownToPreviewHtml(md)
+                                   : ExportManager::markdownToHtml(md, MathRenderMode::KatexOutput);
+                };
+                const QString rendered = render(with);
+                ok &= require(rendered.contains(QStringLiteral("<table"))
+                                  && listShape(rendered) == listShape(render(without))
+                                  && rendered.contains(QStringLiteral("<p")) == shape.loose,
+                              QStringLiteral("table changed list spacing: ") + QLatin1String(shape.name)
+                                  + QLatin1Char('\n') + rendered);
+            }
+        }
+
+        const QString lines = ExportManager::markdownToPreviewHtml(QStringLiteral(
+            "- a\n  | h | i |\n  |---|---|\n  | 1 | 2 |\n- b\n\ntext\n| j | k |\n|---|---|\n| 3 | 4 |\n\nend\n"));
+        for (const char* expected : {"<li data-src-start=\"1\" data-src-end=\"4\"",
+                                     "<table data-src-start=\"2\" data-src-end=\"4\"",
+                                     "<span data-src-line=\"4\">1", "<li data-src-start=\"5\" data-src-end=\"5\"",
+                                     "<p data-src-start=\"7\" data-src-end=\"7\"",
+                                     "<table data-src-start=\"8\" data-src-end=\"10\"",
+                                     "<p data-src-start=\"12\" data-src-end=\"12\""}) {
+            ok &= require(lines.contains(QLatin1String(expected)),
+                          QStringLiteral("table source line missing: ") + QLatin1String(expected)
+                              + QLatin1Char('\n') + lines);
+        }
+
+        const QString reference = ExportManager::markdownToHtml(
+            QStringLiteral("[f]: /u\n| a | b |\n|---|---|\n\n[f]\n"), MathRenderMode::KatexOutput);
+        ok &= require(reference.contains(QStringLiteral("<table"))
+                          && reference.contains(QStringLiteral("href=\"/u\""))
+                          && !reference.contains(QStringLiteral("[f]")),
+                      QStringLiteral("reference definition before a table was lost: ") + reference);
     }
 
     QFile derivativesFile(QStringLiteral(FASTMD_FIXTURES_DIR "/test-math-derivatives.md"));

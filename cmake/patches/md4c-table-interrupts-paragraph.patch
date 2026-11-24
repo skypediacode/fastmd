@@ -1,0 +1,101 @@
+--- a/md4c.c
++++ b/md4c.c
+@@ -5286,6 +5286,37 @@
+     return TRUE;
+ }
+ 
++/* FastMD: Count cells of a potential table header row. As in cmark-gfm, only a
++ * backslash protects '|' (a code span does not), so the count is never lower
++ * than what md_process_table_row() finds and no cell can be dropped. */
++static unsigned
++md_table_header_col_count(MD_CTX* ctx, OFF beg, OFF end)
++{
++    unsigned col_count = 0;
++    OFF off;
++
++    while(beg < end  &&  ISWHITESPACE(beg))
++        beg++;
++    while(end > beg  &&  ISWHITESPACE(end-1))
++        end--;
++
++    if(beg < end  &&  CH(beg) == _T('|')) {
++        beg++;
++        while(beg < end  &&  ISWHITESPACE(beg))
++            beg++;
++    }
++
++    while(beg < end) {
++        off = beg;
++        while(off < end  &&  CH(off) != _T('|'))
++            off += (CH(off) == _T('\\')) ? 2 : 1;
++        col_count++;
++        beg = off + 1;
++    }
++
++    return col_count;
++}
++
+ static int
+ md_is_table_underline(MD_CTX* ctx, OFF beg, OFF* p_end, unsigned* p_col_count)
+ {
+@@ -5799,6 +5830,22 @@
+     return FALSE;
+ }
+ 
++/* FastMD: Upstream starts a table only if the header row is the sole line of the
++ * paragraph. As in GFM, let a table interrupt a longer paragraph too, provided
++ * the last line of it is a header row of the matching width. */
++static int
++md_can_start_table(MD_CTX* ctx, const MD_LINE_ANALYSIS* underline, unsigned col_count)
++{
++    const MD_LINE* lines = (const MD_LINE*) (ctx->current_block + 1);
++    MD_SIZE n_lines = ctx->current_block->n_lines;
++
++    if(n_lines == 1)
++        return TRUE;
++
++    return (underline->indent < ctx->code_indent_offset  &&
++            md_table_header_col_count(ctx, lines[n_lines-1].beg, lines[n_lines-1].end) == col_count);
++}
++
+ static unsigned
+ md_line_indentation(MD_CTX* ctx, unsigned total_indent, OFF beg, OFF* p_end)
+ {
+@@ -6175,10 +6222,13 @@
+             &&  n_parents == ctx->n_containers)
+         {
+             unsigned col_count;
++            OFF underline_end;
+ 
+-            if(ctx->current_block != NULL  &&  ctx->current_block->n_lines == 1  &&
+-                md_is_table_underline(ctx, off, &off, &col_count))
++            if(ctx->current_block != NULL  &&
++                md_is_table_underline(ctx, off, &underline_end, &col_count)  &&
++                md_can_start_table(ctx, line, col_count))
+             {
++                off = underline_end;
+                 line->data = col_count;
+                 line->type = MD_LINE_TABLEUNDERLINE;
+                 break;
+@@ -6360,6 +6410,21 @@
+     /* MD_LINE_TABLEUNDERLINE changes meaning of the current block. */
+     if(line->type == MD_LINE_TABLEUNDERLINE) {
+         MD_ASSERT(ctx->current_block != NULL);
++
++        /* FastMD: Split the header row off the paragraph it interrupts. */
++        if(ctx->current_block->n_lines > 1) {
++            const MD_LINE* lines = (const MD_LINE*) (ctx->current_block + 1);
++            MD_LINE_ANALYSIS header = { MD_LINE_TEXT, 0, 0, 0, 0, 0 };
++
++            header.beg = lines[ctx->current_block->n_lines - 1].beg;
++            header.end = lines[ctx->current_block->n_lines - 1].end;
++            ctx->current_block->n_lines--;
++            ctx->n_block_bytes -= sizeof(MD_LINE);
++            MD_CHECK(md_end_current_block(ctx));
++            MD_CHECK(md_start_new_block(ctx, &header));
++            MD_CHECK(md_add_line_into_current_block(ctx, &header));
++        }
++
+         MD_ASSERT(ctx->current_block->n_lines == 1);
+         ctx->current_block->type = MD_BLOCK_TABLE;
+         ctx->current_block->data = line->data;
