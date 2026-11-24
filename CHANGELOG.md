@@ -1,5 +1,13 @@
 # FastMD Changelog
 
+## [3.7.4] - 2026-11-24
+
+### Added
+- Render GitHub-style tables that interrupt paragraphs, including inside list items, while keeping lists tight.
+
+### Changed
+- Refreshed the website screenshots and third-party notices.
+
 ## [3.7.3] - 2026-11-24
 
 ### Added
