@@ -44,17 +44,53 @@ if ($args[0] -eq 'api') {
     if (Test-Path $file) { Get-Content $file -Encoding UTF8 }
     exit 0
 }
+if ($args[0] -eq 'release' -and $args[1] -eq 'download') {
+    $dir = $args[[array]::IndexOf($args, '--dir') + 1]
+    $content = if (Test-Path (Join-Path $state 'launcher-bad')) { 'bad launcher' } else { 'mock launcher' }
+    [IO.File]::WriteAllText((Join-Path $dir 'FastMD.Installer.exe'), $content, (New-Object System.Text.UTF8Encoding($false)))
+    exit 0
+}
 if ($args[0] -eq 'release' -and $args[1] -eq 'create') {
     if (Test-Path (Join-Path $state 'create-fail')) { [Console]::Error.WriteLine('HTTP 500: server error'); exit 1 }
     $tag = $args[2]
     $notes = $args[[array]::IndexOf($args, '--notes-file') + 1]
     [IO.File]::WriteAllBytes((Join-Path $state 'notes-captured.md'), [IO.File]::ReadAllBytes($notes))
-    Add-Content -LiteralPath (Join-Path $state 'releases.txt') -Value ('{"tag_name":"' + $tag + '","draft":false,"url":"https://github.com/skypediacode/fastmd/releases/tag/' + $tag + '"}')
+    $assetNames = @($args | Where-Object { $_ -match '\.(exe|zip)$' } | ForEach-Object { '"' + (Split-Path $_ -Leaf) + '"' })
+    $assets = if (Test-Path (Join-Path $state 'asset-fail')) { '[]' } else { '[' + ($assetNames -join ',') + ']' }
+    Add-Content -LiteralPath (Join-Path $state 'releases.txt') -Value ('{"tag_name":"' + $tag + '","draft":false,"url":"https://github.com/skypediacode/fastmd/releases/tag/' + $tag + '","assets":' + $assets + '}')
+    if (Test-Path (Join-Path $state 'asset-fail')) { [Console]::Error.WriteLine('HTTP 502: asset upload failed'); exit 1 }
     'https://github.com/skypediacode/fastmd/releases/tag/' + $tag
+    exit 0
+}
+if ($args[0] -eq 'release' -and $args[1] -eq 'upload') {
+    if (Test-Path (Join-Path $state 'upload-fail')) { [Console]::Error.WriteLine('HTTP 502: upload failed'); exit 1 }
+    $tag = $args[2]
+    $names = @()
+    for ($i = 3; $i -lt $args.Count -and $args[$i] -ne '--repo'; $i++) { $names += (Split-Path $args[$i] -Leaf) }
+    $list = (@($names | ForEach-Object { '"' + $_ + '"' })) -join ','
+    $file = Join-Path $state 'releases.txt'
+    $lines = foreach ($line in @(Get-Content $file -Encoding UTF8)) {
+        if ($line -like ('*"tag_name":"' + $tag + '"*')) {
+            if ($line.Contains('"assets":[]')) { $line = $line.Replace('"assets":[]', '"assets":[' + $list + ']') }
+            else { $line = $line.Replace('"assets":[', '"assets":[' + $list + ',') }
+        }
+        $line
+    }
+    [IO.File]::WriteAllText($file, (($lines -join "`n") + "`n"), (New-Object System.Text.UTF8Encoding($false)))
     exit 0
 }
 [Console]::Error.WriteLine('unexpected gh call: ' + ($args -join ' '))
 exit 2
+'@
+
+$mockPortable = @'
+param([switch]$SkipToolSync, [switch]$SkipArchive, [string]$Config = 'Release', [switch]$Clean, [ValidateSet('x64', 'arm64')][string]$Architecture = 'x64')
+$root = Split-Path $PSScriptRoot -Parent
+Add-Content (Join-Path $root 'trace.txt') "portable:$Architecture"
+if (Test-Path (Join-Path $root 'fail-portable')) { throw 'Mock portable failed' }
+New-Item -ItemType Directory -Path (Join-Path $root 'dist') -Force | Out-Null
+$zip = if ($Architecture -eq 'x64') { 'FastMD-Portable.zip' } else { 'FastMD-Portable-arm64.zip' }
+Set-Content (Join-Path $root "dist\$zip") "mock portable $Architecture"
 '@
 
 $script:counter = 0
@@ -74,11 +110,15 @@ function New-Fixture {
     Rgit $work @('remote', 'add', 'origin', 'git@github.com:skypediacode/fastmd.git') | Out-Null
     Rgit $work @('config', ('url.' + ($bare -replace '\\', '/') + '.insteadOf'), 'git@github.com:skypediacode/fastmd.git') | Out-Null
     $scripts = Join-Path $work 'scripts'
-    foreach ($name in @('build-store-release.ps1', 'build-all-and-publish-to-github.ps1')) {
-        New-Item -ItemType Directory -Path $scripts -Force | Out-Null
-        Copy-Item (Join-Path $root "scripts\$name") (Join-Path $scripts $name)
-    }
-    Write-Text (Join-Path $work '.gitignore') "dist/`ntrace.txt`nfail`nfail-sync`n"
+    New-Item -ItemType Directory -Path $scripts -Force | Out-Null
+    Copy-Item (Join-Path $root 'scripts\build-store-release.ps1') (Join-Path $scripts 'build-store-release.ps1')
+    # The pinned Store launcher hash is the real one; the fixture swaps in the hash of the mock launcher.
+    $launcherHash = ([BitConverter]::ToString([Security.Cryptography.SHA256]::Create().ComputeHash([Text.Encoding]::UTF8.GetBytes('mock launcher'))) -replace '-', '').ToLowerInvariant()
+    $publishText = [IO.File]::ReadAllText((Join-Path $root 'scripts\build-all-and-publish-to-github.ps1'), $utf8)
+    $pinnedHash = 'bbefb47d09f82c88f28c4be25ae32dc2d7d5e45781633d5373e985f925a20a2b'
+    Assert-True $publishText.Contains($pinnedHash) 'Pinned Store launcher hash not found in the publish script.'
+    [IO.File]::WriteAllText((Join-Path $scripts 'build-all-and-publish-to-github.ps1'), $publishText.Replace($pinnedHash, $launcherHash), $utf8)
+    Write-Text (Join-Path $work '.gitignore') "dist/`ntrace.txt`nfail`nfail-sync`nfail-portable`n"
     Write-Text (Join-Path $work 'CMakeLists.txt') 'project(FastMD VERSION 9.8.7 LANGUAGES CXX C)'
     Write-Text (Join-Path $work 'CHANGELOG.md') "# Changelog`n`n## [9.8.7] - 2026-01-01`n`n### Fixed`n- Current fix caf$eacute.`n`n## [9.8.6] - 2025-01-01`n- Older fix.`n"
     Write-Text (Join-Path $scripts 'sync-bundled-tools.ps1') @'
@@ -95,6 +135,7 @@ New-Item -ItemType Directory -Path (Join-Path $root 'dist') -Force | Out-Null
 $suffix = if ($Architecture -eq 'x64') { '' } else { '-arm64' }
 foreach ($ext in @('msix', 'msixupload')) { Set-Content (Join-Path $root "dist\FastMD-$Version$suffix.$ext") "mock $Architecture $ext" }
 '@
+    Write-Text (Join-Path $scripts 'build-and-create-portable-app.ps1') $mockPortable
     Rgit $work @('add', '-A') | Out-Null
     Rgit $work @('commit', '-q', '-m', 'initial') | Out-Null
     Rgit $work @('push', '-q', 'origin', 'main:refs/heads/main') | Out-Null
@@ -237,19 +278,24 @@ try {
     $head = @(Rgit $f.Work @('rev-parse', 'HEAD'))[0]
     Run $f @{ Clean = $true }
     $calls = @(Get-Content $f.Trace) -join ','
-    Assert-True ($calls -eq 'sync:x64,sync:arm64,x64|9.8.7.0|Release|True|True,arm64|9.8.7.0|Release|True|True') "Unexpected build trace: $calls"
+    Assert-True ($calls -eq 'sync:x64,sync:arm64,x64|9.8.7.0|Release|True|True,arm64|9.8.7.0|Release|True|True,portable:x64,portable:arm64') "Unexpected build trace: $calls"
     Assert-True ((Remote-Ref $f "refs/heads/main") -eq $head) "main was not pushed. head=[$head] remote=[$(Remote-Ref $f "refs/heads/main")]"
     Assert-True (@(Rgit $f.Bare @('cat-file', '-t', 'refs/tags/v9.8.7'))[0] -eq 'tag') 'Remote tag is not annotated.'
     Assert-True (@(Rgit $f.Bare @('rev-parse', 'refs/tags/v9.8.7^{commit}'))[0] -eq $head) 'Tag points to the wrong commit.'
     Assert-True (@(Rgit $f.Bare @('for-each-ref', 'refs/tags')).Count -eq 1) 'Unexpected remote tags.'
     Assert-True ((Count-GhCreates $f) -eq 1) 'Release was not created exactly once.'
     $createLine = Get-Content (Join-Path $f.State 'gh.log') | Where-Object { $_ -like 'release create*' }
-    Assert-True ($createLine -match '--verify-tag' -and $createLine -match 'FastMD 9\.8\.7' -and $createLine -notmatch '\.(msix|msixupload|zip|exe)') 'Release arguments are wrong.'
+    Assert-True ($createLine -match '--verify-tag' -and $createLine -match 'FastMD 9\.8\.7' -and $createLine -match 'FastMD\.Installer\.exe' -and $createLine -match 'FastMD-Portable-9\.8\.7-x64\.zip' -and $createLine -match 'FastMD-Portable-9\.8\.7-arm64\.zip' -and $createLine -notmatch '\.msix') 'Release arguments are wrong.'
+    Assert-True ((Get-Content (Join-Path $f.State 'releases.txt') -Raw) -match '"assets":\["FastMD\.Installer\.exe","FastMD-Portable-9\.8\.7-x64\.zip","FastMD-Portable-9\.8\.7-arm64\.zip"\]') 'Release does not carry the three assets.'
+    Assert-True (Test-Path (Join-Path $f.Work 'dist\FastMD.Installer.exe')) 'Store launcher was not downloaded.'
+    Assert-True (Test-Path (Join-Path $f.Work 'dist\FastMD-Portable-9.8.7-x64.zip')) 'x64 portable ZIP is missing.'
+    Assert-True (Test-Path (Join-Path $f.Work 'dist\FastMD-Portable-9.8.7-arm64.zip')) 'arm64 portable ZIP is missing.'
+    $receipt = Get-Content (Join-Path $f.Work 'dist\build-receipt.json') -Raw | ConvertFrom-Json
+    Assert-True (@($receipt.packages.name) -contains 'FastMD.Installer.exe' -and @($receipt.packages.name) -contains 'FastMD-Portable-9.8.7-arm64.zip') 'Receipt does not record the release assets.'
     $notesBytes = [IO.File]::ReadAllBytes((Join-Path $f.State 'notes-captured.md'))
     Assert-True (!($notesBytes.Length -ge 3 -and $notesBytes[0] -eq 0xEF -and $notesBytes[1] -eq 0xBB)) 'Notes have a BOM.'
     $body = [Text.Encoding]::UTF8.GetString($notesBytes)
     Assert-True ($body.Contains("Current fix caf$eacute.") -and !$body.Contains('Older fix.') -and !$body.Contains('## [')) 'Wrong release notes.'
-    Assert-True (@(Get-ChildItem (Join-Path $f.Work 'dist') -Filter '*.zip').Count -eq 0) 'Unexpected ZIP.'
     Assert-True (Test-Path (Join-Path $f.Work 'dist\build-receipt.json')) 'Missing build receipt.'
     Assert-True (@(Rgit $f.Work @('status', '--porcelain')).Count -eq 0) 'Release left the tree dirty.'
 
@@ -303,6 +349,39 @@ try {
     Rgit $f.Work @('tag', 'v9.8.7') | Out-Null
     Assert-Throws { & $f.Script } 'not an annotated tag' 'lightweight tag'
 
+    # --- Store launcher and portable ZIPs -------------------------------------------------------------
+    $f = New-Fixture
+    Set-Content (Join-Path $f.State 'launcher-bad') 'x'
+    $remoteBefore = (Get-Snapshot $f).RemoteRefs
+    Assert-Throws { & $f.Script } 'does not match the pinned Store launcher' 'launcher hash mismatch'
+    Assert-True ((Get-Snapshot $f).RemoteRefs -eq $remoteBefore) 'Launcher mismatch pushed something.'
+    Assert-True ((Count-GhCreates $f) -eq 0) 'Launcher mismatch created a release.'
+    Remove-Item (Join-Path $f.State 'launcher-bad')
+    $f = New-Fixture
+    Set-Content (Join-Path $f.Work 'fail-portable') 'x'
+    $remoteBefore = (Get-Snapshot $f).RemoteRefs
+    Assert-Throws { & $f.Script } 'Mock portable failed' 'portable failure'
+    Assert-True ((Get-Snapshot $f).RemoteRefs -eq $remoteBefore) 'Portable failure pushed something.'
+    Assert-True ((Count-GhCreates $f) -eq 0) 'Portable failure created a release.'
+    Remove-Item (Join-Path $f.Work 'fail-portable')
+    Remove-Item $f.Trace -ErrorAction SilentlyContinue
+    $f = New-Fixture
+    Set-Content (Join-Path $f.State 'asset-fail') 'x'
+    Assert-Throws { & $f.Script } 'gh release create' 'asset upload failure'
+    Assert-True ((Remote-Ref $f 'refs/tags/v9.8.7') -ne '') 'Tag should be pushed before the release.'
+    Assert-True ((Get-Content (Join-Path $f.State 'releases.txt') -Raw) -notmatch 'FastMD\.Installer') 'Failed release already lists the assets.'
+    Remove-Item (Join-Path $f.State 'asset-fail'), $f.Trace
+    Run $f
+    Assert-True ((Count-GhCreates $f) -eq 1) 'Rerun created a second release.'
+    $uploads = @(Get-Content (Join-Path $f.State 'gh.log') | Where-Object { $_ -like 'release upload*' })
+    Assert-True ($uploads.Count -eq 1 -and $uploads[0] -match 'FastMD\.Installer\.exe' -and $uploads[0] -match 'FastMD-Portable-9\.8\.7-x64\.zip' -and $uploads[0] -match 'FastMD-Portable-9\.8\.7-arm64\.zip') 'Rerun did not upload the three assets once.'
+    Assert-True ((Get-Content (Join-Path $f.State 'releases.txt') -Raw) -match '"assets":\["FastMD\.Installer\.exe","FastMD-Portable-9\.8\.7-x64\.zip","FastMD-Portable-9\.8\.7-arm64\.zip"\]') 'Assets missing after rerun.'
+    Remove-Item $f.Trace
+    $before = Get-Snapshot $f
+    Run $f
+    Assert-True (!(Test-Path $f.Trace)) 'Completed rerun built again.'
+    Assert-Unchanged $before (Get-Snapshot $f) 'completed rerun with assets'
+
     # --- -SkipBuild -----------------------------------------------------------------------------------------
     $f = New-Fixture
     Assert-Throws { & $f.Script -SkipBuild } 'No build receipt' 'no receipt'
@@ -333,8 +412,14 @@ try {
     $text = (Get-Content $receiptPath -Raw).Replace('9.8.7', '9.8.6')
     Set-Content $receiptPath $text
     Assert-Throws { & $f.Script -SkipBuild } 'Build receipt is for version' 'receipt version mismatch'
+    $f = New-Fixture
+    Set-Content (Join-Path $f.State 'create-fail') 'x'
+    Assert-Throws { & $f.Script } 'gh release create' 'portable receipt setup failure'
+    Remove-Item (Join-Path $f.State 'create-fail')
+    Add-Content (Join-Path $f.Work 'dist\FastMD-Portable-9.8.7-x64.zip') 'tampered'
+    Assert-Throws { & $f.Script -SkipBuild } 'does not match the build receipt' 'portable ZIP hash mismatch'
 
-    Write-Host 'PASS: dry run, version/changelog/repository guards, divergence, API failure, build failure, notes, publish order, rerun states, and -SkipBuild verification.' -ForegroundColor Green
+    Write-Host 'PASS: dry run, version/changelog/repository guards, divergence, API failure, build failure, notes, publish order, rerun states, launcher and portable assets, and -SkipBuild verification.' -ForegroundColor Green
 }
 finally {
     $env:PATH = $originalPath

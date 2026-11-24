@@ -12,7 +12,9 @@
 | --- | --- |
 | **[Microsoft Store](https://apps.microsoft.com/detail/9N4DSD4WNZ9D)** | The primary install and automatic update channel. |
 | **[Store installer](https://github.com/skypediacode/fastmd/releases/download/store-installer/FastMD.Installer.exe)** | A small, permanent launcher. It installs the version currently available to your account through Microsoft Store. Store access is required; it is not an offline installer. |
-| **[GitHub Releases](https://github.com/skypediacode/fastmd/releases)** | Release notes only. Standalone EXE, MSI, and portable packages are not published. |
+| **[GitHub Releases](https://github.com/skypediacode/fastmd/releases)** | Release notes for every version, with the Store installer and the portable ZIPs for x64 and arm64 attached. MSI packages are not published. |
+
+**Portable ZIP (optional):** download `FastMD-Portable-<version>-x64.zip` (or `-arm64` on ARM64 Windows) from the [latest GitHub release](https://github.com/skypediacode/fastmd/releases/latest), extract it, and run `FastMD.exe`. Nothing is installed, and Microsoft Store remains the channel for automatic updates. Windows SmartScreen can show a warning for downloaded programs that are not code-signed yet. If that happens, select **More info**, then **Run anyway**.
 
 See [release information](RELEASES.md) for version history and packaging details.
 

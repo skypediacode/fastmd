@@ -10,10 +10,15 @@ Its address and `store-installer` release tag stay the same across app versions.
 
 Version releases (`vX.Y.Z`, such as 3.7.2) go through Microsoft Store. Each GitHub
 release is created by `scripts/build-all-and-publish-to-github.ps1` from the tagged
-source and carries that version's changelog section as its notes, without Portable,
-MSI, or standalone EXE assets. The permanent launcher is uploaded once, separately
-from version releases, and is never modified by them. Historical releases are
-unchanged. Old standalone packages do not represent the current Store version.
+source and carries that version's changelog section as its notes, with three
+assets: `FastMD.Installer.exe` (a copy of the permanent Store launcher) and the
+portable ZIPs `FastMD-Portable-<version>-x64.zip` and `FastMD-Portable-<version>-arm64.zip`.
+Windows SmartScreen can warn about downloaded programs that are not code-signed
+yet, including the portable executable. MSI packages are not published. Microsoft Store remains the primary
+installation and update channel. The permanent launcher is uploaded once,
+separately from version releases, and is never modified by them. Historical
+releases are unchanged. Old standalone packages do not represent the current Store
+version.
 
 This repository contains the application source code, build scripts, website pages
 (`docs/`), screenshots, maintainer documentation (`dev-docs/`), and release notes.

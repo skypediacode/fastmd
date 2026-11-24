@@ -6,8 +6,8 @@
 11 modern Explorer context menu (and the Windows 10 classic menu) for **every
 file and every folder**, Notepad++-style — there is no extension allowlist.
 It ships **only** inside the MSIX package built by `scripts/build-msix.ps1` —
-the portable ZIP (`scripts/build-and-create-portable-app.ps1`) and the Inno
-Setup installer (`fastmd.iss`) do not include it and are unaffected.
+the portable ZIP (`scripts/build-and-create-portable-app.ps1`) does not include it
+and is unaffected.
 
 The DLL is Qt-free (no CRT-heavy work, no blocking calls) because it is
 loaded directly into Explorer or a `DllHost.exe` COM surrogate process. It
