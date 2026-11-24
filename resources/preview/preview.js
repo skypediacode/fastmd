@@ -83,7 +83,7 @@
     // Unlabelled fences are never highlighted (highlightIn skips them) and Mermaid
     // fences become diagrams, so only another labelled block needs highlight.js.
     if (!featureLoaded.code) featureLoaded.code = /<pre\b[^>]*>\s*<code\b[^>]*\blanguage-(?!mermaid\b)/i.test(html);
-    if (!featureLoaded.math) featureLoaded.math = /\$\$|\\\[|\\\(|\$(?:[^$\n]|\\\$)+\$/.test(html);
+    if (!featureLoaded.math) featureLoaded.math = /\$\$|\\\[|\\\(/.test(html);
     if (!featureLoaded.chemistry) featureLoaded.chemistry = /\\ce\s*\{|\\pu\s*\{/.test(html);
     if (!featureLoaded.mermaid) featureLoaded.mermaid = /language-mermaid\b/i.test(html);
     return featureLoaded;
@@ -294,11 +294,12 @@
     });
   }
 
+  // No single '$': FastMdMath::preprocess() emits inline math as \(...\), so a
+  // '$' left in the page is literal (currency) and must not be paired here.
   var mathDelimiters = [
     { left: '$$', right: '$$', display: true },
     { left: '\\[', right: '\\]', display: true },
-    { left: '\\(', right: '\\)', display: false },
-    { left: '$', right: '$', display: false }
+    { left: '\\(', right: '\\)', display: false }
   ];
 
   function renderDisplayMathFallback(root) {

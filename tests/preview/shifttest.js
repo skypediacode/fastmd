@@ -258,7 +258,7 @@
                  '();</span><span data-src-line="' + (s + 4) + '">\n</span></code></pre>');
       if (i % 4 === 0)
         out.push('<p data-src-start="' + (s + 5) + '" data-src-end="' + (s + 5) +
-                 '"><span data-src-line="' + (s + 5) + '">Math $E_' + i + ' = mc^2$.</span></p>');
+                 '"><span data-src-line="' + (s + 5) + '">Math \\(E_' + i + ' = mc^2\\).</span></p>');
     }
     return out.join('\n');
   }

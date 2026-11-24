@@ -55,7 +55,7 @@
       if (i % 6 === 0)
         out.push('<pre><code>Plain prose must not be auto-detected as a programming language.</code></pre>');
       if (i % 4 === 0)
-        out.push('<p>Math $E_' + i + ' = mc^2$ inline.</p>');
+        out.push('<p>Math \\(E_' + i + ' = mc^2\\) inline.</p>');
       if (i % 5 === 0)
         out.push('<blockquote class="fastmd-callout fastmd-callout-note"><p>Note ' + i + '</p></blockquote>');
       if (i % 7 === 0)

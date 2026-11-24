@@ -1,7 +1,7 @@
 // Decoration lifecycle: a push that supersedes an unfinished decoration pass
 // must not strand the blocks that pass was decorating. The superseding push
 // usually keeps those blocks (they are unchanged), so unless something
-// remembers them they stay as raw code, raw $...$ and raw Mermaid source.
+// remembers them they stay as raw code, raw \(...\) and raw Mermaid source.
 //
 // Every case pushes A and then B before A's decoration can finish, waits for
 // B, and requires the page to equal a fresh render of B with every code block
@@ -84,7 +84,7 @@
     var walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
     for (var n; (n = walker.nextNode());) {
       if (n.parentNode.closest('.katex, pre, code')) continue;
-      if (/\$[^$\s][^$]*\$/.test(n.nodeValue)) out.push('math "' + n.nodeValue.trim().slice(0, 30) + '"');
+      if (/\\\(.*?\\\)/.test(n.nodeValue)) out.push('math "' + n.nodeValue.trim().slice(0, 30) + '"');
     }
     return out;
   }
@@ -93,7 +93,7 @@
     var s = i * 10 + 1;
     var out = '<h2 data-src-start="' + s + '" data-src-end="' + s + '">Section ' + i + '</h2>' +
       '<p data-src-start="' + (s + 2) + '" data-src-end="' + (s + 2) + '">Prose ' + i +
-      ' with $x_' + i + '^2$ inline.</p>' +
+      ' with \\(x_' + i + '^2\\) inline.</p>' +
       '<pre data-src-start="' + (s + 4) + '" data-src-end="' + (s + 6) +
       '"><code class="language-cpp">int f' + i + '() { return ' + i + '; }\n</code></pre>';
     if (i % 4 === 0)
@@ -109,11 +109,11 @@
     return out.join('\n');
   }
   var N = 12;
-  var edited = { at: 5, replace: '<p data-src-start="51" data-src-end="51">Edited $y^3$ paragraph.</p>' };
+  var edited = { at: 5, replace: '<p data-src-start="51" data-src-end="51">Edited \\(y^3\\) paragraph.</p>' };
   var inserted = { after: 7, extra:
     '<pre data-src-start="78" data-src-end="80"><code class="language-mermaid">graph LR\n  New --&gt; Node\n</code></pre>' +
     '<pre data-src-start="81" data-src-end="82"><code class="language-python">def added(): return 1\n</code></pre>' +
-    '<p data-src-start="83" data-src-end="83">New $z_1$ formula.</p>' };
+    '<p data-src-start="83" data-src-end="83">New \\(z_1\\) formula.</p>' };
   var insertedEdited = { after: 7, extra: inserted.extra, at: 2,
     replace: '<p data-src-start="21" data-src-end="21">Changed again.</p>' };
 

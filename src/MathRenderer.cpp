@@ -1,4 +1,5 @@
 #include "MathRenderer.h"
+#include "MathDelimiters.h"
 
 #include <QRegularExpression>
 #include <QSet>
@@ -560,8 +561,14 @@ static QString makeMathSnippet(MathRenderMode mode, bool block, const QString& e
                                bool markdownEscaped = false)
 {
     const QString expr = markdownEscaped ? normalizeEscapedMathScripts(expression) : expression;
-    if (mode == MathRenderMode::KatexOutput)
+    if (mode == MathRenderMode::KatexOutput) {
+        // A bare '$' never delimits math in the rendered page: this scanner has
+        // already separated math from currency, and KaTeX auto-render would
+        // pair the literal dollars again.
+        if (openDelim == QLatin1String("$"))
+            return (QLatin1String("\\(") + expr + QLatin1String("\\)")).toHtmlEscaped();
         return (openDelim + expr + closeDelim).toHtmlEscaped();
+    }
     return block ? renderMathBlock(expr) : renderMathInline(expr, false);
 }
 
@@ -580,6 +587,110 @@ static int blockquoteContentStart(const QString& text, int lineStart)
     return quoted ? pos : -1;
 }
 
+static QStringView quotedLineContent(QStringView line, int* quoteDepth)
+{
+    int depth = 0;
+    qsizetype pos = 0;
+    while (pos < line.size() && (line.at(pos).isSpace() || line.at(pos) == QLatin1Char('>'))) {
+        if (line.at(pos) == QLatin1Char('>'))
+            ++depth;
+        ++pos;
+    }
+    if (quoteDepth)
+        *quoteDepth = depth;
+    return line.mid(pos).trimmed();
+}
+
+static QStringView lineAt(const QString& text, qsizetype start)
+{
+    const qsizetype end = text.indexOf(QLatin1Char('\n'), start);
+    return QStringView(text).mid(start, end < 0 ? -1 : end - start);
+}
+
+static bool isTableDelimiterRow(QStringView content)
+{
+    bool pipe = false;
+    bool dash = false;
+    for (const QChar ch : content) {
+        if (ch == QLatin1Char('|'))
+            pipe = true;
+        else if (ch == QLatin1Char('-'))
+            dash = true;
+        else if (ch != QLatin1Char(':') && !ch.isSpace())
+            return false;
+    }
+    return pipe && dash;
+}
+
+static bool isAtxHeading(QStringView content)
+{
+    qsizetype hashes = 0;
+    while (hashes < content.size() && content.at(hashes) == QLatin1Char('#'))
+        ++hashes;
+    return hashes >= 1 && hashes <= 6
+        && (hashes == content.size() || content.at(hashes).isSpace());
+}
+
+// Whether a line (quote markers removed) cannot continue the paragraph above.
+static bool endsParagraph(QStringView content)
+{
+    if (content.isEmpty() || isAtxHeading(content) || isTableDelimiterRow(content))
+        return true;
+    const QChar first = content.at(0);
+    const QChar second = content.size() > 1 ? content.at(1) : QChar(QLatin1Char(' '));
+    if (first == QLatin1Char('|'))
+        return true;
+    if (first == QLatin1Char('<'))
+        return second.isLetter() || second == QLatin1Char('/') || second == QLatin1Char('!')
+            || second == QLatin1Char('?');
+    if (first == QLatin1Char(':'))
+        return second.isSpace();
+    if (first == QLatin1Char('[') && second == QLatin1Char('^'))
+        return content.contains(QLatin1String("]:"));
+    if ((first == QLatin1Char('-') || first == QLatin1Char('+') || first == QLatin1Char('*'))
+        && second.isSpace())
+        return true;
+    if (content.startsWith(QLatin1String("```")) || content.startsWith(QLatin1String("~~~")))
+        return true;
+    if (first == QLatin1Char('-') || first == QLatin1Char('=') || first == QLatin1Char('*')
+        || first == QLatin1Char('_')) {
+        // Setext underline or thematic break.
+        for (const QChar ch : content) {
+            if (ch != first && !ch.isSpace())
+                return false;
+        }
+        return first == QLatin1Char('-') || first == QLatin1Char('=') || content.count(first) >= 3;
+    }
+    qsizetype digits = 0;
+    while (digits < content.size() && digits < 10 && content.at(digits) >= QLatin1Char('0')
+           && content.at(digits) <= QLatin1Char('9'))
+        ++digits;
+    return digits >= 1 && digits <= 9 && digits < content.size()
+        && (content.at(digits) == QLatin1Char('.') || content.at(digits) == QLatin1Char(')'))
+        && (digits + 1 == content.size() || content.at(digits + 1).isSpace());
+}
+
+// End of the block holding `pos`: inline math must close before it.
+static qsizetype inlineBlockEnd(const QString& text, qsizetype pos, bool inTable)
+{
+    qsizetype lineStart = pos > 0 ? text.lastIndexOf(QLatin1Char('\n'), pos - 1) + 1 : 0;
+    int depth = 0;
+    const bool singleLine = isAtxHeading(quotedLineContent(lineAt(text, lineStart), &depth)) || inTable;
+    for (;;) {
+        const qsizetype lineEnd = text.indexOf(QLatin1Char('\n'), lineStart);
+        if (lineEnd < 0)
+            return text.size();
+        if (singleLine)
+            return lineEnd;
+        int nextDepth = 0;
+        const QStringView next = quotedLineContent(lineAt(text, lineEnd + 1), &nextDepth);
+        if (nextDepth > depth || endsParagraph(next))
+            return lineEnd;
+        depth = nextDepth;
+        lineStart = lineEnd + 1;
+    }
+}
+
 QString preprocess(const QString& markdown, MathRenderMode mode, QStringList* mathSnippets,
                     QVector<MathLineShift>* lineShifts, QStringList* literalSnippets)
 {
@@ -592,6 +703,8 @@ QString preprocess(const QString& markdown, MathRenderMode mode, QStringList* ma
     int fenceLength = 0;
     int fenceQuoteDepth = 0;
     int inlineCodeTicks = 0;
+    bool inTable = false;
+    qsizetype blockEnd = 0;
 
     for (int i = 0; i < markdown.size();) {
         bool fenceLine = false;
@@ -624,6 +737,14 @@ QString preprocess(const QString& markdown, MathRenderMode mode, QStringList* ma
                     fenceLine = true;
                 }
             }
+        }
+
+        if (i == 0 || markdown.at(i - 1) == QLatin1Char('\n')) {
+            const QStringView content = quotedLineContent(lineAt(markdown, i), nullptr);
+            if (content.isEmpty() || inFence)
+                inTable = false;
+            else if (isTableDelimiterRow(content))
+                inTable = true;
         }
 
         const QChar ch = markdown.at(i);
@@ -727,24 +848,23 @@ QString preprocess(const QString& markdown, MathRenderMode mode, QStringList* ma
             const bool block = (i + 1 < markdown.size() && markdown.at(i + 1) == '$');
             const int start = i + (block ? 2 : 1);
             int end = -1;
-            bool codeSpan = false;
-            for (int j = start; j < markdown.size(); ++j) {
-                if (markdown.at(j) == QLatin1Char('`')) {
-                    codeSpan = !codeSpan;
-                    continue;
-                }
-                if (codeSpan)
-                    continue;
-                if (markdown.at(j) != '$' || (j > 0 && markdown.at(j - 1) == '\\'))
-                    continue;
-                if (block) {
+            if (!block) {
+                if (i >= blockEnd)
+                    blockEnd = inlineBlockEnd(markdown, i, inTable);
+                end = int(findInlineDollarClose(markdown, i, blockEnd));
+            } else {
+                bool codeSpan = false;
+                for (int j = start; j < markdown.size(); ++j) {
+                    if (markdown.at(j) == QLatin1Char('`')) {
+                        codeSpan = !codeSpan;
+                        continue;
+                    }
+                    if (codeSpan || markdown.at(j) != '$' || markdown.at(j - 1) == '\\')
+                        continue;
                     if (j + 1 < markdown.size() && markdown.at(j + 1) == '$') {
                         end = j;
                         break;
                     }
-                } else {
-                    end = j;
-                    break;
                 }
             }
             if (end > start) {
@@ -764,6 +884,10 @@ QString preprocess(const QString& markdown, MathRenderMode mode, QStringList* ma
                 i = matchEnd;
                 continue;
             }
+            // Neither half of an unmatched "$$" may open inline math.
+            out += markdown.mid(i, start - i);
+            i = start;
+            continue;
         }
 
         // LaTeX bracket delimiters: \(...\) (inline) and \[...\] (display).
