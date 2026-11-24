@@ -434,6 +434,64 @@ int main(int argc, char** argv)
                       .contains(QStringLiteral("<p data-src-start=\"5\" data-src-end=\"5\"><span data-src-line=\"5\">after")),
                   QStringLiteral("escaped display math shifted the following source lines"));
 
+    // Tables inside list items: the table rows are list-item content, not
+    // paragraph text, so they must reach MD4C intact in every render path.
+    {
+        const QString sample = QString::fromUtf8(
+            "* Điểm cực đại $x_0$:\n"
+            "  |   $x$   | $-\\infty$ |            |        $x_0$         |            | $+\\infty$ |\n"
+            "  |:-------:|:---------:|:----------:|:--------------------:|:----------:|:---------:|\n"
+            "  | $f'(x)$ |           |    $+$     |          0           |    $-$     |           |\n"
+            "  | $f(x)$  |           | $\\nearrow$ | $f(x_0)$ *(Cực đại)* | $\\searrow$ |           |\n"
+            "\n"
+            "* Điểm cực tiểu $x_0$:\n"
+            "  |   $x$   | $-\\infty$ |            |         $x_0$         |            | $+\\infty$ |\n"
+            "  |:-------:|:---------:|:----------:|:---------------------:|:----------:|:---------:|\n"
+            "  | $f'(x)$ |           |    $-$     |           0           |    $+$     |           |\n"
+            "  | $f(x)$  |           | $\\searrow$ | $f(x_0)$ *(Cực tiểu)* | $\\nearrow$ |           |\n");
+        for (const QString& rendered : {ExportManager::markdownToHtml(sample, MathRenderMode::KatexOutput),
+                                        ExportManager::markdownToPreviewHtml(sample)}) {
+            ok &= require(rendered.count(QStringLiteral("<table")) == 2
+                              && rendered.count(QStringLiteral("<li")) == 2
+                              && rendered.count(QStringLiteral("<tr")) == 6
+                              && rendered.count(QStringLiteral("<em>")) == 2
+                              && !rendered.contains(QStringLiteral("|:--")),
+                          QStringLiteral("table in list item not rendered: ") + rendered);
+        }
+        struct Case { const char* name; const char* md; int tables; int items; };
+        const Case cases[] = {
+            {"bullet, no blank", "- item\n  | a | b |\n  |---|---|\n  | 1 | 2 |\n", 1, 1},
+            {"bullet, blank line", "- item\n\n  | a | b |\n  |---|---|\n  | 1 | 2 |\n", 1, 1},
+            {"ordered", "1. item\n   | a | b |\n   |---|---|\n   | 1 | 2 |\n", 1, 1},
+            {"nested list", "- a\n  - b\n    | a | b |\n    |---|---|\n    | 1 | 2 |\n", 1, 2},
+            {"empty cells", "- item\n  | a | b |\n  |---|---|\n  |   |   |\n", 1, 1},
+            {"math cells", "- item\n  | $a$ | $b|c$ |\n  |---|---|\n  | $f'(x)$ | 0 |\n", 1, 1},
+            {"standalone", "| a | b |\n|---|---|\n| 1 | 2 |\n", 1, 0},
+            {"after top-level paragraph", "text\n| a | b |\n|---|---|\n| 1 | 2 |\n", 1, 0},
+            {"mismatched columns stay text", "- item\n  | a | b |\n  |---|\n  | 1 | 2 |\n", 0, 1},
+            {"lazy line stays in item", "- item\n| a | b |\n|---|---|\n", 0, 1},
+            {"fenced code untouched", "```\ntext\n| a | b |\n|---|---|\n```\n", 0, 0},
+            {"no pipe delimiter is a heading", "- item\n  text\n  ---\n", 0, 1},
+        };
+        const QString quote = ExportManager::markdownToHtml(
+            QStringLiteral("> text\n> | a | b |\n> |---|---|\n> | 1 | 2 |\n"), MathRenderMode::KatexOutput);
+        ok &= require(quote.contains(QStringLiteral("<blockquote>")) && quote.count(QStringLiteral("<table")) == 1
+                          && quote.indexOf(QStringLiteral("<table")) < quote.indexOf(QStringLiteral("</blockquote>")),
+                      QStringLiteral("table after quoted paragraph left the blockquote: ") + quote);
+        const QString mapped = ExportManager::markdownToPreviewHtml(sample);
+        ok &= require(mapped.contains(QStringLiteral("<li data-src-start=\"7\""))
+                          && mapped.contains(QStringLiteral("<table data-src-start=\"8\" data-src-end=\"11\"")),
+                      QStringLiteral("table split shifted source lines: ") + mapped);
+        for (const Case& c : cases) {
+            for (const QString& rendered : {ExportManager::markdownToHtml(QString::fromUtf8(c.md), MathRenderMode::KatexOutput),
+                                            ExportManager::markdownToPreviewHtml(QString::fromUtf8(c.md))}) {
+                ok &= require(rendered.count(QStringLiteral("<table")) == c.tables
+                                  && rendered.count(QStringLiteral("<li")) == c.items,
+                              QStringLiteral("table case failed: ") + QLatin1String(c.name) + QLatin1Char('\n') + rendered);
+            }
+        }
+    }
+
     QFile derivativesFile(QStringLiteral(FASTMD_FIXTURES_DIR "/test-math-derivatives.md"));
     ok &= require(derivativesFile.open(QIODevice::ReadOnly),
                   QStringLiteral("tests/fixtures/test-math-derivatives.md is missing"));
