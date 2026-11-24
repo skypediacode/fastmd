@@ -180,7 +180,7 @@ int main(int argc, char** argv)
     ok &= require(inlineMathSnippets.size() == 1
                       && inlineAfterFence.contains(QStringLiteral("@@FASTMD_MATH_0@@"))
                       && ExportManager::markdownToPreviewHtml(inlineMathAfterFence)
-                             .contains(QStringLiteral("$x^2$")),
+                             .contains(QStringLiteral("\\(x^2\\)")),
                   QStringLiteral("inline math after a fence was not tokenized"));
     const QString literalMathInCode = QStringLiteral("```cpp\nconst char* math = \"$$E = mc^2$$\";\n```");
     QStringList codeMathSnippets;
@@ -232,7 +232,7 @@ int main(int argc, char** argv)
                      {QStringLiteral("$$ b_1 * b_2 * b_3 $$")});
     requireMathSpans(QStringLiteral("inline forms"),
                      QStringLiteral("Text \\(c_1 * c_2\\) and $d_2$ end."),
-                     {QStringLiteral("\\(c_1 * c_2\\)"), QStringLiteral("$d_2$")});
+                     {QStringLiteral("\\(c_1 * c_2\\)"), QStringLiteral("\\(d_2\\)")});
     requireMathSpans(QStringLiteral("escaped bracket display"),
                      QStringLiteral("\\\\[ y=\\frac{2x+3}{x-1} \\\\]"),
                      {QStringLiteral("\\[ y=\\frac{2x+3}{x-1} \\]")});
@@ -265,7 +265,9 @@ int main(int argc, char** argv)
                                    qMakePair(QStringLiteral("$$"), QStringLiteral("$$")),
                                    qMakePair(QStringLiteral("$"), QStringLiteral("$"))}) {
         const QString source = delimiters.first + literalTex + delimiters.second;
-        requireMathSpans(QStringLiteral("literal escapes in standard math"), source, {source});
+        requireMathSpans(QStringLiteral("literal escapes in standard math"), source,
+                         {delimiters.first == QLatin1String("$")
+                              ? QStringLiteral("\\(") + literalTex + QStringLiteral("\\)") : source});
     }
     requireMathSpans(QStringLiteral("literal escapes in copied math"),
                      QStringLiteral(R"(\\[x\_{i}+\text{file\_{name} {nested\_{text}} \{ok\}}+\operatorname*{a\_{b}}+\_i+\{x\}+\begin{matrix}a\\b\end{matrix}\\])"),
@@ -326,7 +328,7 @@ int main(int argc, char** argv)
     requireMathSpans(QStringLiteral("math in lists"),
                      QStringLiteral("- item \\(a\\)\n- \\\\[ b \\\\]\n- [ ] task $c$\n\n"
                                     "1. first\n\n   $$\n   d\n   $$\n2. \\[ e \\]"),
-                     {QStringLiteral("\\(a\\)"), QStringLiteral("\\[ b \\]"), QStringLiteral("$c$"),
+                     {QStringLiteral("\\(a\\)"), QStringLiteral("\\[ b \\]"), QStringLiteral("\\(c\\)"),
                       QStringLiteral("$$\n   d\n   $$"), QStringLiteral("\\[ e \\]")});
     requireMathSpans(QStringLiteral("math in blockquotes and callouts"),
                      QStringLiteral("> \\[ e \\] and \\\\(f\\\\)\n\n> \\\\[\n> g\n> \\\\]\n\n"
@@ -336,8 +338,95 @@ int main(int argc, char** argv)
     requireMathSpans(QStringLiteral("math in headings, tables and emphasis"),
                      QStringLiteral("## Title \\\\(j\\\\)\n\n| A | B |\n|---|---|\n| \\(m\\) | $n$ |\n\n"
                                     "**bold \\(p\\)** and *it \\\\(q\\\\)*"),
-                     {QStringLiteral("\\(j\\)"), QStringLiteral("\\(m\\)"), QStringLiteral("$n$"),
+                     {QStringLiteral("\\(j\\)"), QStringLiteral("\\(m\\)"), QStringLiteral("\\(n\\)"),
                       QStringLiteral("\\(p\\)"), QStringLiteral("\\(q\\)")});
+
+    // Issue #1: currency must never be paired as math, and inline math must
+    // never leave its block. "Literal" documents must reach MD4C unchanged.
+    const QString issue1 = QStringLiteral(
+        "## What it costs\n\n"
+        "- **$300 annual administrative/membership fee** — separate from insurance.\n"
+        "- Another normal bullet item.\n\n"
+        "## Action items\n\n"
+        "| Owner | Item |\n|---|---|\n| Rob | Example action |\n| Practice | Example action |\n\n"
+        "---\n\n"
+        "## Questions that were NOT answered\n\n"
+        "1. **Example question?** Some normal text mentioning a $300 fee later in the document.\n");
+    for (const QString& rendered : {ExportManager::markdownToHtml(issue1, MathRenderMode::KatexOutput),
+                                    ExportManager::markdownToHtml(issue1, MathRenderMode::UnicodePreview),
+                                    ExportManager::markdownToPreviewHtml(issue1)}) {
+        ok &= require(rendered.count(QStringLiteral("<h2")) == 3 && rendered.count(QStringLiteral("<li")) == 3
+                          && rendered.count(QStringLiteral("<table")) == 1
+                          && rendered.count(QStringLiteral("<hr")) == 1
+                          && rendered.count(QStringLiteral("$300")) == 2
+                          && rendered.contains(QStringLiteral("<strong>"))
+                          && !rendered.contains(QStringLiteral("\\(")),
+                      QStringLiteral("issue 1: currency corrupted the document structure"));
+    }
+    ok &= require(ExportManager::markdownToPreviewHtml(issue1)
+                      .contains(QStringLiteral("data-src-start=\"17\"")),
+                  QStringLiteral("issue 1: source lines drifted"));
+    const QStringList literalDollars = {
+        issue1,
+        QStringLiteral("It was $300, then $400, then $500."),
+        QStringLiteral("From $5-$10 to $5M–$10M, or **$20** and **$30**."),
+        QStringLiteral("Pay 5 $ or 6 $ today; spaced $ x $ is text."),
+        QStringLiteral("Escaped \\$5 and \\$6, or \\$x\\$."),
+        QStringLiteral("| A | B |\n|---|---|\n| $300 | $400 |\n|$5|$6|"),
+        QStringLiteral("A | B\n--- | ---\n$5 | a\nb$ | c"),
+        QStringLiteral("a $x\n\ny$ b"),
+        QStringLiteral("# a $x\ny$ b"),
+        QStringLiteral("a $x\n# y$ b"),
+        QStringLiteral("a $x\n===\ny$ b"),
+        QStringLiteral("a $x\n---\ny$ b"),
+        QStringLiteral("a $x\n***\ny$ b"),
+        QStringLiteral("- a $x\n- y$ b"),
+        QStringLiteral("1. a $x\n2. y$ b"),
+        QStringLiteral("a $x\n> y$ b"),
+        QStringLiteral("> a $x\n>\n> y$ b"),
+        QStringLiteral("a $x\n```\ncode\n```\ny$ b"),
+        QStringLiteral("a $x\n<div>\ny$ b"),
+        QStringLiteral("a $x\r\n\r\ny$ b"),
+        QStringLiteral("Unmatched $$300 and $400"),
+    };
+    for (const QString& literal : literalDollars) {
+        QStringList snippets;
+        ok &= require(FastMdMath::preprocess(literal, MathRenderMode::KatexOutput, &snippets) == literal
+                          && snippets.isEmpty(),
+                      QStringLiteral("literal dollars were read as math: ") + literal);
+    }
+    requireMathSpans(QStringLiteral("mixed currency and math"),
+                     QStringLiteral("Pay $300 for $x^2$ and $400 for ($y_1$) or **$z$**, not $5."),
+                     {QStringLiteral("\\(x^2\\)"), QStringLiteral("\\(y_1\\)"), QStringLiteral("\\(z\\)")});
+    requireMathSpans(QStringLiteral("currency before a parenthesized or bold expression"),
+                     QStringLiteral("A $300 fee ($a$)\n\nA $400 fee **$\\beta$**"),
+                     {QStringLiteral("\\(a\\)"), QStringLiteral("\\(\\beta\\)")});
+    requireMathSpans(QStringLiteral("currency and display math"),
+                     QStringLiteral("Cost $300\n\n$$\nE = 1\n\n+ 2\n$$\n\nor $400 and $$c$$"),
+                     {QStringLiteral("$$\nE = 1\n\n+ 2\n$$"), QStringLiteral("$$c$$")});
+    requireMathSpans(QStringLiteral("inline math forms kept"),
+                     QStringLiteral("$2$, $n$th, 3$\\times$ x, $[0,1)$, $|v|$, $\\$5$, $p$-value, $q$$r$"),
+                     {QStringLiteral("\\(2\\)"), QStringLiteral("\\(n\\)"), QStringLiteral("\\(\\times\\)"),
+                      QStringLiteral("\\([0,1)\\)"), QStringLiteral("\\(|v|\\)"),
+                      QStringLiteral("\\(\\$5\\)"), QStringLiteral("\\(p\\)"),
+                      QStringLiteral("\\(q\\)"), QStringLiteral("\\(r\\)")});
+    requireMathSpans(QStringLiteral("inline math across a soft break"),
+                     QStringLiteral("Paragraph $a =\nb$ and $300\n\nnext $c$ and $400"),
+                     {QStringLiteral("\\(a =\nb\\)"), QStringLiteral("\\(c\\)")});
+    requireMathSpans(QStringLiteral("math in table cells with currency"),
+                     QStringLiteral("| A | B |\n|---|---|\n| $300 | $x$ |\n| $400 | $y$ |"),
+                     {QStringLiteral("\\(x\\)"), QStringLiteral("\\(y\\)")});
+    ok &= require(ExportManager::markdownToPreviewHtml(QStringLiteral("Code `$300` and    `$x$` and $5"))
+                      .contains(QStringLiteral("$x$")),
+                  QStringLiteral("dollars in code changed"));
+    ok &= require(ExportManager::markdownToPreviewHtml(QStringLiteral("$300 ==marked== $400"))
+                      .contains(QStringLiteral("<mark>")),
+                  QStringLiteral("currency suppressed inline formatting between amounts"));
+    // Literal dollars alone must not pull KaTeX into exported documents, and
+    // the page must not pair them.
+    ok &= require(!ExportManager::buildPreviewHtml(QStringLiteral("<p>$300 and $400</p>"), false, 17)
+                       .contains(QStringLiteral("katex-css'>")),
+                  QStringLiteral("currency embedded KaTeX in an export"));
 
     // The escaped multi-line form collapses lines like any display block, so
     // later blocks must keep their source lines for double-click navigation.

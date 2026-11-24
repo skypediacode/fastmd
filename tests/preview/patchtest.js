@@ -334,7 +334,7 @@
   };
   var inserted = '<pre data-src-start="31" data-src-end="33"><code class="language-mermaid">graph LR\n  A --&gt; B\n</code></pre>\n' +
     '<pre data-src-start="34" data-src-end="35"><code class="language-python">x = 1\n</code></pre>\n' +
-    '<p data-src-start="36" data-src-end="36">Mass $m^2$ here.</p>';
+    '<p data-src-start="36" data-src-end="36">Mass \\(m^2\\) here.</p>';
   synthetic.push(function () {
     var name = 'synthetic [inserted blocks decorated, kept ones untouched]';
     var problems = [];

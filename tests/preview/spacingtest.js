@@ -57,8 +57,8 @@
     '<h3 id="htab">Before table</h3><div class="table-wrap" id="tabwrap"><table id="table"><thead><tr><th>A</th><th>B</th></tr></thead>' +
       '<tbody><tr><td>' + LOREM + '</td><td>x</td></tr></tbody></table></div>' +
     '<h3 id="hq">Before quote</h3><blockquote id="quote"><p>Quoted</p></blockquote>' +
-    '<p id="math">Inline $\\frac{a}{b}$ and $\\sum_{i=1}^{n}\\frac{x_i}{y_i}$ with <code>code</code>, <mark>mark</mark>, ' +
-      '<kbd>K</kbd> and $x^2$. ' + LOREM + ' Again $\\frac{1}{2}$ and ' + LOREM + '</p>' +
+    '<p id="math">Inline \\(\\frac{a}{b}\\) and \\(\\sum_{i=1}^{n}\\frac{x_i}{y_i}\\) with <code>code</code>, <mark>mark</mark>, ' +
+      '<kbd>K</kbd> and \\(x^2\\). ' + LOREM + ' Again \\(\\frac{1}{2}\\) and ' + LOREM + '</p>' +
     '<p>$$\\sum_{i=1}^{n}\\frac{x_i}{y_i}$$</p><p id="last">End</p>';
 
   function $(id) { return document.getElementById(id); }

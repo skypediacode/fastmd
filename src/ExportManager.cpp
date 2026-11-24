@@ -71,8 +71,7 @@ static QString buildKatexHead(bool renderOnLoad = true)
           QString::fromUtf8(autoFile.readAll()), renderOnLoad ? QStringLiteral("<script>document.addEventListener('DOMContentLoaded',function(){"
         "var d=[{left:'$$',right:'$$',display:true},"
         "{left:'\\\\[',right:'\\\\]',display:true},"
-        "{left:'\\\\(',right:'\\\\)',display:false},"
-        "{left:'$',right:'$',display:false}];"
+        "{left:'\\\\(',right:'\\\\)',display:false}];"
         "renderMathInElement(document.body,{delimiters:d,throwOnError:false});"
         "document.querySelectorAll('blockquote').forEach(function(e){"
         "renderMathInElement(e,{delimiters:d,throwOnError:false});"
@@ -529,7 +528,7 @@ QString ExportManager::buildPreviewHtml(const QString& bodyHtml, bool dark, int 
     const bool renderedDark = dark && !isPrint;
     const bool hasCode = hasLabelledCodeBlock(bodyHtml);
     const bool hasMath = QRegularExpression(
-        QStringLiteral(R"(\$\$|\\\[|\\\(|\$(?:[^$\n]|\\\$)+\$)"))
+        QStringLiteral(R"rx(\$\$|\\\[|\\\()rx"))
         .match(bodyHtml).hasMatch();
     const bool hasMermaid = bodyHtml.contains(QStringLiteral("language-mermaid"), Qt::CaseInsensitive);
     const QString themeVars = QStringLiteral(":root{--fs:%1px;}").arg(fontSize);

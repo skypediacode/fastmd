@@ -1,4 +1,5 @@
 #include "MarkdownExtensions.h"
+#include "MathDelimiters.h"
 
 #include <QHash>
 #include <QRegularExpression>
@@ -168,8 +169,9 @@ QString transformLine(const QString& line, QStringList* snippets)
                 && line.at(position + 1) == QLatin1Char('$');
             const QString delimiter = display ? QStringLiteral("$$") : QStringLiteral("$");
             const int contentStart = position + delimiter.size();
-            int close = contentStart;
-            while (close < line.size()) {
+            int close = display ? contentStart
+                : int(FastMdMath::findInlineDollarClose(line, position, line.size()));
+            while (display && close < line.size()) {
                 close = line.indexOf(delimiter, close);
                 if (close < 0 || close == 0 || line.at(close - 1) != QLatin1Char('\\'))
                     break;

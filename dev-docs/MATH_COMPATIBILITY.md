@@ -25,6 +25,23 @@ Only the rendered snippet is normalized. Opening/saving the file, the editor,
 undo history and clipboard source are unchanged. The rule is independent of
 `\underbrace`: it also applies to ordinary braced subscripts and nested math.
 
+## Dollar signs in prose
+
+A single `$` delimits inline math only under these rules, so currency stays text:
+
+- the opening `$` is followed by a non-space, and the closing `$` is preceded by
+  a non-space and not followed by a digit (Pandoc's `tex_math_dollars` rule);
+- the next unescaped `$` must be able to close, otherwise the opener is literal.
+  A `$` after `(`, `[`, `{` or `**` and before a letter or command only opens;
+- both delimiters are in one block: math may cross a soft line break, never a
+  blank line, heading, list item, table row, quote, fence, rule or HTML block.
+
+`FastMdMath::preprocess()` is the only authority. It emits inline math as
+`\(...\)`, and neither the preview shell nor exports give KaTeX auto-render a
+single-`$` delimiter: it would pair the literal dollars again.
+
+`$5 and a$` still reads as math; escape such a dollar as `\$`.
+
 ## Literal content and compatibility trade-offs
 
 - Standard delimiters and dollar math retain their existing TeX semantics.
