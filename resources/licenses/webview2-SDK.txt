@@ -1,0 +1,19 @@
+Microsoft Edge WebView2
+
+The FastMD Markdown preview is rendered by the Evergreen Microsoft Edge WebView2
+Runtime, a shared component of the Windows operating system. FastMD does NOT
+bundle or redistribute any browser engine — it uses the runtime already present
+on the user's machine.
+
+FastMD links the WebView2 SDK's static loader (WebView2LoaderStatic.lib). The
+WebView2 SDK is provided by Microsoft Corporation under the Microsoft Software
+License Terms for the Microsoft Edge WebView2 SDK.
+
+You may review the full license terms here:
+
+    https://aka.ms/webview2/license
+
+The WebView2 Runtime itself is distributed and licensed by Microsoft as part of
+Microsoft Edge / Windows and is not covered by FastMD's license.
+
+Homepage: https://developer.microsoft.com/microsoft-edge/webview2/

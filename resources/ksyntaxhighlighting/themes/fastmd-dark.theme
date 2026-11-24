@@ -1,0 +1,57 @@
+{
+    "metadata": {
+        "name": "FastMD Dark",
+        "revision": 1,
+        "author": "FastMD"
+    },
+    "editor-colors": {
+        "background-color": "#1e1e1e",
+        "text-color": "#d4d4d4",
+        "selection": "#264f78",
+        "current-line": "#2a2a2a"
+    },
+    "text-styles": {
+        "Normal": { "text-color": "#d4d4d4" },
+        "Comment": { "text-color": "#8b949e" },
+        "Char": { "text-color": "#79c0ff", "background-color": "#1b2a3a" }
+    },
+    "custom-styles": {
+        "FastMD Markdown": {
+            "Normal Text":          { "text-color": "#d4d4d4" },
+            "FrontMatter":          { "text-color": "#8b949e" },
+            "Heading13":            { "text-color": "#58a6ff", "bold": true },
+            "Heading46":            { "text-color": "#79c0ff", "bold": true },
+            "HeadingMarker":        { "text-color": "#8b949e" },
+            "BoldItalic":           { "text-color": "#e6edf3", "bold": true, "italic": true },
+            "Bold":                 { "text-color": "#e6edf3", "bold": true },
+            "Italic":               { "text-color": "#e6edf3", "italic": true },
+            "InlineCode":           { "text-color": "#79c0ff", "background-color": "#1b2a3a" },
+            "Link":                 { "text-color": "#58a6ff", "underline": true },
+            "Image":                { "text-color": "#7ed0b5" },
+            "Footnote":             { "text-color": "#7ed0b5" },
+            "DefinitionMarker":     { "text-color": "#8b949e" },
+            "Blockquote":           { "text-color": "#8b949e" },
+            "Callout":              { "text-color": "#8b949e", "bold": true },
+            "ListMarker":           { "text-color": "#d6b656", "bold": true },
+            "TaskMarker":           { "text-color": "#d6b656", "bold": true },
+            "HorizontalRule":       { "text-color": "#30363d" },
+            "TableDelimiter":       { "text-color": "#8b949e" },
+            "PageBreakMarker":      { "text-color": "#5588aa", "italic": true },
+            "Strikethrough":        { "text-color": "#8b949e", "strike-through": true },
+            "HighlightMark":        { "text-color": "#c9d1d9", "background-color": "#5a451a" },
+            "HighlightDelimiter":   { "text-color": "#8b949e" },
+            "SubSuperscript":       { "text-color": "#e6edf3" },
+            "Emoji":                { "text-color": "#7ed0b5" },
+            "HtmlTag":              { "text-color": "#79c0ff" },
+            "HtmlAttr":             { "text-color": "#a5d6ff" },
+            "HtmlValue":            { "text-color": "#7ed0b5" },
+            "MathDelimiter":        { "text-color": "#8b949e" },
+            "MathCommand":          { "text-color": "#d2a8ff" },
+            "Escaped":              { "text-color": "#8b949e" },
+            "StructuralPunctuation": { "text-color": "#8b949e" },
+            "CodeFenceDelimiter":   { "text-color": "#8b949e" },
+            "CodeFenceLanguage":    { "text-color": "#79c0ff" },
+            "CodeBlockBody":        { "text-color": "#e6edf3", "background-color": "#222933" }
+        }
+    }
+}

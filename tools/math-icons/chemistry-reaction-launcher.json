@@ -1,0 +1,6 @@
+{
+  "canvas": { "height": 64, "padding": 4, "fontSize": 26, "renderWidth": 1024 },
+  "actions": [
+    { "id": "reaction-launcher", "category": "Chemistry", "label": "Arrows", "latex": "\\mathrm{Arrows}" }
+  ]
+}

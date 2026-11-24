@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<title>FastMD soft-break test</title>
+<link rel="stylesheet" href="preview.css">
+<script>
+  // Stub the WebView2 host bridge so preview.js takes its normal host path and
+  // we can drive real 'content' pushes at it.
+  (function () {
+    // Headless Chrome stops firing rAF once the page is idle, which would stall
+    // reportRendered(). Timers behave the same for DOM-correctness purposes.
+    window.requestAnimationFrame = function (fn) { return setTimeout(function () { fn(performance.now()); }, 0); };
+    window.cancelAnimationFrame = function (id) { clearTimeout(id); };
+    var listeners = [];
+    window.__posted = [];
+    window.chrome = {
+      webview: {
+        addEventListener: function (t, fn) { if (t === 'message') listeners.push(fn); },
+        postMessage: function (o) { window.__posted.push(o); }
+      }
+    };
+    window.__send = function (msg) {
+      listeners.forEach(function (fn) { fn({ data: msg }); });
+    };
+  })();
+</script>
+</head>
+<body>
+<div id="content"></div>
+<button id="outline-btn" type="button" title="Outline"><span id="outline-btn-label">Outline</span></button>
+<script src="preview.js"></script>
+<script src="softbreakdata.js"></script>
+<script>if(location.search.indexOf("ref=1")===-1){var t=document.createElement("script");t.src="softbreaktest.js";document.body.appendChild(t);}</script>
+</body>
+</html>

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<title>FastMD preview incremental render vs real sample documents</title>
+<link rel="stylesheet" href="preview.css">
+<script>
+  (function () {
+    // Headless Chrome stops firing rAF once the page is idle, which would stall
+    // reportRendered(). Timers are equivalent for DOM-correctness purposes.
+    window.requestAnimationFrame = function (fn) { return setTimeout(function () { fn(performance.now()); }, 0); };
+    window.cancelAnimationFrame = function (id) { clearTimeout(id); };
+    var listeners = [];
+    window.__posted = [];
+    window.chrome = {
+      webview: {
+        addEventListener: function (t, fn) { if (t === 'message') listeners.push(fn); },
+        postMessage: function (o) { window.__posted.push(o); }
+      }
+    };
+    window.__send = function (msg) { listeners.forEach(function (fn) { fn({ data: msg }); }); };
+  })();
+</script>
+</head>
+<body>
+<div id="content"></div>
+<button id="outline-btn" type="button" title="Outline"><span id="outline-btn-label">Outline</span></button>
+<script src="preview.js"></script>
+<script>
+  // The reference iframe only renders; it must not run the suite.
+  if (location.search.indexOf('ref=1') === -1) {
+    document.write('<script src="sampledata.js"><\/script>');
+    document.write('<script src="realsamples.js"><\/script>');
+  }
+</script>
+</body>
+</html>

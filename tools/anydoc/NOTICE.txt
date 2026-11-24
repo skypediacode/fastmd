@@ -1,0 +1,14 @@
+FastMD AnyDoc Importer
+=======================
+
+This directory is populated by the release tooling with architecture-specific
+fastmd-anydoc.exe artifacts, the FastMD-maintained native wrapper around the
+MIT-licensed AnyDoc Rust crate. The executables are intentionally not committed
+to source control.
+
+Normal development builds may omit the executable. In that case FastMD keeps
+the Import as Markdown command visible and explains that a complete release
+package is required.
+
+Upstream: https://github.com/firecrawl/anydoc
+License: MIT (see resources/licenses/anydoc-MIT.txt)

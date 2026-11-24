@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  FastMD's own Markdown syntax definition for KSyntaxHighlighting.
+
+  This is not the stock KDE "Markdown" definition - it is written from
+  scratch to reproduce (and extend) exactly what FastMD's editor previously
+  highlighted with its own hand-rolled QSyntaxHighlighter, so the migration
+  changes the implementation, not the appearance or feature set. Colors are
+  not hardcoded here; they come from FastMD's fastmd-light.theme /
+  fastmd-dark.theme via each itemData's "custom-styles" entry, keyed by this
+  definition's name.
+
+  License: MIT (same terms as the bundled KSyntaxHighlighting definitions).
+-->
+<language name="FastMD Markdown" version="1" kateversion="5.79" section="Markup"
+           extensions="*.md;*.markdown;*.mdown;*.mkd" mimetype="text/markdown"
+           priority="15">
+  <highlighting>
+    <contexts>
+      <!-- Front matter is only recognized on the very first line of the
+           document; any other content falls through to Normal permanently. -->
+      <context name="Start" attribute="Normal Text" lineEndContext="#stay"
+               fallthrough="true" fallthroughContext="Normal">
+        <RegExpr String="^---\s*$" attribute="FrontMatter" context="FrontMatterBody" column="0"/>
+      </context>
+
+      <context name="FrontMatterBody" attribute="FrontMatter" lineEndContext="#stay">
+        <RegExpr String="^---\s*$" attribute="FrontMatter" context="#pop"/>
+        <RegExpr String="^\.\.\.\s*$" attribute="FrontMatter" context="#pop"/>
+      </context>
+
+      <!-- Fenced code blocks: backtick or tilde runs of length &gt;= 3.
+           Opening/closing symmetry is loose (any run of the same family
+           closes it), matching FastMD's existing simplification, now
+           extended to tilde fences. -->
+      <context name="FenceOpenLine" attribute="CodeFenceLanguage" lineEndContext="#pop!FenceBody">
+      </context>
+
+      <context name="FenceBody" attribute="CodeBlockBody" lineEndContext="#stay">
+        <RegExpr String="^(```+|~~~+)\s*$" attribute="CodeFenceDelimiter" context="#pop" column="0"/>
+      </context>
+
+      <!-- Shared inline rules, reused verbatim inside headings so emphasis
+           still renders inside a heading line. -->
+      <context name="InlineEmphasis" attribute="Normal Text" lineEndContext="#stay">
+        <!-- Escaped punctuation consumes the backslash + char so emphasis
+             rules below can never match through it. -->
+        <RegExpr String="\\[!&quot;#$%&amp;'()*+,\-./:;&lt;=&gt;?@\[\]^_`{|}~\\]" attribute="Escaped" context="#stay"/>
+
+        <!-- Inline code first, so nothing inside a code span is re-colored. -->
+        <RegExpr String="`[^`\r\n]+`" attribute="InlineCode" context="#stay"/>
+
+        <!-- Bold+italic, bold, italic (longest markers first). -->
+        <RegExpr String="\*{3}[^*]+\*{3}" attribute="BoldItalic" context="#stay"/>
+        <RegExpr String="_{3}[^_]+_{3}" attribute="BoldItalic" context="#stay"/>
+        <RegExpr String="\*{2}[^*]+\*{2}" attribute="Bold" context="#stay"/>
+        <RegExpr String="_{2}[^_]+_{2}" attribute="Bold" context="#stay"/>
+        <RegExpr String="(?&lt;![*_])\*(?![*\s])[^*]+(?&lt;!\s|\*)\*(?![*])" attribute="Italic" context="#stay"/>
+        <RegExpr String="(?&lt;![*_])_(?![_\s])[^_]+(?&lt;!\s|_)_(?![_])" attribute="Italic" context="#stay"/>
+
+        <!-- Strikethrough before subscript so ~~text~~ is fully consumed. -->
+        <RegExpr String="~~[^~\r\n]+~~" attribute="Strikethrough" context="#stay"/>
+
+        <!-- ==highlight== marks: opening/closing delimiters are only
+             consumed when a valid close exists later on the same line, so
+             an unclosed "==" never bleeds highlight color across the rest
+             of the line/document. -->
+        <RegExpr String="(?&lt;![=])==(?=[^=\r\n]+==(?!=))" attribute="HighlightDelimiter" context="HighlightBody"/>
+
+        <!-- Subscript / superscript. -->
+        <RegExpr String="(?&lt;!~)~(?!~)[^~\r\n]+(?&lt;!~)~(?!~)" attribute="SubSuperscript" context="#stay"/>
+        <RegExpr String="(?&lt;!\^)\^(?!\^)[^\^\r\n]+(?&lt;!\^)\^(?!\^)" attribute="SubSuperscript" context="#stay"/>
+
+        <!-- Footnote reference / images / links (footnote before link since
+             both start with '['; image before link since it starts with '!['). -->
+        <RegExpr String="\[\^[^\]\r\n]+\]" attribute="Footnote" context="#stay"/>
+        <RegExpr String="!\[[^\]\r\n]*\]\([^)\r\n]*\)" attribute="Image" context="#stay"/>
+        <RegExpr String="\[[^\]\r\n]+\]\([^)\r\n]*\)" attribute="Link" context="#stay"/>
+
+        <!-- Emoji shortcodes. -->
+        <RegExpr String=":(?![0-9]+:)[A-Za-z0-9_+\-]+:" attribute="Emoji" context="#stay"/>
+
+        <!-- Literal HTML marks are what the Highlight command writes. Keep
+             their tags in the normal HTML color; only their body receives the
+             highlight treatment. -->
+        <RegExpr String="&lt;mark&gt;" attribute="HtmlTag" context="HtmlMarkBody" insensitive="true"/>
+
+        <!-- Embedded HTML: tag name switches into an attribute-aware context. -->
+        <RegExpr String="&lt;/?[A-Za-z][\w-]*" attribute="HtmlTag" context="HtmlTagBody"/>
+
+        <!-- LaTeX math: delimiters, then commands. -->
+        <RegExpr String="\\\(|\\\)|\\\[|\\\]|\$+" attribute="MathDelimiter" context="#stay"/>
+        <RegExpr String="\\[A-Za-z]+" attribute="MathCommand" context="#stay"/>
+
+        <!-- Muted structural punctuation left over after the rules above. -->
+        <RegExpr String="[#|!\[\]\(\):&lt;&gt;]" attribute="StructuralPunctuation" context="#stay"/>
+      </context>
+
+      <context name="HighlightBody" attribute="HighlightMark" lineEndContext="#pop">
+        <RegExpr String="==(?!=)" attribute="HighlightDelimiter" context="#pop"/>
+      </context>
+
+      <context name="HtmlMarkBody" attribute="HighlightMark" lineEndContext="#stay">
+        <RegExpr String="&lt;/mark&gt;" attribute="HtmlTag" context="#pop" insensitive="true"/>
+      </context>
+
+      <context name="HtmlTagBody" attribute="HtmlTag" lineEndContext="#pop">
+        <RegExpr String="[A-Za-z_:][\w.:\-]*(?=\s*=)" attribute="HtmlAttr" context="#stay"/>
+        <StringDetect String="&quot;" attribute="HtmlValue" context="HtmlValueDouble"/>
+        <StringDetect String="'" attribute="HtmlValue" context="HtmlValueSingle"/>
+        <RegExpr String="/?&gt;" attribute="HtmlTag" context="#pop"/>
+      </context>
+      <context name="HtmlValueDouble" attribute="HtmlValue" lineEndContext="#pop">
+        <StringDetect String="&quot;" attribute="HtmlValue" context="#pop"/>
+      </context>
+      <context name="HtmlValueSingle" attribute="HtmlValue" lineEndContext="#pop">
+        <StringDetect String="'" attribute="HtmlValue" context="#pop"/>
+      </context>
+
+      <!-- Heading levels 1-3 and 4-6: marker consumed distinctly, the rest
+           of the line keeps the level color while still allowing inline
+           emphasis (bold/italic/etc.) to take over locally, matching the
+           previous highlighter's actual layered behavior. -->
+      <context name="Heading13" attribute="Heading13" lineEndContext="#pop">
+        <IncludeRules context="InlineEmphasis"/>
+      </context>
+      <context name="Heading46" attribute="Heading46" lineEndContext="#pop">
+        <IncludeRules context="InlineEmphasis"/>
+      </context>
+
+      <context name="Normal" attribute="Normal Text" lineEndContext="#stay">
+        <!-- FastMD page-break marker (defensive fallback; the editor's own
+             paintEvent normally draws over this line). -->
+        <RegExpr String="^&lt;div style=&quot;break-after: page;&quot;&gt;&lt;/div&gt;$" attribute="PageBreakMarker" context="#stay"/>
+
+        <!-- Fenced code open. -->
+        <RegExpr String="^(```+|~~~+)" attribute="CodeFenceDelimiter" context="FenceOpenLine" column="0"/>
+
+        <!-- Indented code block (approximation: any 4-space/tab indented line). -->
+        <RegExpr String="^(?: {4,}|\t).*$" attribute="CodeBlockBody" context="#stay" column="0"/>
+
+        <!-- ATX headings: marker then level-specific context for the rest. -->
+        <RegExpr String="^(\s*#{1,3})(?=\s)" attribute="HeadingMarker" context="Heading13" column="0"/>
+        <RegExpr String="^(\s*#{4,6})(?=\s)" attribute="HeadingMarker" context="Heading46" column="0"/>
+
+        <!-- Setext headings (=== underline on the line following text). -->
+        <RegExpr String="^={3,}\s*$" attribute="Heading13" context="#stay" column="0"/>
+
+        <!-- Table delimiter/alignment row. -->
+        <RegExpr String="^\s*\|?\s*:?-{3,}:?\s*(?:\|\s*:?-{3,}:?\s*)+\|?\s*$" attribute="TableDelimiter" context="#stay" column="0"/>
+
+        <!-- Horizontal rule. -->
+        <RegExpr String="^([-*_]\s?){3,}$" attribute="HorizontalRule" context="#stay" column="0"/>
+
+        <!-- Definition list marker: ": definition" on its own line. -->
+        <RegExpr String="^:(?=\s)" attribute="DefinitionMarker" context="#stay" column="0"/>
+
+        <!-- Footnote definition marker at line start. -->
+        <RegExpr String="^\[\^[^\]\r\n]+\]:" attribute="Footnote" context="#stay" column="0"/>
+
+        <!-- GitHub-style callouts take priority over the generic blockquote line. -->
+        <RegExpr String="^&gt;\s*\[!(?:NOTE|TIP|IMPORTANT|WARNING|CAUTION)\].*$" attribute="Callout" context="#stay" column="0" insensitive="true"/>
+        <RegExpr String="^&gt;.*$" attribute="Blockquote" context="#stay" column="0"/>
+
+        <!-- Task list checkbox, then generic list markers. -->
+        <RegExpr String="^\s*[-*+](?=\s+\[[ xX]\](?:\s|$))" attribute="ListMarker" context="#stay" column="0"/>
+        <RegExpr String="\[[ xX]\](?=\s|$)" attribute="TaskMarker" context="#stay"/>
+        <RegExpr String="^\s*[-*+](?=\s)" attribute="ListMarker" context="#stay" column="0"/>
+        <RegExpr String="^\s*\d+\.(?=\s)" attribute="ListMarker" context="#stay" column="0"/>
+
+        <IncludeRules context="InlineEmphasis"/>
+      </context>
+    </contexts>
+
+    <itemDatas>
+      <itemData name="Normal Text"        defStyleNum="dsNormal"/>
+      <itemData name="FrontMatter"        defStyleNum="dsComment"/>
+      <itemData name="Heading13"          defStyleNum="dsNormal" bold="true"/>
+      <itemData name="Heading46"          defStyleNum="dsNormal" bold="true"/>
+      <itemData name="HeadingMarker"      defStyleNum="dsNormal"/>
+      <itemData name="BoldItalic"         defStyleNum="dsNormal" bold="true" italic="true"/>
+      <itemData name="Bold"               defStyleNum="dsNormal" bold="true"/>
+      <itemData name="Italic"             defStyleNum="dsNormal" italic="true"/>
+      <itemData name="InlineCode"         defStyleNum="dsChar"/>
+      <itemData name="Link"               defStyleNum="dsNormal" underline="true"/>
+      <itemData name="Image"              defStyleNum="dsNormal"/>
+      <itemData name="Footnote"           defStyleNum="dsNormal"/>
+      <itemData name="DefinitionMarker"   defStyleNum="dsNormal"/>
+      <itemData name="Blockquote"         defStyleNum="dsComment"/>
+      <itemData name="Callout"            defStyleNum="dsComment" bold="true"/>
+      <itemData name="ListMarker"         defStyleNum="dsNormal" bold="true"/>
+      <itemData name="TaskMarker"         defStyleNum="dsNormal" bold="true"/>
+      <itemData name="HorizontalRule"     defStyleNum="dsNormal"/>
+      <itemData name="TableDelimiter"     defStyleNum="dsNormal"/>
+      <itemData name="PageBreakMarker"    defStyleNum="dsNormal" italic="true"/>
+      <itemData name="Strikethrough"      defStyleNum="dsNormal" strikeOut="true"/>
+      <itemData name="HighlightMark"      defStyleNum="dsNormal"/>
+      <itemData name="HighlightDelimiter" defStyleNum="dsNormal"/>
+      <itemData name="SubSuperscript"     defStyleNum="dsNormal"/>
+      <itemData name="Emoji"              defStyleNum="dsNormal"/>
+      <itemData name="HtmlTag"            defStyleNum="dsNormal"/>
+      <itemData name="HtmlAttr"           defStyleNum="dsNormal"/>
+      <itemData name="HtmlValue"          defStyleNum="dsNormal"/>
+      <itemData name="MathDelimiter"      defStyleNum="dsNormal"/>
+      <itemData name="MathCommand"        defStyleNum="dsNormal"/>
+      <itemData name="Escaped"            defStyleNum="dsNormal"/>
+      <itemData name="StructuralPunctuation" defStyleNum="dsNormal"/>
+      <itemData name="CodeFenceDelimiter" defStyleNum="dsNormal"/>
+      <itemData name="CodeFenceLanguage"  defStyleNum="dsNormal"/>
+      <itemData name="CodeBlockBody"      defStyleNum="dsNormal"/>
+    </itemDatas>
+  </highlighting>
+  <general>
+    <keywords casesensitive="1"/>
+  </general>
+</language>

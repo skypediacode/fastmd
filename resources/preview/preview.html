@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'none'; img-src * data: https://fastmd.doc; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; font-src 'self'; connect-src 'none';">
+  <title>FastMD Preview</title>
+
+  <!-- Apply the initial theme synchronously so the very first paint is already
+       the right color (no white flash). Theme + font size arrive as query args
+       baked into the navigation URL by the C++ host. -->
+  <script>
+    (function () {
+      try {
+        var q = new URLSearchParams(location.search);
+        var dark = q.get('theme') === 'dark';
+        document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+        var fs = parseInt(q.get('fs') || '17', 10);
+        if (fs > 0) document.documentElement.style.setProperty('--fs', fs + 'px');
+      } catch (e) {}
+    })();
+  </script>
+
+  <link rel="stylesheet" href="preview.css">
+</head>
+<body>
+  <div id="content"></div>
+
+  <button id="outline-btn" type="button" title="Outline">
+    <svg id="outline-btn-icon" viewBox="0 0 24 24" width="18" height="18" fill="currentColor" aria-hidden="true">
+      <circle cx="4" cy="6" r="1.6"/><rect x="8.5" y="4.8" width="12" height="2.4" rx="1.2"/>
+      <circle cx="4" cy="12" r="1.6"/><rect x="8.5" y="10.8" width="12" height="2.4" rx="1.2"/>
+      <circle cx="4" cy="18" r="1.6"/><rect x="8.5" y="16.8" width="12" height="2.4" rx="1.2"/>
+    </svg>
+    <span id="outline-btn-label">Outline</span>
+  </button>
+
+  <script src="preview.js"></script>
+</body>
+</html>

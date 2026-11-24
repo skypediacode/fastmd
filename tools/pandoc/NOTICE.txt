@@ -1,0 +1,31 @@
+Pandoc
+======
+
+FastMD bundles the Pandoc command-line tool (pandoc.exe) to power
+"Export DOCX". Pandoc is invoked as an external process; it is not linked
+into FastMD as a library.
+
+Homepage / source: https://pandoc.org  /  https://github.com/jgm/pandoc
+License: GNU General Public License, version 2 or later (see LICENSE.txt
+in this directory).
+Copyright (c) 2006-2026 John MacFarlane and Pandoc contributors.
+
+Obtaining pandoc.exe
+---------------------
+This directory ships without the actual "pandoc.exe" binary checked into
+source control (it's a ~230MB binary and doesn't belong in git history).
+
+scripts/sync-bundled-tools.ps1 downloads the pinned Pandoc release and caches
+it here (tools/pandoc/pandoc.exe is gitignored via the repo's `*.exe` rule),
+so subsequent runs skip the download. Every packaging path calls that script,
+so a release build fetches it automatically.
+
+The pinned version lives in scripts/sync-bundled-tools.ps1 and nowhere else;
+VERSION.txt and SHA256.txt in this directory record what is actually installed.
+To upgrade, change the version there and re-run it - see dev-docs/BUNDLED_TOOLS.md.
+
+To test "Export DOCX" from a dev build without packaging, run that script, or
+install pandoc system-wide (FastMD falls back to a "pandoc" found on PATH).
+
+The build (CMakeLists.txt) and packaging script (scripts/build-and-create-portable-app.ps1) copy
+whatever is in this directory next to FastMD.exe automatically.

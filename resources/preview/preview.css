@@ -1,0 +1,620 @@
+/* FastMD WebView2 preview shell — a compact, document-reader typography system
+   tuned for the split editor/preview layout. Theme colors live in CSS variables
+   so light/dark switching is instant without recreating the WebView2.
+
+   NOTE: this stylesheet used to mirror ExportManager::buildCss (Print/PDF/HTML
+   export) 1:1. It intentionally no longer does — the on-screen preview is tuned
+   as a reader (looser leading, capped/centered measure, softer heading scale,
+   rounded code/table cards), while export/print keeps buildCss's tighter,
+   full-width, page-oriented style. The two are deliberately independent; do not
+   "resync" them without a product decision to unify the look. (Headings are the
+   exception: the heading block below is shared by Preview, Print and PDF.)
+
+   The page background (--bg) must stay in lock-step with the WebView2 host's
+   clear color (PreviewWidget.cpp: #ffffff light / #121314 dark) or the first
+   paint flashes. The base font size (--fs) is set from JS and the export host;
+   heading sizes are derived from it in CSS. The value below is a fallback. */
+
+:root {
+  --fs: 17px;
+
+  /* Vertical rhythm — one knob keeps block spacing consistent everywhere. */
+  --space: 16px;
+
+  /* Document Spacing (Preferences > Typography). --lh, --pspace and --li-gap
+     are set on :root only when the user picks a non-default preset, so the
+     fallbacks below ARE the defaults: 1.5 line height, 12pt (16px) between
+     paragraphs, 0.25em between list items. They are independent of --space,
+     which block "cards" (code, tables, quotes, math, diagrams) and heading
+     gaps still use. */
+
+  /* Light theme (default) ------------------------------------------------- */
+  --bg:        #ffffff;   /* matches host clear color — do not drift */
+  --fg:        #24292f;
+  --muted:     #57606a;   /* secondary text: h6, captions, footnotes */
+
+  --link:      #0969da;
+  --link-hover:#0550ae;
+
+  --border:    #d0d7de;   /* structural lines: tables, hr, code borders */
+  --border-soft: #dee2e7; /* interior lines (table cells) — visible but not heavy */
+
+  --code-fg:   #24292f;
+  --code-bg:   #ececef;   /* inline code chip */
+  --code-bdr:  rgba(27,31,36,0.08);
+  --code-badge-fg: #6e7681;
+  --pre-bg:    #ffffff;   /* fenced block — a crisp card on the grey page */
+  --pre-bdr:   #d8dde3;
+
+  --bq-fg:     #57606a;
+  --bq-bdr:    #d0d7de;
+  --bq-bg:     rgba(27,31,36,0.025);
+
+  --table-head-bg: #f0f2f4;
+  --stripe:    #f4f6f8;
+
+  --mark-bg:   #fff3b8;
+  --mark-fg:   #24292f;
+  --kbd-bg:    #f6f8fa;
+  --kbd-bdr:   #c6cdd5;
+
+  --pb:        #7799aa;
+  --scroll-thumb: rgba(0,0,0,0.28);
+  --scroll-thumb-hover: rgba(0,0,0,0.42);
+
+  --outline-btn-bdr: #8a8a8a;
+  --outline-btn-bg: rgba(255,255,255,0.8);
+  --outline-btn-bg-hover: rgba(230,230,230,0.9);
+  --outline-btn-fg: #24292f;
+  --outline-btn-icon: #3d3d3d;
+}
+
+:root[data-theme="dark"] {
+  --bg:        #121314;   /* matches host clear color — do not drift */
+  --fg:        #bbbebf;
+  --muted:     #8c8c8c;
+
+  --link:      #58a6ff;
+  --link-hover:#79b8ff;
+
+  --border:    #2a2b2c;
+  --border-soft: #242526; /* interior lines (table cells) — visible but not heavy */
+
+  --code-fg:   #c5c8ca;
+  --code-bg:   #202122;
+  --code-bdr:  rgba(255,255,255,0.09);
+  --code-badge-fg: #8c8c8c;
+  --pre-bg:    #191a1b;   /* one step above the page */
+  --pre-bdr:   #2a2b2c;
+
+  --bq-fg:     #9b9d9f;
+  --bq-bdr:    #3a3b3c;
+  --bq-bg:     rgba(255,255,255,0.03);
+
+  --table-head-bg: #191a1b;
+  --stripe:    #161718;
+
+  --mark-bg:   #b6892b;
+  --mark-fg:   #1b1f24;   /* dark text reads far better on mid-tone amber than light */
+  --kbd-bg:    #202122;
+  --kbd-bdr:   #3a3b3c;
+
+  --pb:        #6699bb;
+  --scroll-thumb: rgba(255,255,255,0.26);
+  --scroll-thumb-hover: rgba(255,255,255,0.4);
+
+  --outline-btn-bdr: #7a7a7a;
+  --outline-btn-bg: rgba(25,26,27,0.85);
+  --outline-btn-bg-hover: rgba(49,50,51,0.92);
+  --outline-btn-fg: #f0f0f0;
+  --outline-btn-icon: #dadada;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  background-color: var(--bg);
+  color: var(--fg);
+}
+
+body {
+  font-family: 'Segoe UI','SF Pro Text',system-ui,-apple-system,'Helvetica Neue',Arial,sans-serif;
+  font-size: var(--fs);
+  line-height: var(--lh, 1.5);
+  /* Fill the preview pane: content spans the full width with compact side
+     gutters so a split editor/preview doesn't waste horizontal space. */
+  margin: 0;
+  padding: 24px 60px 44px;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-wrap: break-word;   /* very long words/URLs never force h-scroll */
+  word-break: break-word;
+}
+
+@media (max-width: 520px) {
+  body { padding: 18px 18px 32px; }
+}
+
+/* First block never pushes the top gutter open. */
+body > :first-child { margin-top: 0 !important; }
+body > :last-child  { margin-bottom: 0 !important; }
+
+/* Insert Matrix dialog's live preview: vertically center the rendered
+   matrix inside the bordered preview panel instead of top-aligning it like
+   normal document content. (KaTeX's own .katex-display already centers it
+   horizontally, so only #content itself needs to change here -- scoped to
+   this one element so it can never affect normal document layout, and if
+   :has() support is ever absent the matrix still renders, just top-aligned
+   rather than vertically centered.) */
+html, body { height: 100%; }
+#content:has(> .matrix-insert-preview) {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* The Insert Matrix preview never needs to scroll (it's a small, generously
+   sized fixed panel) -- .katex-display's normal overflow-x:auto can trigger
+   a visible horizontal-scrollbar track for compact layouts (e.g. the Small
+   matrix type's tighter scriptstyle sizing) even though nothing is actually
+   clipped. Let it size to its content instead of reserving scrollbar chrome. */
+.matrix-insert-preview .katex-display {
+  overflow: visible;
+}
+
+/* The outline button is main-preview chrome (opens the heading-outline
+   popup) that has no meaning inside this small matrix preview. */
+body:has(> #content > .matrix-insert-preview) #outline-btn {
+  display: none;
+}
+
+/* Headings ------------------------------------------------------------------ */
+/* Every size and margin derives from --fs, the body size, so the scale follows
+   the user's font size. The ratios are the 11pt-body editorial scale
+   (22/17/14/12/11/11pt) divided by 11. No rules, no case change: heading text
+   is shown as written. A heading sits closer to what it introduces than to
+   what precedes it. */
+h1,h2,h3,h4,h5,h6 {
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--fg);
+  letter-spacing: 0;
+  text-wrap: balance;
+  overflow-wrap: break-word;
+  margin: var(--mt) 0 var(--mb);
+}
+h1 { --mt: calc(var(--fs) * 2.545); --mb: calc(var(--fs) * 0.727);
+     font-size: calc(var(--fs) * 2); font-weight: 700; }
+h2 { --mt: calc(var(--fs) * 2.18); --mb: calc(var(--fs) * 0.545);
+     font-size: calc(var(--fs) * 1.545); }
+h3 { --mt: calc(var(--fs) * 1.82); --mb: calc(var(--fs) * 0.455);
+     font-size: calc(var(--fs) * 1.273); }
+h4 { --mt: calc(var(--fs) * 1.455); --mb: calc(var(--fs) * 0.364);
+     font-size: calc(var(--fs) * 1.09); }
+h5 { --mt: calc(var(--fs) * 1.273); --mb: calc(var(--fs) * 0.364);
+     font-size: var(--fs); }
+h6 { --mt: calc(var(--fs) * 1.09); --mb: calc(var(--fs) * 0.364);
+     font-size: var(--fs); font-weight: 500; }
+/* A heading directly under another keeps a tight gap instead of a section gap. */
+:is(h1,h2,h3,h4,h5,h6) + :is(h1,h2,h3,h4,h5,h6) {
+  margin-top: min(var(--mt), calc(var(--fs) * 1.1));
+}
+/* Nothing to separate from at the top of the document, a quote, a list item. */
+:is(h1,h2,h3,h4,h5,h6):first-child { margin-top: 0; }
+
+/* Paragraphs & vertical rhythm --------------------------------------------- */
+p { margin: 0 0 var(--pspace, var(--space)); }
+
+ul, ol { margin: 0 0 var(--pspace, var(--space)); padding-left: 1.6em; }
+/* One gap drives every list relationship: tight items, 2x for a loose item's
+   paragraph, and 1.4x below a nested list (0.25 / 0.5 / 0.35em by default). */
+li { margin: var(--li-gap, 0.25em) 0; }
+li > p { margin-bottom: calc(var(--li-gap, 0.25em) * 2); }
+/* Nested lists hug their parent item — dense and scannable. */
+li > ul, li > ol { margin: var(--li-gap, 0.25em) 0 calc(var(--li-gap, 0.25em) * 1.4); }
+ol { list-style: decimal; }
+ol ol { list-style: lower-alpha; }
+ol ol ol { list-style: lower-roman; }
+
+/* Task lists (MD4C output post-processed to these attributes) */
+[data-fastmd-task-list='1'] { list-style: none; padding-left: 0.1em; margin-left: 0; }
+[data-fastmd-task-item='1'] { list-style: none; margin-left: 0; padding-left: 0; }
+.task-list-item > p:first-of-type { display: inline; }
+/* A blank line makes a task list loose. Keep the gap on the row boundary so
+   adjacent lists created by different bullet markers have the same spacing. */
+[data-fastmd-task-list='1'][data-fastmd-loose-list='1'] > .task-list-item {
+  margin: 0 0 var(--pspace, var(--space));
+  padding: 0;
+}
+[data-fastmd-task-list='1'][data-fastmd-loose-list='1'] > .task-list-item:last-child { margin-bottom: 0; }
+.task-list-marker { display: inline-block; min-width: 1.4em; }
+input[type="checkbox"] {
+  margin: 0 0.5em 0 0;
+  vertical-align: -0.06em;
+  accent-color: var(--link);
+}
+
+/* Inline code --------------------------------------------------------------- */
+code {
+  font-family: 'JetBrains Mono','Cascadia Code',Consolas,'Courier New',monospace;
+  font-size: 0.86em;
+  background-color: var(--code-bg);
+  color: var(--code-fg);
+  /* The vertical padding shrinks with the leading below 1.5 (and is exactly
+     0.15em at the default and above), so inline code on adjacent lines does not
+     paint over each other at tight line heights. */
+  padding: calc(0.15em * min(1, (var(--lh, 1.5) - 1) * 2)) 0.4em;
+  border-radius: 5px;
+  border: 1px solid var(--code-bdr);
+  white-space: break-spaces;
+}
+
+/* Fenced code blocks -------------------------------------------------------- */
+.code-block-wrapper {
+  position: relative;
+  margin: var(--space) 0;
+}
+.code-block-wrapper pre {
+  margin: 0;
+}
+.code-lang-badge {
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  font-size: 0.72em;
+  font-weight: 400;
+  color: var(--code-badge-fg);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  opacity: 0.7;
+  pointer-events: none;
+  user-select: none;
+  z-index: 2;
+  line-height: 1;
+}
+pre {
+  background-color: var(--pre-bg);
+  margin: var(--space) 0;
+  padding: 13px 4.5em 13px 16px;
+  border: 1px solid var(--pre-bdr);
+  border-radius: 8px;
+  overflow-x: auto;
+  line-height: 1.5;
+  font-size: 0.94em;
+}
+pre code {
+  background: transparent;
+  color: inherit;
+  font-size: 0.9em;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  white-space: pre;
+}
+/* highlight.js supplies token colors only — the FastMD panel background wins. */
+pre code.hljs { background: transparent; padding: 0; }
+
+/* Blockquotes --------------------------------------------------------------- */
+blockquote {
+  margin: var(--space) 0;
+  padding: 0.5em 1em;
+  border-left: 3px solid var(--bq-bdr);
+  border-radius: 0 6px 6px 0;
+  color: var(--bq-fg);
+  background: var(--bq-bg);
+}
+blockquote > :first-child { margin-top: 0; }
+blockquote > :last-child  { margin-bottom: 0; }
+blockquote p { margin: 0 0 0.5em; }
+
+/* Links --------------------------------------------------------------------- */
+a { color: var(--link); text-decoration: none; }
+a:hover { color: var(--link-hover); text-decoration: underline; text-underline-offset: 0.15em; }
+
+/* Tables -------------------------------------------------------------------- */
+/* <table> doesn't reliably clip its own cell backgrounds/borders to a
+   border-radius in Chromium/WebView2 (table boxes are a special case for
+   overflow) -- a plain wrapping div owns the rounding/clipping instead, since
+   that's clipped reliably. wrapContentTables() (ExportManagerMarkdown.cpp)
+   adds this wrapper around every genuine content table. */
+.table-wrap {
+  margin: var(--space) 0;
+  overflow: hidden;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+}
+table {
+  border-collapse: separate;
+  border-spacing: 0;
+  width: 100%;
+  font-size: 0.96em;
+  /* Rows never get taller than at 1.5, however loose the document is. */
+  line-height: min(var(--lh, 1.5), 1.5);
+}
+th, td {
+  border-style: solid;
+  border-color: var(--border-soft);
+  border-width: 0 1px 1px 0;
+  padding: 7px 13px; text-align: left; vertical-align: top;
+}
+table tr > *:last-child  { border-right: none; }
+tbody tr:last-child > *  { border-bottom: none; }
+th { font-weight: 700; background: var(--table-head-bg); }
+tbody tr:nth-child(2n) { background-color: var(--stripe); }
+
+/* Images -------------------------------------------------------------------- */
+img { max-width: 100%; height: auto; border-radius: 6px; vertical-align: middle; }
+
+/* Horizontal rules ---------------------------------------------------------- */
+hr { border: none; border-top: 1px solid var(--border); margin: calc(var(--space) * 1.75) 0; }
+
+/* Secondary inline elements ------------------------------------------------- */
+mark { background: var(--mark-bg); color: var(--mark-fg); padding: 0 0.2em; border-radius: 3px; }
+del, s { color: var(--muted); }
+sub, sup { line-height: 0; }
+kbd {
+  font-family: 'JetBrains Mono','Cascadia Code',Consolas,monospace;
+  font-size: 0.82em;
+  padding: calc(0.1em * min(1, (var(--lh, 1.5) - 1) * 2)) 0.45em;
+  color: var(--fg);
+  background: var(--kbd-bg);
+  border: 1px solid var(--kbd-bdr);
+  border-bottom-width: 2px;
+  border-radius: 5px;
+}
+
+/* Definition lists ---------------------------------------------------------- */
+dl { margin: 0 0 var(--pspace, var(--space)); }
+dt { font-weight: 600; margin: 0.45em 0 0.08em; }
+dd { margin: 0 0 0.42em 22px; color: var(--fg); }
+dt + dd { margin-top: 0; }
+dd + dd { margin-top: 0.18em; }
+dd > p { margin: 0 0 0.38em; }
+dd > ul, dd > ol { margin-top: 0.2em; margin-bottom: 0.38em; }
+dd > :last-child { margin-bottom: 0; }
+
+/* Footnotes --------------------------------------------------------------- */
+.footnotes { font-size: 0.9em; color: var(--muted); margin-top: calc(var(--space) * 1.5); }
+.footnotes hr, .footnotes::before { border-top: 1px solid var(--border); }
+.footnotes ol { margin-top: 0; margin-bottom: 0; padding-left: 1.55em; }
+.footnotes li { margin: 0 0 0.3em; padding-left: 0.08em; }
+.footnotes li > p { margin: 0 0 0.28em; }
+.footnotes li > p:last-of-type { margin-bottom: 0; }
+.footnotes li > ul, .footnotes li > ol { margin-top: 0.2em; margin-bottom: 0.28em; }
+.footnotes li > :last-child { margin-bottom: 0; }
+.footnote-ref, .footnote-backref { text-decoration: none; }
+.reference-link { font-size: 0.78em; line-height: 0; vertical-align: super; }
+.reference-link a { text-decoration: none; }
+.reference-link a:hover, .reference-link a:focus-visible { text-decoration: underline; }
+.footnote-backlinks { white-space: nowrap; margin-left: 0.3em; }
+.footnote-backref { margin-left: 0.16em; font-size: 0.85em; color: var(--muted); }
+.footnote-backref:hover, .footnote-backref:focus-visible { color: var(--link); text-decoration: underline; }
+.footnote-backlinks sup { font-size: 0.72em; line-height: 0; }
+
+/* Footnote hover preview --------------------------------------------------- */
+.footnote-popover {
+  position: fixed;
+  z-index: 1000;
+  width: max-content;
+  max-width: min(360px, calc(100vw - 24px));
+  max-height: min(60vh, 420px);
+  overflow: auto;
+  padding: 10px 13px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--pre-bg);
+  color: var(--fg);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+  line-height: 1.5;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateY(4px);
+  transition: opacity 150ms ease, transform 150ms ease, visibility 150ms ease;
+}
+.footnote-popover.is-visible {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+.footnote-popover p { margin: 0 0 0.55em; }
+.footnote-popover p:last-child { margin-bottom: 0; }
+.footnote-popover ul, .footnote-popover ol { margin-bottom: 0.55em; }
+.footnote-popover > :last-child { margin-bottom: 0; }
+.footnote-popover .footnote-backlinks { display: none; }
+
+@keyframes footnote-ref-flash {
+  0% { background-color: color-mix(in srgb, var(--link) 28%, transparent); border-radius: 3px; }
+  100% { background-color: transparent; }
+}
+.footnote-ref-flash { animation: footnote-ref-flash 320ms ease-out; }
+@keyframes source-nav-flash {
+  0% { outline: 2px solid color-mix(in srgb, var(--link) 65%, transparent); outline-offset: 3px; }
+  100% { outline: 2px solid transparent; outline-offset: 3px; }
+}
+.source-nav-flash { animation: source-nav-flash 3000ms ease-out; }
+@media (prefers-reduced-motion: reduce) {
+  .footnote-popover { transition: none; }
+  .footnote-ref-flash { animation: none; background-color: color-mix(in srgb, var(--link) 20%, transparent); }
+  .source-nav-flash { animation: none; outline: 2px solid color-mix(in srgb, var(--link) 45%, transparent); outline-offset: 3px; }
+}
+
+/* Page-break marker (mirrors the in-app "Page Break" separator) */
+.fastmd-page-break {
+  display: flex; align-items: center; gap: 10px;
+  margin: calc(var(--space) * 1.25) 0; color: var(--pb); font-style: italic; user-select: none;
+}
+.fastmd-page-break::before, .fastmd-page-break::after {
+  content: ""; flex: 1; height: 1px; background: var(--pb);
+}
+
+/* KaTeX --------------------------------------------------------------------- */
+.katex { color: var(--fg); }
+.katex-display {
+  margin: var(--space) 0;
+  padding: 2px 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+/* ---------------------------------------------------------------------------
+   Outline button — floating top-right control that opens the heading outline
+   popup (hosted natively, outside the page). Lives in the page itself (rather
+   than as a separate native Qt overlay widget) so its hover-expand animation
+   is composited by the browser like any other page content — no native HWND
+   resize/repaint flicker is possible this way. The native Find/Replace
+   overlay anchors to the editor pane, not the preview, so it never covers
+   this corner (see MainWindow::onEditorActivated/ensureFindOverlay).
+
+   Geometry constants (top/right 24px, height 40px, expanded width 118px)
+   are mirrored in PreviewWidget::outlineButtonGeometry() for popup
+   positioning — keep both in sync if these change.
+   --------------------------------------------------------------------------- */
+#outline-btn {
+  position: fixed;
+  top: 24px; right: 24px;
+  width: 44px; height: 40px;
+  display: flex; align-items: center;
+  gap: 10px;
+  padding: 0 8px 0 13px;
+  border-radius: 8px;
+  border: 1px solid var(--outline-btn-bdr);
+  background: var(--outline-btn-bg);
+  color: var(--outline-btn-fg);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.18);
+  cursor: pointer;
+  font: inherit; font-size: 14px; font-weight: 600;
+  overflow: hidden;
+  white-space: nowrap;
+  z-index: 20;
+  transition: width 150ms ease, background-color 120ms ease;
+}
+#outline-btn:hover, #outline-btn.expanded { background: var(--outline-btn-bg-hover); }
+#outline-btn.expanded { width: 118px; }
+#outline-btn-icon { flex: none; color: var(--outline-btn-icon); }
+#outline-btn-label { opacity: 0; transition: opacity 100ms ease; }
+#outline-btn.expanded #outline-btn-label { opacity: 1; }
+
+/* ---------------------------------------------------------------------------
+   Mermaid diagrams
+   --------------------------------------------------------------------------- */
+.mermaid-diagram {
+  margin: var(--space) 0;
+  text-align: center;
+  overflow-x: auto;
+}
+.mermaid-diagram svg { max-width: 100%; height: auto; }
+.mermaid-clickable { cursor: zoom-in; }
+.mermaid-saveable { cursor: context-menu; }
+.fastmd-mermaid-save-menu {
+  position: fixed; z-index: 10000; display: none; min-width: 112px;
+  padding: 4px; border: 1px solid var(--border); border-radius: 8px;
+  background: var(--pre-bg); box-shadow: 0 6px 18px rgba(0,0,0,0.2);
+}
+.fastmd-mermaid-save-menu.open { display: grid; gap: 2px; }
+.fastmd-mermaid-save-menu button {
+  border: 0; border-radius: 4px; background: transparent; color: var(--fg);
+  padding: 6px 10px; text-align: left; font: inherit; font-size: 13px; cursor: pointer;
+}
+.fastmd-mermaid-save-menu button:hover { background: var(--code-bg); }
+
+/* Inline error for a diagram that failed to parse — the rest of the document
+   still renders normally. */
+.mermaid-error {
+  margin: var(--space) 0;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-left: 3px solid #d1242f;
+  border-radius: 8px;
+  background: var(--pre-bg);
+}
+:root[data-theme="dark"] .mermaid-error { border-left-color: #f85149; }
+.mermaid-error-title { font-weight: 600; color: #d1242f; margin-bottom: 6px; }
+:root[data-theme="dark"] .mermaid-error-title { color: #f85149; }
+.mermaid-error-msg {
+  margin: 0; padding: 0; border: none; background: transparent;
+  font-family: 'JetBrains Mono','Cascadia Code',Consolas,'Courier New',monospace;
+  font-size: 0.85em; white-space: pre-wrap; color: var(--fg);
+}
+
+/* ---------------------------------------------------------------------------
+   Diagram viewer modal (zoom / pan / fit)
+   --------------------------------------------------------------------------- */
+#mmd-modal {
+  position: fixed; inset: 0; z-index: 9999;
+  display: none; flex-direction: column;
+  background: rgba(20, 20, 22, 0.62);
+  backdrop-filter: blur(2px);
+  --mmd-bar-bg: #f9f9f9; --mmd-bar-fg: #24292f; --mmd-bar-bdr: #d0d7de;
+  --mmd-btn-bg: #ffffff; --mmd-btn-hover: #eaeef2;
+}
+#mmd-modal[data-theme="dark"] {
+  background: rgba(0, 0, 0, 0.68);
+  --mmd-bar-bg: #191a1b; --mmd-bar-fg: #bbbebf; --mmd-bar-bdr: #2a2b2c;
+  --mmd-btn-bg: #202122; --mmd-btn-hover: #313233;
+}
+#mmd-modal.open { display: flex; }
+
+.mmd-modal-bar {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 12px;
+  background: var(--mmd-bar-bg); color: var(--mmd-bar-fg);
+  border-bottom: 1px solid var(--mmd-bar-bdr);
+  user-select: none;
+}
+.mmd-modal-bar button {
+  font: inherit; font-size: 13px;
+  padding: 5px 12px;
+  color: var(--mmd-bar-fg);
+  background: var(--mmd-btn-bg);
+  border: 1px solid var(--mmd-bar-bdr);
+  border-radius: 6px; cursor: pointer;
+}
+.mmd-modal-bar button:hover { background: var(--mmd-btn-hover); }
+.mmd-modal-zoom { font-size: 13px; opacity: 0.75; min-width: 44px; }
+.mmd-modal-close { margin-left: auto; font-size: 15px; line-height: 1; padding: 5px 10px; }
+
+.mmd-modal-stage {
+  flex: 1; position: relative; overflow: hidden;
+  display: flex; align-items: center; justify-content: center;
+  cursor: grab;
+}
+#mmd-modal.mmd-panning .mmd-modal-stage { cursor: grabbing; }
+.mmd-modal-canvas {
+  transform-origin: center center;
+  will-change: transform;
+  pointer-events: none;   /* clicks/drags belong to the stage, not the SVG */
+}
+.mmd-modal-canvas svg { display: block; }
+
+/* Themed scrollbar to match the app chrome (avoids a stark default scrollbar) */
+::-webkit-scrollbar { width: 14px; height: 14px; }
+::-webkit-scrollbar-thumb { background: var(--scroll-thumb); border-radius: 6px; border: 3px solid transparent; background-clip: content-box; }
+::-webkit-scrollbar-thumb:hover { background: var(--scroll-thumb-hover); background-clip: content-box; }
+::-webkit-scrollbar-track { background: transparent; }
+
+/* Callouts / admonitions --------------------------------------------------- */
+.fastmd-callout { border-left: 3px solid var(--callout-accent); margin: 16px 0;
+  padding: 12px 16px; border-radius: 0 8px 8px 0; background: var(--callout-bg); }
+.fastmd-callout-title { display:flex; align-items:center; gap:8px; margin:0 0 7px;
+  color:var(--callout-accent); font-weight:700; font-size:.92em; letter-spacing:.02em; }
+.fastmd-callout-icon { font-size:1.15em; line-height:1; }
+.fastmd-callout > :last-child { margin-bottom:0; }
+.fastmd-callout-note { --callout-accent:#2f81f7; --callout-bg:rgba(47,129,247,.08); }
+.fastmd-callout-tip { --callout-accent:#3fb950; --callout-bg:rgba(63,185,80,.08); }
+.fastmd-callout-warning { --callout-accent:#d29922; --callout-bg:rgba(210,153,34,.09); }
+.fastmd-callout-important { --callout-accent:#a371f7; --callout-bg:rgba(163,113,247,.09); }
+.fastmd-callout-caution { --callout-accent:#f85149; --callout-bg:rgba(248,81,73,.09); }
+
+/* Preview-only task controls. Exported HTML replaces these with static marks. */
+.task-list-item-checkbox { appearance:none; font:inherit; width:1em; height:1em; margin:0 .45em 0 0;
+  vertical-align:-.12em; border:1px solid var(--border); border-radius:2px;
+  background:transparent; cursor:pointer; position:relative; }
+.task-list-item-checkbox:checked { background:var(--link); border-color:var(--link); }
+.task-list-item-checkbox:checked::after { content:"✓"; position:absolute; color:white;
+  font-size:.8em; left:.13em; top:-.18em; }
+.task-list-item-checkbox:hover { border-color:var(--link); }
+.task-list-item-checkbox:focus-visible { outline:2px solid var(--link); outline-offset:2px; }
+.fastmd-math-fallback { display:block; overflow-x:auto; margin:10px 0; }

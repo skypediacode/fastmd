@@ -1,0 +1,84 @@
+# Build output and packages
+/build/
+/build-*/
+build_test/
+dist/
+*.exe
+*.obj
+*.zip
+.vs/
+*.bak
+*-premigration/
+tools/anydoc-wrapper/target/
+__pycache__/
+*.pyc
+
+# Local certificates and signing material (see scripts/README.md)
+cert/
+*.pfx
+*.cer
+
+# Local tooling state
+.claude/
+.agents/
+.aider*
+.vscode/
+**/.claude/scheduled_tasks.lock
+**/.claude/scheduled_tasks.json
+**/.claude/routines/.state/
+**/.claude/worktrees/
+**/.claude/checkpoints/
+**/.claude/mailbox/
+**/.claude/agent-registry.json
+**/.claude/agent-memory-local
+**/.claude/first-run
+**/.claude/assistant-daemon-state.json
+
+# Agent instructions and local notes (kept locally, not published)
+/AGENTS.md
+/CLAUDE.md
+/GEMINI.md
+/note.md
+/win-arm-smoke-test.md
+/HANDOFF.md
+/ms_store.md
+/edit-with-fastmd.md
+/prompt*.md
+/STARTUP*.md
+/FastMD.md
+/FastMD vs. Notepad++.md
+/FASTMD-VS-NOTEPADPP.md
+/promo
+
+# Local scratch, benchmarks, marketing, Store listing artwork and samples
+/scratch/
+/bench/
+/marketing/
+/windows-store-images/
+/samples/
+stderr.txt
+debug.html
+CMakeLists_test.txt
+
+# Retired tooling (Inno Setup installer, cross-repository publisher)
+/fastmd.iss
+/scripts/retired/
+
+# Maintainer-only release and Store packaging: tied to the maintainer's GitHub
+# account, repository and Partner Center identity (publisher name, package
+# identity, local test certificate). Keep them local.
+/scripts/build-all-and-publish-to-github.ps1
+/scripts/build-store-release.ps1
+/scripts/build-msix.ps1
+/scripts/clear-icon-cache.ps1
+/scripts/README.md
+
+# Maintainer docs: publish reference documentation only; plans, audits and
+# investigations stay local.
+/dev-docs/*
+!/dev-docs/BUNDLED_TOOLS.md
+!/dev-docs/CRASH_DIAGNOSTICS.md
+!/dev-docs/MATH_COMPATIBILITY.md
+!/dev-docs/RELEASE_DISTRIBUTION.md
+!/dev-docs/SHELL_EXTENSION.md
+!/dev-docs/TERMINAL_VISIBILITY_PERSISTENCE.md

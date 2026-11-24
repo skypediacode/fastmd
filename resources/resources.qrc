@@ -1,0 +1,40 @@
+<!DOCTYPE RCC>
+<RCC version="1.0">
+  <qresource prefix="/">
+    <file alias="fastmd.ico">fastmd.ico</file>
+    <file alias="fonts/MaterialIcons-Regular.ttf">fonts/MaterialIcons-Regular.ttf</file>
+    <file alias="fonts/MaterialIconsOutlined-Regular.otf">fonts/MaterialIconsOutlined-Regular.otf</file>
+    <file alias="icons/checkmark.svg">icons/checkmark.svg</file>
+    <file alias="icons/workspace-sort.svg">icons/workspace-sort.svg</file>
+    <file alias="icons/workspace-sort-dark.svg">icons/workspace-sort-dark.svg</file>
+    <file alias="icons/radio-unchecked-light.svg">icons/radio-unchecked-light.svg</file>
+    <file alias="icons/radio-unchecked-light-hover.svg">icons/radio-unchecked-light-hover.svg</file>
+    <file alias="icons/radio-unchecked-dark.svg">icons/radio-unchecked-dark.svg</file>
+    <file alias="icons/radio-unchecked-dark-hover.svg">icons/radio-unchecked-dark-hover.svg</file>
+    <file alias="icons/radio-checked.svg">icons/radio-checked.svg</file>
+    <file alias="icons/radio-checked-hover.svg">icons/radio-checked-hover.svg</file>
+    <file alias="icons/codicons/layout-sidebar-left.svg">icons/codicons/layout-sidebar-left.svg</file>
+    <file alias="icons/codicons/layout-sidebar-left-off.svg">icons/codicons/layout-sidebar-left-off.svg</file>
+    <file alias="icons/codicons/layout-sidebar-right.svg">icons/codicons/layout-sidebar-right.svg</file>
+    <file alias="icons/codicons/layout-sidebar-right-off.svg">icons/codicons/layout-sidebar-right-off.svg</file>
+    <file alias="icons/codicons/layout-centered.svg">icons/codicons/layout-centered.svg</file>
+    <file alias="icons/codicons/layout-centered-off.svg">icons/codicons/layout-centered-off.svg</file>
+    <file alias="licenses/qt-LGPL-3.0.txt">licenses/qt-LGPL-3.0.txt</file>
+    <file alias="licenses/pandoc-GPL-2.0.txt">licenses/pandoc-GPL-2.0.txt</file>
+    <file alias="licenses/md4c-MIT.txt">licenses/md4c-MIT.txt</file>
+    <file alias="licenses/anydoc-MIT.txt">licenses/anydoc-MIT.txt</file>
+    <file alias="licenses/katex-MIT.txt">licenses/katex-MIT.txt</file>
+    <file alias="licenses/highlightjs-BSD-3-Clause.txt">licenses/highlightjs-BSD-3-Clause.txt</file>
+    <file alias="licenses/mermaid-MIT.txt">licenses/mermaid-MIT.txt</file>
+    <file alias="licenses/markmap-MIT.txt">licenses/markmap-MIT.txt</file>
+    <file alias="licenses/d3-ISC.txt">licenses/d3-ISC.txt</file>
+    <file alias="licenses/ksyntaxhighlighting-MIT.txt">licenses/ksyntaxhighlighting-MIT.txt</file>
+    <file alias="licenses/xterm-MIT.txt">licenses/xterm-MIT.txt</file>
+    <file alias="licenses/webview2-SDK.txt">licenses/webview2-SDK.txt</file>
+    <file alias="licenses/materialicons-Apache-2.0.txt">licenses/materialicons-Apache-2.0.txt</file>
+    <file alias="licenses/codicons-CC-BY-4.0.txt">licenses/codicons-CC-BY-4.0.txt</file>
+    <file alias="release-notes/CHANGELOG.md">../CHANGELOG.md</file>
+    <file alias="guide/user-guide.md">guide/user-guide.md</file>
+    <file alias="welcome/welcome.md">welcome/welcome.md</file>
+  </qresource>
+</RCC>

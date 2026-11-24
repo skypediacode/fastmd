@@ -1,0 +1,1481 @@
+{
+  "schema": 1,
+  "canvas": {
+    "width": 64,
+    "height": 64,
+    "padding": 4,
+    "fontSize": 26
+  },
+  "category_canvases": {
+    "Functions": {
+      "width": 192,
+      "height": 64,
+      "padding": 4,
+      "fontSize": 26
+    },
+    "Chemistry": {
+      "height": 64,
+      "padding": 4,
+      "fontSize": 26,
+      "renderWidth": 1024
+    }
+  },
+  "icons": {
+    "frac": {
+      "category": "Fractions",
+      "expression": "\\frac{x}{y}",
+      "insertion": "\\frac{x}{y}",
+      "file": "resources/icons/math/fractions/frac.svg",
+      "width": 64
+    },
+    "dfrac": {
+      "category": "Fractions",
+      "expression": "\\dfrac{x}{y}",
+      "insertion": "\\dfrac{x}{y}",
+      "file": "resources/icons/math/fractions/dfrac.svg",
+      "width": 64
+    },
+    "tfrac": {
+      "category": "Fractions",
+      "expression": "\\tfrac{x}{y}",
+      "insertion": "\\tfrac{x}{y}",
+      "file": "resources/icons/math/fractions/tfrac.svg",
+      "width": 64
+    },
+    "binom": {
+      "category": "Fractions",
+      "expression": "\\binom{n}{k}",
+      "insertion": "\\binom{n}{k}",
+      "file": "resources/icons/math/fractions/binom.svg",
+      "width": 64
+    },
+    "pow": {
+      "category": "Scripts",
+      "expression": "x^2",
+      "insertion": "x^2",
+      "file": "resources/icons/math/scripts/pow.svg",
+      "width": 64
+    },
+    "sub": {
+      "category": "Scripts",
+      "expression": "x_n",
+      "insertion": "x_n",
+      "file": "resources/icons/math/scripts/sub.svg",
+      "width": 64
+    },
+    "subsup": {
+      "category": "Scripts",
+      "expression": "x_n^2",
+      "insertion": "x_n^2",
+      "file": "resources/icons/math/scripts/subsup.svg",
+      "width": 64
+    },
+    "prime": {
+      "category": "Scripts",
+      "expression": "f'(x)",
+      "insertion": "f'(x)",
+      "file": "resources/icons/math/scripts/prime.svg",
+      "width": 64
+    },
+    "double-prime": {
+      "category": "Scripts",
+      "expression": "f''(x)",
+      "insertion": "f''(x)",
+      "file": "resources/icons/math/scripts/double-prime.svg",
+      "width": 64
+    },
+    "factorial": {
+      "category": "Scripts",
+      "expression": "n!",
+      "insertion": "n!",
+      "file": "resources/icons/math/scripts/factorial.svg",
+      "width": 64
+    },
+    "sqrt": {
+      "category": "Roots",
+      "expression": "\\sqrt{x}",
+      "insertion": "\\sqrt{x}",
+      "file": "resources/icons/math/roots/sqrt.svg",
+      "width": 64
+    },
+    "cuberoot": {
+      "category": "Roots",
+      "expression": "\\sqrt[3]{x}",
+      "insertion": "\\sqrt[3]{x}",
+      "file": "resources/icons/math/roots/cuberoot.svg",
+      "width": 64
+    },
+    "nthroot": {
+      "category": "Roots",
+      "expression": "\\sqrt[n]{x}",
+      "insertion": "\\sqrt[n]{x}",
+      "file": "resources/icons/math/roots/nthroot.svg",
+      "width": 64
+    },
+    "int": {
+      "category": "Calculus",
+      "expression": "\\int_a^b",
+      "insertion": "\\int_a^b f(x)\\,dx",
+      "file": "resources/icons/math/calculus/int.svg",
+      "width": 64
+    },
+    "iint": {
+      "category": "Calculus",
+      "expression": "\\iint_D",
+      "insertion": "\\iint_D f(x,y)\\,dA",
+      "file": "resources/icons/math/calculus/iint.svg",
+      "width": 64
+    },
+    "iiint": {
+      "category": "Calculus",
+      "expression": "\\iiint_V",
+      "insertion": "\\iiint_V f\\,dV",
+      "file": "resources/icons/math/calculus/iiint.svg",
+      "width": 64
+    },
+    "oint": {
+      "category": "Calculus",
+      "expression": "\\oint_C",
+      "insertion": "\\oint_C f(z)\\,dz",
+      "file": "resources/icons/math/calculus/oint.svg",
+      "width": 64
+    },
+    "sum": {
+      "category": "Calculus",
+      "expression": "\\sum_{i=1}^n",
+      "insertion": "\\sum_{i=1}^n a_i",
+      "file": "resources/icons/math/calculus/sum.svg",
+      "width": 64
+    },
+    "prod": {
+      "category": "Calculus",
+      "expression": "\\prod_{i=1}^n",
+      "insertion": "\\prod_{i=1}^n a_i",
+      "file": "resources/icons/math/calculus/prod.svg",
+      "width": 64
+    },
+    "bigcup": {
+      "category": "Calculus",
+      "expression": "\\bigcup_{i=1}^n",
+      "insertion": "\\bigcup_{i=1}^n A_i",
+      "file": "resources/icons/math/calculus/bigcup.svg",
+      "width": 64
+    },
+    "bigcap": {
+      "category": "Calculus",
+      "expression": "\\bigcap_{i=1}^n",
+      "insertion": "\\bigcap_{i=1}^n A_i",
+      "file": "resources/icons/math/calculus/bigcap.svg",
+      "width": 64
+    },
+    "lim": {
+      "category": "Calculus",
+      "expression": "\\lim_{x\\to a}",
+      "insertion": "\\lim_{x\\to a} f(x)",
+      "file": "resources/icons/math/calculus/lim.svg",
+      "width": 64
+    },
+    "derivative": {
+      "category": "Calculus",
+      "expression": "\\frac{df}{dx}",
+      "insertion": "\\frac{df}{dx}",
+      "file": "resources/icons/math/calculus/derivative.svg",
+      "width": 64
+    },
+    "partial": {
+      "category": "Calculus",
+      "expression": "\\frac{\\partial f}{\\partial x}",
+      "insertion": "\\frac{\\partial f}{\\partial x}",
+      "file": "resources/icons/math/calculus/partial.svg",
+      "width": 64
+    },
+    "gradient": {
+      "category": "Calculus",
+      "expression": "\\nabla f",
+      "insertion": "\\nabla f",
+      "file": "resources/icons/math/calculus/gradient.svg",
+      "width": 64
+    },
+    "times": {
+      "category": "Operators",
+      "expression": "\\times",
+      "insertion": "\\times",
+      "file": "resources/icons/math/operators/times.svg",
+      "width": 64
+    },
+    "div": {
+      "category": "Operators",
+      "expression": "\\div",
+      "insertion": "\\div",
+      "file": "resources/icons/math/operators/div.svg",
+      "width": 64
+    },
+    "pm": {
+      "category": "Operators",
+      "expression": "\\pm",
+      "insertion": "\\pm",
+      "file": "resources/icons/math/operators/pm.svg",
+      "width": 64
+    },
+    "mp": {
+      "category": "Operators",
+      "expression": "\\mp",
+      "insertion": "\\mp",
+      "file": "resources/icons/math/operators/mp.svg",
+      "width": 64
+    },
+    "cdot": {
+      "category": "Operators",
+      "expression": "\\cdot",
+      "insertion": "\\cdot",
+      "file": "resources/icons/math/operators/cdot.svg",
+      "width": 64
+    },
+    "circ": {
+      "category": "Operators",
+      "expression": "\\circ",
+      "insertion": "\\circ",
+      "file": "resources/icons/math/operators/circ.svg",
+      "width": 64
+    },
+    "ast": {
+      "category": "Operators",
+      "expression": "\\ast",
+      "insertion": "\\ast",
+      "file": "resources/icons/math/operators/ast.svg",
+      "width": 64
+    },
+    "oplus": {
+      "category": "Operators",
+      "expression": "\\oplus",
+      "insertion": "\\oplus",
+      "file": "resources/icons/math/operators/oplus.svg",
+      "width": 64
+    },
+    "otimes": {
+      "category": "Operators",
+      "expression": "\\otimes",
+      "insertion": "\\otimes",
+      "file": "resources/icons/math/operators/otimes.svg",
+      "width": 64
+    },
+    "neq": {
+      "category": "Relations",
+      "expression": "\\neq",
+      "insertion": "\\neq",
+      "file": "resources/icons/math/relations/neq.svg",
+      "width": 64
+    },
+    "leq": {
+      "category": "Relations",
+      "expression": "\\leq",
+      "insertion": "\\leq",
+      "file": "resources/icons/math/relations/leq.svg",
+      "width": 64
+    },
+    "geq": {
+      "category": "Relations",
+      "expression": "\\geq",
+      "insertion": "\\geq",
+      "file": "resources/icons/math/relations/geq.svg",
+      "width": 64
+    },
+    "approx": {
+      "category": "Relations",
+      "expression": "\\approx",
+      "insertion": "\\approx",
+      "file": "resources/icons/math/relations/approx.svg",
+      "width": 64
+    },
+    "equiv": {
+      "category": "Relations",
+      "expression": "\\equiv",
+      "insertion": "\\equiv",
+      "file": "resources/icons/math/relations/equiv.svg",
+      "width": 64
+    },
+    "sim": {
+      "category": "Relations",
+      "expression": "\\sim",
+      "insertion": "\\sim",
+      "file": "resources/icons/math/relations/sim.svg",
+      "width": 64
+    },
+    "simeq": {
+      "category": "Relations",
+      "expression": "\\simeq",
+      "insertion": "\\simeq",
+      "file": "resources/icons/math/relations/simeq.svg",
+      "width": 64
+    },
+    "propto": {
+      "category": "Relations",
+      "expression": "\\propto",
+      "insertion": "\\propto",
+      "file": "resources/icons/math/relations/propto.svg",
+      "width": 64
+    },
+    "cong": {
+      "category": "Relations",
+      "expression": "\\cong",
+      "insertion": "\\cong",
+      "file": "resources/icons/math/relations/cong.svg",
+      "width": 64
+    },
+    "parallel": {
+      "category": "Relations",
+      "expression": "\\parallel",
+      "insertion": "\\parallel",
+      "file": "resources/icons/math/relations/parallel.svg",
+      "width": 64
+    },
+    "perp": {
+      "category": "Miscellaneous",
+      "expression": "\\perp",
+      "insertion": "\\perp",
+      "file": "resources/icons/math/miscellaneous/perp.svg",
+      "width": 64
+    },
+    "rightarrow": {
+      "category": "Arrows",
+      "expression": "\\rightarrow",
+      "insertion": "\\rightarrow",
+      "file": "resources/icons/math/arrows/rightarrow.svg",
+      "width": 64
+    },
+    "leftarrow": {
+      "category": "Arrows",
+      "expression": "\\leftarrow",
+      "insertion": "\\leftarrow",
+      "file": "resources/icons/math/arrows/leftarrow.svg",
+      "width": 64
+    },
+    "leftrightarrow": {
+      "category": "Arrows",
+      "expression": "\\leftrightarrow",
+      "insertion": "\\leftrightarrow",
+      "file": "resources/icons/math/arrows/leftrightarrow.svg",
+      "width": 64
+    },
+    "implies": {
+      "category": "Arrows",
+      "expression": "\\Rightarrow",
+      "insertion": "\\Rightarrow",
+      "file": "resources/icons/math/arrows/implies.svg",
+      "width": 64
+    },
+    "implied-by": {
+      "category": "Arrows",
+      "expression": "\\Leftarrow",
+      "insertion": "\\Leftarrow",
+      "file": "resources/icons/math/arrows/implied-by.svg",
+      "width": 64
+    },
+    "iff": {
+      "category": "Arrows",
+      "expression": "\\Leftrightarrow",
+      "insertion": "\\Leftrightarrow",
+      "file": "resources/icons/math/arrows/iff.svg",
+      "width": 64
+    },
+    "uparrow": {
+      "category": "Arrows",
+      "expression": "\\uparrow",
+      "insertion": "\\uparrow",
+      "file": "resources/icons/math/arrows/uparrow.svg",
+      "width": 64
+    },
+    "downarrow": {
+      "category": "Arrows",
+      "expression": "\\downarrow",
+      "insertion": "\\downarrow",
+      "file": "resources/icons/math/arrows/downarrow.svg",
+      "width": 64
+    },
+    "mapsto": {
+      "category": "Arrows",
+      "expression": "\\mapsto",
+      "insertion": "\\mapsto",
+      "file": "resources/icons/math/arrows/mapsto.svg",
+      "width": 64
+    },
+    "longrightarrow": {
+      "category": "Arrows",
+      "expression": "\\longrightarrow",
+      "insertion": "\\longrightarrow",
+      "file": "resources/icons/math/arrows/longrightarrow.svg",
+      "width": 64
+    },
+    "alpha": {
+      "category": "Greek Letters",
+      "expression": "\\alpha",
+      "insertion": "\\alpha",
+      "file": "resources/icons/math/greek-letters/alpha.svg",
+      "width": 64
+    },
+    "beta": {
+      "category": "Greek Letters",
+      "expression": "\\beta",
+      "insertion": "\\beta",
+      "file": "resources/icons/math/greek-letters/beta.svg",
+      "width": 64
+    },
+    "gamma": {
+      "category": "Greek Letters",
+      "expression": "\\gamma",
+      "insertion": "\\gamma",
+      "file": "resources/icons/math/greek-letters/gamma.svg",
+      "width": 64
+    },
+    "delta": {
+      "category": "Greek Letters",
+      "expression": "\\delta",
+      "insertion": "\\delta",
+      "file": "resources/icons/math/greek-letters/delta.svg",
+      "width": 64
+    },
+    "epsilon": {
+      "category": "Greek Letters",
+      "expression": "\\epsilon",
+      "insertion": "\\epsilon",
+      "file": "resources/icons/math/greek-letters/epsilon.svg",
+      "width": 64
+    },
+    "theta": {
+      "category": "Greek Letters",
+      "expression": "\\theta",
+      "insertion": "\\theta",
+      "file": "resources/icons/math/greek-letters/theta.svg",
+      "width": 64
+    },
+    "lambda": {
+      "category": "Greek Letters",
+      "expression": "\\lambda",
+      "insertion": "\\lambda",
+      "file": "resources/icons/math/greek-letters/lambda.svg",
+      "width": 64
+    },
+    "mu": {
+      "category": "Greek Letters",
+      "expression": "\\mu",
+      "insertion": "\\mu",
+      "file": "resources/icons/math/greek-letters/mu.svg",
+      "width": 64
+    },
+    "pi": {
+      "category": "Greek Letters",
+      "expression": "\\pi",
+      "insertion": "\\pi",
+      "file": "resources/icons/math/greek-letters/pi.svg",
+      "width": 64
+    },
+    "sigma": {
+      "category": "Greek Letters",
+      "expression": "\\sigma",
+      "insertion": "\\sigma",
+      "file": "resources/icons/math/greek-letters/sigma.svg",
+      "width": 64
+    },
+    "phi": {
+      "category": "Greek Letters",
+      "expression": "\\phi",
+      "insertion": "\\phi",
+      "file": "resources/icons/math/greek-letters/phi.svg",
+      "width": 64
+    },
+    "omega": {
+      "category": "Greek Letters",
+      "expression": "\\omega",
+      "insertion": "\\omega",
+      "file": "resources/icons/math/greek-letters/omega.svg",
+      "width": 64
+    },
+    "capital-gamma": {
+      "category": "Greek Letters",
+      "expression": "\\Gamma",
+      "insertion": "\\Gamma",
+      "file": "resources/icons/math/greek-letters/capital-gamma.svg",
+      "width": 64
+    },
+    "capital-delta": {
+      "category": "Greek Letters",
+      "expression": "\\Delta",
+      "insertion": "\\Delta",
+      "file": "resources/icons/math/greek-letters/capital-delta.svg",
+      "width": 64
+    },
+    "capital-pi": {
+      "category": "Greek Letters",
+      "expression": "\\Pi",
+      "insertion": "\\Pi",
+      "file": "resources/icons/math/greek-letters/capital-pi.svg",
+      "width": 64
+    },
+    "capital-sigma": {
+      "category": "Greek Letters",
+      "expression": "\\Sigma",
+      "insertion": "\\Sigma",
+      "file": "resources/icons/math/greek-letters/capital-sigma.svg",
+      "width": 64
+    },
+    "capital-omega": {
+      "category": "Greek Letters",
+      "expression": "\\Omega",
+      "insertion": "\\Omega",
+      "file": "resources/icons/math/greek-letters/capital-omega.svg",
+      "width": 64
+    },
+    "in": {
+      "category": "Sets",
+      "expression": "\\in",
+      "insertion": "\\in",
+      "file": "resources/icons/math/sets/in.svg",
+      "width": 64
+    },
+    "notin": {
+      "category": "Sets",
+      "expression": "\\notin",
+      "insertion": "\\notin",
+      "file": "resources/icons/math/sets/notin.svg",
+      "width": 64
+    },
+    "subset": {
+      "category": "Sets",
+      "expression": "\\subset",
+      "insertion": "\\subset",
+      "file": "resources/icons/math/sets/subset.svg",
+      "width": 64
+    },
+    "subseteq": {
+      "category": "Sets",
+      "expression": "\\subseteq",
+      "insertion": "\\subseteq",
+      "file": "resources/icons/math/sets/subseteq.svg",
+      "width": 64
+    },
+    "supset": {
+      "category": "Sets",
+      "expression": "\\supset",
+      "insertion": "\\supset",
+      "file": "resources/icons/math/sets/supset.svg",
+      "width": 64
+    },
+    "supseteq": {
+      "category": "Sets",
+      "expression": "\\supseteq",
+      "insertion": "\\supseteq",
+      "file": "resources/icons/math/sets/supseteq.svg",
+      "width": 64
+    },
+    "cup": {
+      "category": "Sets",
+      "expression": "\\cup",
+      "insertion": "\\cup",
+      "file": "resources/icons/math/sets/cup.svg",
+      "width": 64
+    },
+    "cap": {
+      "category": "Sets",
+      "expression": "\\cap",
+      "insertion": "\\cap",
+      "file": "resources/icons/math/sets/cap.svg",
+      "width": 64
+    },
+    "setminus": {
+      "category": "Sets",
+      "expression": "\\setminus",
+      "insertion": "\\setminus",
+      "file": "resources/icons/math/sets/setminus.svg",
+      "width": 64
+    },
+    "emptyset": {
+      "category": "Sets",
+      "expression": "\\emptyset",
+      "insertion": "\\emptyset",
+      "file": "resources/icons/math/sets/emptyset.svg",
+      "width": 64
+    },
+    "mathbbR": {
+      "category": "Sets",
+      "expression": "\\mathbb{R}",
+      "insertion": "\\mathbb{R}",
+      "file": "resources/icons/math/sets/mathbbR.svg",
+      "width": 64
+    },
+    "paren": {
+      "category": "Delimiters",
+      "expression": "(x)",
+      "insertion": "(x)",
+      "file": "resources/icons/math/delimiters/paren.svg",
+      "width": 64
+    },
+    "bracket": {
+      "category": "Delimiters",
+      "expression": "[x]",
+      "insertion": "[x]",
+      "file": "resources/icons/math/delimiters/bracket.svg",
+      "width": 64
+    },
+    "brace": {
+      "category": "Delimiters",
+      "expression": "\\{x\\}",
+      "insertion": "\\{x\\}",
+      "file": "resources/icons/math/delimiters/brace.svg",
+      "width": 64
+    },
+    "angle": {
+      "category": "Delimiters",
+      "expression": "\\langle x\\rangle",
+      "insertion": "\\langle x\\rangle",
+      "file": "resources/icons/math/delimiters/angle.svg",
+      "width": 64
+    },
+    "abs": {
+      "category": "Delimiters",
+      "expression": "|x|",
+      "insertion": "|x|",
+      "file": "resources/icons/math/delimiters/abs.svg",
+      "width": 64
+    },
+    "norm": {
+      "category": "Delimiters",
+      "expression": "\\lVert x\\rVert",
+      "insertion": "\\lVert x\\rVert",
+      "file": "resources/icons/math/delimiters/norm.svg",
+      "width": 64
+    },
+    "floor": {
+      "category": "Delimiters",
+      "expression": "\\lfloor x\\rfloor",
+      "insertion": "\\lfloor x\\rfloor",
+      "file": "resources/icons/math/delimiters/floor.svg",
+      "width": 64
+    },
+    "ceil": {
+      "category": "Delimiters",
+      "expression": "\\lceil x\\rceil",
+      "insertion": "\\lceil x\\rceil",
+      "file": "resources/icons/math/delimiters/ceil.svg",
+      "width": 64
+    },
+    "hat": {
+      "category": "Accents",
+      "expression": "\\hat{x}",
+      "insertion": "\\hat{x}",
+      "file": "resources/icons/math/accents/hat.svg",
+      "width": 64
+    },
+    "bar": {
+      "category": "Accents",
+      "expression": "\\bar{x}",
+      "insertion": "\\bar{x}",
+      "file": "resources/icons/math/accents/bar.svg",
+      "width": 64
+    },
+    "vec": {
+      "category": "Accents",
+      "expression": "\\vec{x}",
+      "insertion": "\\vec{x}",
+      "file": "resources/icons/math/accents/vec.svg",
+      "width": 64
+    },
+    "tilde": {
+      "category": "Accents",
+      "expression": "\\tilde{x}",
+      "insertion": "\\tilde{x}",
+      "file": "resources/icons/math/accents/tilde.svg",
+      "width": 64
+    },
+    "dot": {
+      "category": "Accents",
+      "expression": "\\dot{x}",
+      "insertion": "\\dot{x}",
+      "file": "resources/icons/math/accents/dot.svg",
+      "width": 64
+    },
+    "ddot": {
+      "category": "Accents",
+      "expression": "\\ddot{x}",
+      "insertion": "\\ddot{x}",
+      "file": "resources/icons/math/accents/ddot.svg",
+      "width": 64
+    },
+    "underline": {
+      "category": "Accents",
+      "expression": "\\underline{x}",
+      "insertion": "\\underline{x}",
+      "file": "resources/icons/math/accents/underline.svg",
+      "width": 64
+    },
+    "overline": {
+      "category": "Accents",
+      "expression": "\\overline{x}",
+      "insertion": "\\overline{x}",
+      "file": "resources/icons/math/accents/overline.svg",
+      "width": 64
+    },
+    "widehat": {
+      "category": "Accents",
+      "expression": "\\widehat{xy}",
+      "insertion": "\\widehat{xy}",
+      "file": "resources/icons/math/accents/widehat.svg",
+      "width": 64
+    },
+    "widetilde": {
+      "category": "Accents",
+      "expression": "\\widetilde{xy}",
+      "insertion": "\\widetilde{xy}",
+      "file": "resources/icons/math/accents/widetilde.svg",
+      "width": 64
+    },
+    "land": {
+      "category": "Logic",
+      "expression": "\\land",
+      "insertion": "\\land",
+      "file": "resources/icons/math/logic/land.svg",
+      "width": 64
+    },
+    "lor": {
+      "category": "Logic",
+      "expression": "\\lor",
+      "insertion": "\\lor",
+      "file": "resources/icons/math/logic/lor.svg",
+      "width": 64
+    },
+    "lnot": {
+      "category": "Logic",
+      "expression": "\\lnot",
+      "insertion": "\\lnot",
+      "file": "resources/icons/math/logic/lnot.svg",
+      "width": 64
+    },
+    "forall": {
+      "category": "Logic",
+      "expression": "\\forall",
+      "insertion": "\\forall",
+      "file": "resources/icons/math/logic/forall.svg",
+      "width": 64
+    },
+    "exists": {
+      "category": "Logic",
+      "expression": "\\exists",
+      "insertion": "\\exists",
+      "file": "resources/icons/math/logic/exists.svg",
+      "width": 64
+    },
+    "therefore": {
+      "category": "Logic",
+      "expression": "\\therefore",
+      "insertion": "\\therefore",
+      "file": "resources/icons/math/logic/therefore.svg",
+      "width": 64
+    },
+    "because": {
+      "category": "Logic",
+      "expression": "\\because",
+      "insertion": "\\because",
+      "file": "resources/icons/math/logic/because.svg",
+      "width": 64
+    },
+    "triangle": {
+      "category": "Miscellaneous",
+      "expression": "\\triangle",
+      "insertion": "\\triangle",
+      "file": "resources/icons/math/miscellaneous/triangle.svg",
+      "width": 64
+    },
+    "angle-symbol": {
+      "category": "Geometry",
+      "expression": "\\angle A",
+      "insertion": "\\angle ABC",
+      "file": "resources/icons/math/geometry/angle-symbol.svg",
+      "width": 64
+    },
+    "degree": {
+      "category": "Geometry",
+      "expression": "90^\\circ",
+      "insertion": "90^\\circ",
+      "file": "resources/icons/math/geometry/degree.svg",
+      "width": 64
+    },
+    "congruent": {
+      "category": "Geometry",
+      "expression": "\\cong",
+      "insertion": "\\cong",
+      "file": "resources/icons/math/geometry/congruent.svg",
+      "width": 64
+    },
+    "similar": {
+      "category": "Geometry",
+      "expression": "\\sim",
+      "insertion": "\\sim",
+      "file": "resources/icons/math/geometry/similar.svg",
+      "width": 64
+    },
+    "plus": {
+      "category": "Operators",
+      "expression": "+",
+      "insertion": "+",
+      "file": "resources/icons/math/operators/plus.svg",
+      "width": 64
+    },
+    "minus": {
+      "category": "Operators",
+      "expression": "-",
+      "insertion": "-",
+      "file": "resources/icons/math/operators/minus.svg",
+      "width": 64
+    },
+    "equals": {
+      "category": "Relations",
+      "expression": "=",
+      "insertion": "=",
+      "file": "resources/icons/math/relations/equals.svg",
+      "width": 64
+    },
+    "capital-theta": {
+      "category": "Greek Letters",
+      "expression": "\\Theta",
+      "insertion": "\\Theta",
+      "file": "resources/icons/math/greek-letters/capital-theta.svg",
+      "width": 64
+    },
+    "capital-lambda": {
+      "category": "Greek Letters",
+      "expression": "\\Lambda",
+      "insertion": "\\Lambda",
+      "file": "resources/icons/math/greek-letters/capital-lambda.svg",
+      "width": 64
+    },
+    "capital-phi": {
+      "category": "Greek Letters",
+      "expression": "\\Phi",
+      "insertion": "\\Phi",
+      "file": "resources/icons/math/greek-letters/capital-phi.svg",
+      "width": 64
+    },
+    "left-paren": {
+      "category": "Delimiters",
+      "expression": "\\left(x\\right)",
+      "insertion": "\\left(x\\right)",
+      "file": "resources/icons/math/delimiters/left-paren.svg",
+      "width": 64
+    },
+    "left-bracket": {
+      "category": "Delimiters",
+      "expression": "\\left[x\\right]",
+      "insertion": "\\left[x\\right]",
+      "file": "resources/icons/math/delimiters/left-bracket.svg",
+      "width": 64
+    },
+    "left-brace": {
+      "category": "Delimiters",
+      "expression": "\\left\\{x\\right\\}",
+      "insertion": "\\left\\{x\\right\\}",
+      "file": "resources/icons/math/delimiters/left-brace.svg",
+      "width": 64
+    },
+    "left-abs": {
+      "category": "Delimiters",
+      "expression": "\\left|x\\right|",
+      "insertion": "\\left|x\\right|",
+      "file": "resources/icons/math/delimiters/left-abs.svg",
+      "width": 64
+    },
+    "partial-operator": {
+      "category": "Calculus",
+      "expression": "\\frac{\\partial}{\\partial x}",
+      "insertion": "\\frac{\\partial}{\\partial x}",
+      "file": "resources/icons/math/calculus/partial-operator.svg",
+      "width": 64
+    },
+    "nabla": {
+      "category": "Calculus",
+      "expression": "\\nabla",
+      "insertion": "\\nabla",
+      "file": "resources/icons/math/calculus/nabla.svg",
+      "width": 64
+    },
+    "limit-template": {
+      "category": "Calculus",
+      "expression": "\\lim_{x\\to0}",
+      "insertion": "\\lim_{x\\to0}f(x)",
+      "file": "resources/icons/math/calculus/limit-template.svg",
+      "width": 64
+    },
+    "mathbbN": {
+      "category": "Sets",
+      "expression": "\\mathbb{N}",
+      "insertion": "\\mathbb{N}",
+      "file": "resources/icons/math/sets/mathbbN.svg",
+      "width": 64
+    },
+    "mathbbZ": {
+      "category": "Sets",
+      "expression": "\\mathbb{Z}",
+      "insertion": "\\mathbb{Z}",
+      "file": "resources/icons/math/sets/mathbbZ.svg",
+      "width": 64
+    },
+    "mathbbQ": {
+      "category": "Sets",
+      "expression": "\\mathbb{Q}",
+      "insertion": "\\mathbb{Q}",
+      "file": "resources/icons/math/sets/mathbbQ.svg",
+      "width": 64
+    },
+    "mathbbC": {
+      "category": "Sets",
+      "expression": "\\mathbb{C}",
+      "insertion": "\\mathbb{C}",
+      "file": "resources/icons/math/sets/mathbbC.svg",
+      "width": 64
+    },
+    "breve": {
+      "category": "Accents",
+      "expression": "\\breve{x}",
+      "insertion": "\\breve{x}",
+      "file": "resources/icons/math/accents/breve.svg",
+      "width": 64
+    },
+    "check": {
+      "category": "Accents",
+      "expression": "\\check{x}",
+      "insertion": "\\check{x}",
+      "file": "resources/icons/math/accents/check.svg",
+      "width": 64
+    },
+    "infty": {
+      "category": "Miscellaneous",
+      "expression": "\\infty",
+      "insertion": "\\infty",
+      "file": "resources/icons/math/miscellaneous/infty.svg",
+      "width": 64
+    },
+    "partial-symbol": {
+      "category": "Miscellaneous",
+      "expression": "\\partial",
+      "insertion": "\\partial",
+      "file": "resources/icons/math/miscellaneous/partial-symbol.svg",
+      "width": 64
+    },
+    "ell": {
+      "category": "Miscellaneous",
+      "expression": "\\ell",
+      "insertion": "\\ell",
+      "file": "resources/icons/math/miscellaneous/ell.svg",
+      "width": 64
+    },
+    "hbar": {
+      "category": "Miscellaneous",
+      "expression": "\\hbar",
+      "insertion": "\\hbar",
+      "file": "resources/icons/math/miscellaneous/hbar.svg",
+      "width": 64
+    },
+    "real-part": {
+      "category": "Miscellaneous",
+      "expression": "\\Re",
+      "insertion": "\\Re",
+      "file": "resources/icons/math/miscellaneous/real-part.svg",
+      "width": 64
+    },
+    "imaginary-part": {
+      "category": "Miscellaneous",
+      "expression": "\\Im",
+      "insertion": "\\Im",
+      "file": "resources/icons/math/miscellaneous/imaginary-part.svg",
+      "width": 64
+    },
+    "square": {
+      "category": "Miscellaneous",
+      "expression": "\\square",
+      "insertion": "\\square",
+      "file": "resources/icons/math/miscellaneous/square.svg",
+      "width": 64
+    },
+    "diamond": {
+      "category": "Miscellaneous",
+      "expression": "\\diamond",
+      "insertion": "\\diamond",
+      "file": "resources/icons/math/miscellaneous/diamond.svg",
+      "width": 64
+    },
+    "star": {
+      "category": "Miscellaneous",
+      "expression": "\\star",
+      "insertion": "\\star",
+      "file": "resources/icons/math/miscellaneous/star.svg",
+      "width": 64
+    },
+    "dagger": {
+      "category": "Miscellaneous",
+      "expression": "\\dagger",
+      "insertion": "\\dagger",
+      "file": "resources/icons/math/miscellaneous/dagger.svg",
+      "width": 64
+    },
+    "ddagger": {
+      "category": "Miscellaneous",
+      "expression": "\\ddagger",
+      "insertion": "\\ddagger",
+      "file": "resources/icons/math/miscellaneous/ddagger.svg",
+      "width": 64
+    },
+    "aleph": {
+      "category": "Miscellaneous",
+      "expression": "\\aleph",
+      "insertion": "\\aleph",
+      "file": "resources/icons/math/miscellaneous/aleph.svg",
+      "width": 64
+    },
+    "measuredangle": {
+      "category": "Miscellaneous",
+      "expression": "\\measuredangle A",
+      "insertion": "\\measuredangle ABC",
+      "file": "resources/icons/math/miscellaneous/measuredangle.svg",
+      "width": 64
+    },
+    "prime-symbol": {
+      "category": "Miscellaneous",
+      "expression": "'",
+      "insertion": "'",
+      "file": "resources/icons/math/miscellaneous/prime-symbol.svg",
+      "width": 64
+    },
+    "cdots": {
+      "category": "Miscellaneous",
+      "expression": "\\cdots",
+      "insertion": "\\cdots",
+      "file": "resources/icons/math/miscellaneous/cdots.svg",
+      "width": 64
+    },
+    "ldots": {
+      "category": "Miscellaneous",
+      "expression": "\\ldots",
+      "insertion": "\\ldots",
+      "file": "resources/icons/math/miscellaneous/ldots.svg",
+      "width": 64
+    },
+    "vdots": {
+      "category": "Miscellaneous",
+      "expression": "\\vdots",
+      "insertion": "\\vdots",
+      "file": "resources/icons/math/miscellaneous/vdots.svg",
+      "width": 64
+    },
+    "ddots": {
+      "category": "Miscellaneous",
+      "expression": "\\ddots",
+      "insertion": "\\ddots",
+      "file": "resources/icons/math/miscellaneous/ddots.svg",
+      "width": 64
+    },
+    "func": {
+      "category": "Functions",
+      "expression": "\\mathrm{func}",
+      "insertion": "\\mathrm{func}",
+      "file": "resources/icons/math/functions/func.svg",
+      "width": 64
+    },
+    "bullet": {
+      "category": "Operators",
+      "expression": "\\bullet",
+      "insertion": "\\bullet",
+      "file": "resources/icons/math/operators/bullet.svg",
+      "width": 64
+    },
+    "overset": {
+      "category": "Scripts",
+      "expression": "\\overset{a}{x}",
+      "insertion": "\\overset{a}{x}",
+      "file": "resources/icons/math/scripts/overset.svg",
+      "width": 64
+    },
+    "underset": {
+      "category": "Scripts",
+      "expression": "\\underset{a}{x}",
+      "insertion": "\\underset{a}{x}",
+      "file": "resources/icons/math/scripts/underset.svg",
+      "width": 64
+    },
+    "less-than": {
+      "category": "Relations",
+      "expression": "<",
+      "insertion": "<",
+      "file": "resources/icons/math/relations/less-than.svg",
+      "width": 64
+    },
+    "greater-than": {
+      "category": "Relations",
+      "expression": ">",
+      "insertion": ">",
+      "file": "resources/icons/math/relations/greater-than.svg",
+      "width": 64
+    },
+    "ll": {
+      "category": "Relations",
+      "expression": "\\ll",
+      "insertion": "\\ll",
+      "file": "resources/icons/math/relations/ll.svg",
+      "width": 64
+    },
+    "gg": {
+      "category": "Relations",
+      "expression": "\\gg",
+      "insertion": "\\gg",
+      "file": "resources/icons/math/relations/gg.svg",
+      "width": 64
+    },
+    "longleftrightarrow": {
+      "category": "Arrows",
+      "expression": "\\longleftrightarrow",
+      "insertion": "\\longleftrightarrow",
+      "file": "resources/icons/math/arrows/longleftrightarrow.svg",
+      "width": 64
+    },
+    "left-norm": {
+      "category": "Delimiters",
+      "expression": "\\left\\lVert x\\right\\rVert",
+      "insertion": "\\left\\lVert x\\right\\rVert",
+      "file": "resources/icons/math/delimiters/left-norm.svg",
+      "width": 64
+    },
+    "left-angle": {
+      "category": "Delimiters",
+      "expression": "\\left\\langle x\\right\\rangle",
+      "insertion": "\\left\\langle x\\right\\rangle",
+      "file": "resources/icons/math/delimiters/left-angle.svg",
+      "width": 64
+    },
+    "ceiling": {
+      "category": "Delimiters",
+      "expression": "\\left\\lceil x\\right\\rceil",
+      "insertion": "\\left\\lceil x\\right\\rceil",
+      "file": "resources/icons/math/delimiters/ceiling.svg",
+      "width": 64
+    },
+    "overrightarrow": {
+      "category": "Accents",
+      "expression": "\\overrightarrow{AB}",
+      "insertion": "\\overrightarrow{AB}",
+      "file": "resources/icons/math/accents/overrightarrow.svg",
+      "width": 64
+    },
+    "overbrace": {
+      "category": "Accents",
+      "expression": "\\overbrace{x+y}^{label}",
+      "insertion": "\\overbrace{x+y}^{label}",
+      "file": "resources/icons/math/accents/overbrace.svg",
+      "width": 64
+    },
+    "underbrace": {
+      "category": "Accents",
+      "expression": "\\underbrace{x+y}_{label}",
+      "insertion": "\\underbrace{x+y}_{label}",
+      "file": "resources/icons/math/accents/underbrace.svg",
+      "width": 64
+    },
+    "derivative-operator": {
+      "category": "Calculus",
+      "expression": "\\frac{d}{dx}",
+      "insertion": "\\frac{d}{dx}",
+      "file": "resources/icons/math/calculus/derivative-operator.svg",
+      "width": 64
+    },
+    "second-derivative": {
+      "category": "Calculus",
+      "expression": "\\frac{d^2f}{dx^2}",
+      "insertion": "\\frac{d^2f}{dx^2}",
+      "file": "resources/icons/math/calculus/second-derivative.svg",
+      "width": 64
+    },
+    "evaluated-derivative": {
+      "category": "Calculus",
+      "expression": "\\left.\\frac{df}{dx}\\right|_{x=a}",
+      "insertion": "\\left.\\frac{df}{dx}\\right|_{x=a}",
+      "file": "resources/icons/math/calculus/evaluated-derivative.svg",
+      "width": 64
+    },
+    "indefinite-integral": {
+      "category": "Calculus",
+      "expression": "\\int f(x)\\,dx",
+      "insertion": "\\int f(x)\\,dx",
+      "file": "resources/icons/math/calculus/indefinite-integral.svg",
+      "width": 64
+    },
+    "common-h2o": {
+      "category": "Chemistry",
+      "expression": "\\ce{H2O}",
+      "insertion": "\\ce{H2O}",
+      "file": "resources/icons/math/chemistry/common-h2o.svg",
+      "width": 67
+    },
+    "common-hplus": {
+      "category": "Chemistry",
+      "expression": "\\ce{H+}",
+      "insertion": "\\ce{H+}",
+      "file": "resources/icons/math/chemistry/common-hplus.svg",
+      "width": 47
+    },
+    "common-cro4": {
+      "category": "Chemistry",
+      "expression": "\\ce{CrO4^2-}",
+      "insertion": "\\ce{CrO4^2-}",
+      "file": "resources/icons/math/chemistry/common-cro4.svg",
+      "width": 105
+    },
+    "common-ohminus": {
+      "category": "Chemistry",
+      "expression": "\\ce{OH-}",
+      "insertion": "\\ce{OH-}",
+      "file": "resources/icons/math/chemistry/common-ohminus.svg",
+      "width": 70
+    },
+    "common-2h2o": {
+      "category": "Chemistry",
+      "expression": "\\ce{2H2O}",
+      "insertion": "\\ce{2H2O}",
+      "file": "resources/icons/math/chemistry/common-2h2o.svg",
+      "width": 87
+    },
+    "common-arrow": {
+      "category": "Chemistry",
+      "expression": "\\ce{A -> B}",
+      "insertion": "\\ce{A -> B}",
+      "file": "resources/icons/math/chemistry/common-arrow.svg",
+      "width": 115
+    },
+    "common-equil": {
+      "category": "Chemistry",
+      "expression": "\\ce{A <=> B}",
+      "insertion": "\\ce{A <=> B}",
+      "file": "resources/icons/math/chemistry/common-equil.svg",
+      "width": 124
+    },
+    "formula-co2": {
+      "category": "Chemistry",
+      "expression": "\\ce{CO2}",
+      "insertion": "\\ce{CO2}",
+      "file": "resources/icons/math/chemistry/formula-co2.svg",
+      "width": 64
+    },
+    "formula-h2o": {
+      "category": "Chemistry",
+      "expression": "\\ce{H2O}",
+      "insertion": "\\ce{H2O}",
+      "file": "resources/icons/math/chemistry/formula-h2o.svg",
+      "width": 67
+    },
+    "formula-naoh": {
+      "category": "Chemistry",
+      "expression": "\\ce{NaOH}",
+      "insertion": "\\ce{NaOH}",
+      "file": "resources/icons/math/chemistry/formula-naoh.svg",
+      "width": 94
+    },
+    "formula-h2so4": {
+      "category": "Chemistry",
+      "expression": "\\ce{H2SO4}",
+      "insertion": "\\ce{H2SO4}",
+      "file": "resources/icons/math/chemistry/formula-h2so4.svg",
+      "width": 96
+    },
+    "formula-fe2o3": {
+      "category": "Chemistry",
+      "expression": "\\ce{Fe2O3}",
+      "insertion": "\\ce{Fe2O3}",
+      "file": "resources/icons/math/chemistry/formula-fe2o3.svg",
+      "width": 89
+    },
+    "ion-naplus": {
+      "category": "Chemistry",
+      "expression": "\\ce{Na+}",
+      "insertion": "\\ce{Na+}",
+      "file": "resources/icons/math/chemistry/ion-naplus.svg",
+      "width": 63
+    },
+    "ion-hplus": {
+      "category": "Chemistry",
+      "expression": "\\ce{H+}",
+      "insertion": "\\ce{H+}",
+      "file": "resources/icons/math/chemistry/ion-hplus.svg",
+      "width": 47
+    },
+    "ion-ohminus": {
+      "category": "Chemistry",
+      "expression": "\\ce{OH-}",
+      "insertion": "\\ce{OH-}",
+      "file": "resources/icons/math/chemistry/ion-ohminus.svg",
+      "width": 70
+    },
+    "ion-ca2plus": {
+      "category": "Chemistry",
+      "expression": "\\ce{Ca^2+}",
+      "insertion": "\\ce{Ca^2+}",
+      "file": "resources/icons/math/chemistry/ion-ca2plus.svg",
+      "width": 72
+    },
+    "ion-so4": {
+      "category": "Chemistry",
+      "expression": "\\ce{SO4^2-}",
+      "insertion": "\\ce{SO4^2-}",
+      "file": "resources/icons/math/chemistry/ion-so4.svg",
+      "width": 88
+    },
+    "ion-agcl2": {
+      "category": "Chemistry",
+      "expression": "\\ce{[AgCl2]-}",
+      "insertion": "\\ce{[AgCl2]-}",
+      "file": "resources/icons/math/chemistry/ion-agcl2.svg",
+      "width": 121
+    },
+    "stoich-05": {
+      "category": "Chemistry",
+      "expression": "\\ce{0.5H2O}",
+      "insertion": "\\ce{0.5H2O}",
+      "file": "resources/icons/math/chemistry/stoich-05.svg",
+      "width": 112
+    },
+    "stoich-2": {
+      "category": "Chemistry",
+      "expression": "\\ce{2H2O}",
+      "insertion": "\\ce{2H2O}",
+      "file": "resources/icons/math/chemistry/stoich-2.svg",
+      "width": 87
+    },
+    "stoich-half": {
+      "category": "Chemistry",
+      "expression": "\\ce{1/2H2O}",
+      "insertion": "\\ce{1/2H2O}",
+      "file": "resources/icons/math/chemistry/stoich-half.svg",
+      "width": 87
+    },
+    "stoich-n": {
+      "category": "Chemistry",
+      "expression": "\\ce{nH2O}",
+      "insertion": "\\ce{nH2O}",
+      "file": "resources/icons/math/chemistry/stoich-n.svg",
+      "width": 91
+    },
+    "arrow-left": {
+      "category": "Chemistry",
+      "expression": "\\ce{A <- B}",
+      "insertion": "\\ce{A <- B}",
+      "file": "resources/icons/math/chemistry/arrow-left.svg",
+      "width": 115
+    },
+    "arrow-right": {
+      "category": "Chemistry",
+      "expression": "\\ce{A -> B}",
+      "insertion": "\\ce{A -> B}",
+      "file": "resources/icons/math/chemistry/arrow-right.svg",
+      "width": 115
+    },
+    "arrow-equil": {
+      "category": "Chemistry",
+      "expression": "\\ce{A <=> B}",
+      "insertion": "\\ce{A <=> B}",
+      "file": "resources/icons/math/chemistry/arrow-equil.svg",
+      "width": 124
+    },
+    "arrow-double": {
+      "category": "Chemistry",
+      "expression": "\\ce{A <-> B}",
+      "insertion": "\\ce{A <-> B}",
+      "file": "resources/icons/math/chemistry/arrow-double.svg",
+      "width": 124
+    },
+    "arrow-equil2": {
+      "category": "Chemistry",
+      "expression": "\\ce{A <=>> B}",
+      "insertion": "\\ce{A <=>> B}",
+      "file": "resources/icons/math/chemistry/arrow-equil2.svg",
+      "width": 124
+    },
+    "arrow-cond": {
+      "category": "Chemistry",
+      "expression": "\\ce{A ->[H2O] B}",
+      "insertion": "\\ce{A ->[H2O] B}",
+      "file": "resources/icons/math/chemistry/arrow-cond.svg",
+      "width": 134
+    },
+    "arrow-cond2": {
+      "category": "Chemistry",
+      "expression": "\\ce{A ->[text above][text below] B}",
+      "insertion": "\\ce{A ->[text above][text below] B}",
+      "file": "resources/icons/math/chemistry/arrow-cond2.svg",
+      "width": 191
+    },
+    "state-gas": {
+      "category": "Chemistry",
+      "expression": "\\ce{H2(g)}",
+      "insertion": "\\ce{H2(g)}",
+      "file": "resources/icons/math/chemistry/state-gas.svg",
+      "width": 85
+    },
+    "state-liquid": {
+      "category": "Chemistry",
+      "expression": "\\ce{H2O(l)}",
+      "insertion": "\\ce{H2O(l)}",
+      "file": "resources/icons/math/chemistry/state-liquid.svg",
+      "width": 102
+    },
+    "state-solid": {
+      "category": "Chemistry",
+      "expression": "\\ce{NaCl(s)}",
+      "insertion": "\\ce{NaCl(s)}",
+      "file": "resources/icons/math/chemistry/state-solid.svg",
+      "width": 116
+    },
+    "state-aq-ion": {
+      "category": "Chemistry",
+      "expression": "\\ce{Na+(aq)}",
+      "insertion": "\\ce{Na+(aq)}",
+      "file": "resources/icons/math/chemistry/state-aq-ion.svg",
+      "width": 123
+    },
+    "state-aq": {
+      "category": "Chemistry",
+      "expression": "\\ce{NaOH(aq)}",
+      "insertion": "\\ce{NaOH(aq)}",
+      "file": "resources/icons/math/chemistry/state-aq.svg",
+      "width": 153
+    },
+    "isotope-th": {
+      "category": "Chemistry",
+      "expression": "\\ce{^{227}_{90}Th+}",
+      "insertion": "\\ce{^{227}_{90}Th+}",
+      "file": "resources/icons/math/chemistry/isotope-th.svg",
+      "width": 98
+    },
+    "isotope-c": {
+      "category": "Chemistry",
+      "expression": "\\ce{^{14}_{6}C}",
+      "insertion": "\\ce{^{14}_{6}C}",
+      "file": "resources/icons/math/chemistry/isotope-c.svg",
+      "width": 51
+    },
+    "isotope-h2o": {
+      "category": "Chemistry",
+      "expression": "\\ce{^{3}H2O}",
+      "insertion": "\\ce{^{3}H2O}",
+      "file": "resources/icons/math/chemistry/isotope-h2o.svg",
+      "width": 79
+    },
+    "eq-co2": {
+      "category": "Chemistry",
+      "expression": "\\ce{CO2 + C -> 2CO}",
+      "insertion": "\\ce{CO2 + C -> 2CO}",
+      "file": "resources/icons/math/chemistry/eq-co2.svg",
+      "width": 258
+    },
+    "eq-water": {
+      "category": "Chemistry",
+      "expression": "\\ce{H2 + O2 -> H2O}",
+      "insertion": "\\ce{2H2 + O2 -> 2H2O}",
+      "file": "resources/icons/math/chemistry/eq-water.svg",
+      "width": 242
+    }
+  }
+}

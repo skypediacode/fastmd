@@ -1,0 +1,40 @@
+// Generated into the build tree by CMake -- edit fastmd.rc.in, never the copy.
+// The version numbers come from project(FastMD VERSION ...) in CMakeLists.txt so
+// the executable's Details tab, the MSIX manifest and the installers cannot drift
+// apart. The icon is referenced absolutely because the generated .rc no longer
+// sits beside it in the source tree.
+
+IDI_ICON1 ICON "@FASTMD_RC_ICON@"
+
+#include <winver.h>
+
+VS_VERSION_INFO VERSIONINFO
+FILEVERSION     @PROJECT_VERSION_MAJOR@,@PROJECT_VERSION_MINOR@,@PROJECT_VERSION_PATCH@,0
+PRODUCTVERSION  @PROJECT_VERSION_MAJOR@,@PROJECT_VERSION_MINOR@,@PROJECT_VERSION_PATCH@,0
+FILEFLAGSMASK   VS_FFI_FILEFLAGSMASK
+FILEFLAGS       0x0L
+FILEOS          VOS_NT_WINDOWS32
+FILETYPE        VFT_APP
+FILESUBTYPE     VFT2_UNKNOWN
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904B0"
+        BEGIN
+            VALUE "CompanyName",      "skypediacode"
+            VALUE "FileDescription",  "FastMD Markdown and Text Editor"
+            VALUE "FileVersion",      "@PROJECT_VERSION@.0"
+            VALUE "InternalName",     "FastMD"
+            VALUE "LegalCopyright",   "Copyright (C) skypediacode"
+            VALUE "OriginalFilename", "FastMD.exe"
+            VALUE "ProductName",      "FastMD"
+            VALUE "ProductVersion",   "@PROJECT_VERSION@.0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        // 0x0409 US English, 1200 Unicode -- must match the StringFileInfo block
+        // name above or Explorer shows no version details at all.
+        VALUE "Translation", 0x409, 1200
+    END
+END

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <title>FastMD terminal link test</title>
+  <link rel="stylesheet" href="../../resources/terminal/xterm/xterm.css">
+  <link rel="stylesheet" href="../../resources/terminal/terminal.css">
+  <script>
+    // xterm renders on animation frames, which headless virtual time does not
+    // drive reliably. Timer-driven frames make every run render the same way.
+    window.requestAnimationFrame = function (callback) {
+      return setTimeout(function () { callback(performance.now()); }, 16);
+    };
+    window.cancelAnimationFrame = function (handle) { clearTimeout(handle); };
+  </script>
+  <script src="../../resources/terminal/xterm/xterm.js"></script>
+  <script src="../../resources/terminal/xterm/addon-fit.js"></script>
+  <script src="../../resources/terminal/xterm/addon-unicode11.js"></script>
+  <script src="keytest-host.js"></script>
+</head>
+<body>
+  <pre id="result">LINKTEST_PENDING</pre>
+  <div id="terminals" style="width: 800px; height: 400px"></div>
+  <script src="../../resources/terminal/terminal-links.js"></script>
+  <script src="../../resources/terminal/terminal.js"></script>
+  <script src="linktest.js"></script>
+</body>
+</html>

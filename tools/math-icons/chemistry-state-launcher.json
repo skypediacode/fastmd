@@ -1,0 +1,6 @@
+{
+  "canvas": { "height": 64, "padding": 4, "fontSize": 26, "renderWidth": 1024 },
+  "actions": [
+    { "id": "state-launcher", "category": "Chemistry", "label": "States", "latex": "\\mathrm{States}" }
+  ]
+}

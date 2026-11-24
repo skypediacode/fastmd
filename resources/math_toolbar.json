@@ -1,0 +1,1297 @@
+{
+  "schema": 1,
+  "quickAccess": [
+    "frac",
+    "pow",
+    "sub",
+    "subsup",
+    "sqrt",
+    "nthroot",
+    "abs",
+    "norm",
+    "vec",
+    "hat",
+    "bar"
+  ],
+  "groups": [
+    {
+      "id": "greek",
+      "title": "Greek",
+      "listLayout": false,
+      "symbols": [
+        "alpha",
+        "beta",
+        "gamma",
+        "delta",
+        "epsilon",
+        "theta",
+        "lambda",
+        "mu",
+        "pi",
+        "sigma",
+        "phi",
+        "omega",
+        "capital-gamma",
+        "capital-delta",
+        "capital-theta",
+        "capital-lambda",
+        "capital-pi",
+        "capital-sigma",
+        "capital-phi",
+        "capital-omega"
+      ]
+    },
+    {
+      "id": "operators",
+      "title": "Operators",
+      "listLayout": false,
+      "symbols": [
+        "plus",
+        "minus",
+        "pm",
+        "mp",
+        "times",
+        "div",
+        "cdot",
+        "circ",
+        "oplus",
+        "otimes",
+        "sqrt",
+        "nthroot"
+      ]
+    },
+    {
+      "id": "fractions-scripts",
+      "title": "Fractions & Scripts",
+      "listLayout": false,
+      "symbols": [
+        "frac",
+        "dfrac",
+        "binom",
+        "pow",
+        "sub",
+        "subsup",
+        "prime",
+        "factorial"
+      ]
+    },
+    {
+      "id": "relations",
+      "title": "Relations",
+      "listLayout": false,
+      "symbols": [
+        "equals",
+        "neq",
+        "leq",
+        "geq",
+        "approx",
+        "equiv",
+        "sim",
+        "simeq",
+        "cong",
+        "propto"
+      ]
+    },
+    {
+      "id": "sets-logic",
+      "title": "Sets & Logic",
+      "listLayout": false,
+      "symbols": [
+        "in",
+        "notin",
+        "subset",
+        "subseteq",
+        "supset",
+        "supseteq",
+        "cup",
+        "cap",
+        "setminus",
+        "emptyset",
+        "forall",
+        "exists",
+        "land",
+        "lor",
+        "lnot",
+        "mathbbR",
+        "mathbbN",
+        "mathbbZ",
+        "mathbbQ",
+        "mathbbC"
+      ]
+    },
+    {
+      "id": "arrows",
+      "title": "Arrows",
+      "listLayout": false,
+      "symbols": [
+        "rightarrow",
+        "leftarrow",
+        "leftrightarrow",
+        "implies",
+        "implied-by",
+        "iff",
+        "uparrow",
+        "downarrow",
+        "mapsto"
+      ]
+    },
+    {
+      "id": "brackets",
+      "title": "Brackets",
+      "listLayout": false,
+      "symbols": [
+        "paren",
+        "bracket",
+        "brace",
+        "left-paren",
+        "left-bracket",
+        "left-brace",
+        "abs",
+        "left-abs",
+        "norm",
+        "angle"
+      ]
+    },
+    {
+      "id": "accents",
+      "title": "Accents",
+      "listLayout": false,
+      "symbols": [
+        "hat",
+        "bar",
+        "vec",
+        "tilde",
+        "overline",
+        "underline",
+        "dot",
+        "ddot",
+        "overset",
+        "underset",
+        "separator-accents",
+        "accent-overline-ab",
+        "accent-underline-ab",
+        "accent-overrightarrow-ab",
+        "accent-underrightarrow-ab",
+        "accent-overleftrightarrow-ab",
+        "accent-underleftrightarrow-ab",
+        "accent-widehat-ab",
+        "accent-widetilde-ab",
+        "accent-overbrace-ab-abc",
+        "accent-underbrace-ab-abc",
+        "accent-overset-abc-ab",
+        "accent-underset-abc-ab"
+      ]
+    },
+    {
+      "id": "functions",
+      "title": "Functions",
+      "listLayout": false,
+      "symbols": [
+        "sin",
+        "cos",
+        "tan",
+        "arcsin",
+        "arccos",
+        "arctan",
+        "log",
+        "ln",
+        "exp",
+        "lim",
+        "limsup",
+        "liminf",
+        "max",
+        "min",
+        "sup",
+        "inf",
+        "det",
+        "dim",
+        "ker",
+        "gcd",
+        "Pr"
+      ]
+    },
+    {
+      "id": "derivative",
+      "title": "Derivative",
+      "listLayout": false,
+      "symbols": [
+        "derivative",
+        "derivative-operator",
+        "partial",
+        "partial-operator",
+        "prime",
+        "nabla"
+      ]
+    },
+    {
+      "id": "integration",
+      "title": "Integration",
+      "listLayout": false,
+      "symbols": [
+        "indefinite-integral",
+        "int",
+        "iint",
+        "iiint",
+        "oint",
+        "sum",
+        "prod",
+        "limit-template"
+      ]
+    },
+    {
+      "id": "matrices",
+      "title": "Matrices",
+      "listLayout": false,
+      "symbols": [
+        "matrix",
+        "pmatrix",
+        "bmatrix",
+        "brace-matrix",
+        "vmatrix",
+        "norm-matrix",
+        "cases"
+      ]
+    },
+    {
+      "id": "miscellaneous",
+      "title": "Miscellaneous",
+      "listLayout": false,
+      "symbols": [
+        "infty",
+        "angle-symbol",
+        "measuredangle",
+        "degree",
+        "prime-symbol",
+        "cdots",
+        "ldots",
+        "vdots",
+        "ddots",
+        "perp"
+      ]
+    }
+  ],
+  "symbols": [
+    {
+      "id": "frac",
+      "category": "Fractions",
+      "label": "Fraction",
+      "latex": "\\frac{x}{y}"
+    },
+    {
+      "id": "dfrac",
+      "category": "Fractions",
+      "label": "Display fraction",
+      "latex": "\\dfrac{x}{y}"
+    },
+    {
+      "id": "tfrac",
+      "category": "Fractions",
+      "label": "Text fraction",
+      "latex": "\\tfrac{x}{y}"
+    },
+    {
+      "id": "binom",
+      "category": "Fractions",
+      "label": "Binomial coefficient",
+      "latex": "\\binom{n}{k}"
+    },
+    {
+      "id": "pow",
+      "category": "Scripts",
+      "label": "Superscript",
+      "latex": "x^2"
+    },
+    {
+      "id": "sub",
+      "category": "Scripts",
+      "label": "Subscript",
+      "latex": "x_n"
+    },
+    {
+      "id": "subsup",
+      "category": "Scripts",
+      "label": "Subscript and superscript",
+      "latex": "x_n^2"
+    },
+    {
+      "id": "prime",
+      "category": "Scripts",
+      "label": "Prime",
+      "latex": "f'(x)"
+    },
+    {
+      "id": "double-prime",
+      "category": "Scripts",
+      "label": "Double prime",
+      "latex": "f''(x)"
+    },
+    {
+      "id": "factorial",
+      "category": "Scripts",
+      "label": "Factorial",
+      "latex": "n!"
+    },
+    {
+      "id": "sqrt",
+      "category": "Roots",
+      "label": "Square root",
+      "latex": "\\sqrt{x}"
+    },
+    {
+      "id": "cuberoot",
+      "category": "Roots",
+      "label": "Cube root",
+      "latex": "\\sqrt[3]{x}"
+    },
+    {
+      "id": "nthroot",
+      "category": "Roots",
+      "label": "Nth root",
+      "latex": "\\sqrt[n]{x}"
+    },
+    {
+      "id": "int",
+      "category": "Calculus",
+      "label": "Definite integral",
+      "latex": "\\int_a^b f(x)\\,dx",
+      "icon_latex": "\\int_a^b"
+    },
+    {
+      "id": "iint",
+      "category": "Calculus",
+      "label": "Double integral",
+      "latex": "\\iint_D f(x,y)\\,dA",
+      "icon_latex": "\\iint_D"
+    },
+    {
+      "id": "iiint",
+      "category": "Calculus",
+      "label": "Triple integral",
+      "latex": "\\iiint_V f\\,dV",
+      "icon_latex": "\\iiint_V"
+    },
+    {
+      "id": "oint",
+      "category": "Calculus",
+      "label": "Contour integral",
+      "latex": "\\oint_C f(z)\\,dz",
+      "icon_latex": "\\oint_C"
+    },
+    {
+      "id": "sum",
+      "category": "Calculus",
+      "label": "Summation",
+      "latex": "\\sum_{i=1}^n a_i",
+      "icon_latex": "\\sum_{i=1}^n"
+    },
+    {
+      "id": "prod",
+      "category": "Calculus",
+      "label": "Product",
+      "latex": "\\prod_{i=1}^n a_i",
+      "icon_latex": "\\prod_{i=1}^n"
+    },
+    {
+      "id": "bigcup",
+      "category": "Calculus",
+      "label": "Big union",
+      "latex": "\\bigcup_{i=1}^n A_i",
+      "icon_latex": "\\bigcup_{i=1}^n"
+    },
+    {
+      "id": "bigcap",
+      "category": "Calculus",
+      "label": "Big intersection",
+      "latex": "\\bigcap_{i=1}^n A_i",
+      "icon_latex": "\\bigcap_{i=1}^n"
+    },
+    {
+      "id": "lim",
+      "category": "Calculus",
+      "label": "Limit",
+      "latex": "\\lim_{x\\to a} f(x)",
+      "icon_latex": "\\lim_{x\\to a}"
+    },
+    {
+      "id": "derivative",
+      "category": "Calculus",
+      "label": "Derivative",
+      "latex": "\\frac{df}{dx}"
+    },
+    {
+      "id": "partial",
+      "category": "Calculus",
+      "label": "Partial derivative",
+      "latex": "\\frac{\\partial f}{\\partial x}"
+    },
+    {
+      "id": "gradient",
+      "category": "Calculus",
+      "label": "Gradient",
+      "latex": "\\nabla f"
+    },
+    {
+      "id": "times",
+      "category": "Operators",
+      "label": "Multiplication",
+      "latex": "\\times"
+    },
+    {
+      "id": "div",
+      "category": "Operators",
+      "label": "Division",
+      "latex": "\\div"
+    },
+    {
+      "id": "pm",
+      "category": "Operators",
+      "label": "Plus or minus",
+      "latex": "\\pm"
+    },
+    {
+      "id": "mp",
+      "category": "Operators",
+      "label": "Minus or plus",
+      "latex": "\\mp"
+    },
+    {
+      "id": "cdot",
+      "category": "Operators",
+      "label": "Centered dot",
+      "latex": "\\cdot"
+    },
+    {
+      "id": "circ",
+      "category": "Operators",
+      "label": "Composition circle",
+      "latex": "\\circ"
+    },
+    {
+      "id": "ast",
+      "category": "Operators",
+      "label": "Asterisk operator",
+      "latex": "\\ast"
+    },
+    {
+      "id": "oplus",
+      "category": "Operators",
+      "label": "Direct sum",
+      "latex": "\\oplus"
+    },
+    {
+      "id": "otimes",
+      "category": "Operators",
+      "label": "Tensor product",
+      "latex": "\\otimes"
+    },
+    {
+      "id": "neq",
+      "category": "Relations",
+      "label": "Not equal",
+      "latex": "\\neq"
+    },
+    {
+      "id": "leq",
+      "category": "Relations",
+      "label": "Less than or equal",
+      "latex": "\\leq"
+    },
+    {
+      "id": "geq",
+      "category": "Relations",
+      "label": "Greater than or equal",
+      "latex": "\\geq"
+    },
+    {
+      "id": "approx",
+      "category": "Relations",
+      "label": "Approximately equal",
+      "latex": "\\approx"
+    },
+    {
+      "id": "equiv",
+      "category": "Relations",
+      "label": "Equivalent",
+      "latex": "\\equiv"
+    },
+    {
+      "id": "sim",
+      "category": "Relations",
+      "label": "Similar",
+      "latex": "\\sim"
+    },
+    {
+      "id": "simeq",
+      "category": "Relations",
+      "label": "Similar or equal",
+      "latex": "\\simeq"
+    },
+    {
+      "id": "propto",
+      "category": "Relations",
+      "label": "Proportional to",
+      "latex": "\\propto"
+    },
+    {
+      "id": "cong",
+      "category": "Relations",
+      "label": "Congruent",
+      "latex": "\\cong"
+    },
+    {
+      "id": "parallel",
+      "category": "Relations",
+      "label": "Parallel",
+      "latex": "\\parallel"
+    },
+    {
+      "id": "perp",
+      "category": "Relations",
+      "label": "Perpendicular",
+      "latex": "\\perp"
+    },
+    {
+      "id": "rightarrow",
+      "category": "Arrows",
+      "label": "Right arrow",
+      "latex": "\\rightarrow"
+    },
+    {
+      "id": "leftarrow",
+      "category": "Arrows",
+      "label": "Left arrow",
+      "latex": "\\leftarrow"
+    },
+    {
+      "id": "leftrightarrow",
+      "category": "Arrows",
+      "label": "Left-right arrow",
+      "latex": "\\leftrightarrow"
+    },
+    {
+      "id": "implies",
+      "category": "Arrows",
+      "label": "Implies",
+      "latex": "\\Rightarrow"
+    },
+    {
+      "id": "implied-by",
+      "category": "Arrows",
+      "label": "Implied by",
+      "latex": "\\Leftarrow"
+    },
+    {
+      "id": "iff",
+      "category": "Arrows",
+      "label": "If and only if",
+      "latex": "\\Leftrightarrow"
+    },
+    {
+      "id": "uparrow",
+      "category": "Arrows",
+      "label": "Up arrow",
+      "latex": "\\uparrow"
+    },
+    {
+      "id": "downarrow",
+      "category": "Arrows",
+      "label": "Down arrow",
+      "latex": "\\downarrow"
+    },
+    {
+      "id": "mapsto",
+      "category": "Arrows",
+      "label": "Maps to",
+      "latex": "\\mapsto"
+    },
+    {
+      "id": "longrightarrow",
+      "category": "Arrows",
+      "label": "Long right arrow",
+      "latex": "\\longrightarrow"
+    },
+    {
+      "id": "alpha",
+      "category": "Greek Letters",
+      "label": "Alpha",
+      "latex": "\\alpha"
+    },
+    {
+      "id": "beta",
+      "category": "Greek Letters",
+      "label": "Beta",
+      "latex": "\\beta"
+    },
+    {
+      "id": "gamma",
+      "category": "Greek Letters",
+      "label": "Gamma",
+      "latex": "\\gamma"
+    },
+    {
+      "id": "delta",
+      "category": "Greek Letters",
+      "label": "Delta",
+      "latex": "\\delta"
+    },
+    {
+      "id": "epsilon",
+      "category": "Greek Letters",
+      "label": "Epsilon",
+      "latex": "\\epsilon"
+    },
+    {
+      "id": "theta",
+      "category": "Greek Letters",
+      "label": "Theta",
+      "latex": "\\theta"
+    },
+    {
+      "id": "lambda",
+      "category": "Greek Letters",
+      "label": "Lambda",
+      "latex": "\\lambda"
+    },
+    {
+      "id": "mu",
+      "category": "Greek Letters",
+      "label": "Mu",
+      "latex": "\\mu"
+    },
+    {
+      "id": "pi",
+      "category": "Greek Letters",
+      "label": "Pi",
+      "latex": "\\pi"
+    },
+    {
+      "id": "sigma",
+      "category": "Greek Letters",
+      "label": "Sigma",
+      "latex": "\\sigma"
+    },
+    {
+      "id": "phi",
+      "category": "Greek Letters",
+      "label": "Phi",
+      "latex": "\\phi"
+    },
+    {
+      "id": "omega",
+      "category": "Greek Letters",
+      "label": "Omega",
+      "latex": "\\omega"
+    },
+    {
+      "id": "capital-gamma",
+      "category": "Greek Letters",
+      "label": "Capital Gamma",
+      "latex": "\\Gamma"
+    },
+    {
+      "id": "capital-delta",
+      "category": "Greek Letters",
+      "label": "Capital Delta",
+      "latex": "\\Delta"
+    },
+    {
+      "id": "capital-pi",
+      "category": "Greek Letters",
+      "label": "Capital Pi",
+      "latex": "\\Pi"
+    },
+    {
+      "id": "capital-sigma",
+      "category": "Greek Letters",
+      "label": "Capital Sigma",
+      "latex": "\\Sigma"
+    },
+    {
+      "id": "capital-omega",
+      "category": "Greek Letters",
+      "label": "Capital Omega",
+      "latex": "\\Omega"
+    },
+    {
+      "id": "in",
+      "category": "Sets",
+      "label": "Element of",
+      "latex": "\\in"
+    },
+    {
+      "id": "notin",
+      "category": "Sets",
+      "label": "Not an element of",
+      "latex": "\\notin"
+    },
+    {
+      "id": "subset",
+      "category": "Sets",
+      "label": "Subset",
+      "latex": "\\subset"
+    },
+    {
+      "id": "subseteq",
+      "category": "Sets",
+      "label": "Subset or equal",
+      "latex": "\\subseteq"
+    },
+    {
+      "id": "supset",
+      "category": "Sets",
+      "label": "Superset",
+      "latex": "\\supset"
+    },
+    {
+      "id": "supseteq",
+      "category": "Sets",
+      "label": "Superset or equal",
+      "latex": "\\supseteq"
+    },
+    {
+      "id": "cup",
+      "category": "Sets",
+      "label": "Union",
+      "latex": "\\cup"
+    },
+    {
+      "id": "cap",
+      "category": "Sets",
+      "label": "Intersection",
+      "latex": "\\cap"
+    },
+    {
+      "id": "setminus",
+      "category": "Sets",
+      "label": "Set difference",
+      "latex": "\\setminus"
+    },
+    {
+      "id": "emptyset",
+      "category": "Sets",
+      "label": "Empty set",
+      "latex": "\\emptyset"
+    },
+    {
+      "id": "mathbbR",
+      "category": "Sets",
+      "label": "Real numbers",
+      "latex": "\\mathbb{R}"
+    },
+    {
+      "id": "matrix",
+      "category": "Matrices",
+      "label": "Matrix",
+      "latex": "\\begin{matrix}a&b\\\\c&d\\end{matrix}"
+    },
+    {
+      "id": "pmatrix",
+      "category": "Matrices",
+      "label": "Parenthesized matrix",
+      "latex": "\\begin{pmatrix}a&b\\\\c&d\\end{pmatrix}"
+    },
+    {
+      "id": "bmatrix",
+      "category": "Matrices",
+      "label": "Bracketed matrix",
+      "latex": "\\begin{bmatrix}a&b\\\\c&d\\end{bmatrix}"
+    },
+    {
+      "id": "brace-matrix",
+      "category": "Matrices",
+      "label": "Braced matrix",
+      "latex": "\\begin{Bmatrix}a&b\\\\c&d\\end{Bmatrix}"
+    },
+    {
+      "id": "vmatrix",
+      "category": "Matrices",
+      "label": "Determinant matrix",
+      "latex": "\\begin{vmatrix}a&b\\\\c&d\\end{vmatrix}"
+    },
+    {
+      "id": "norm-matrix",
+      "category": "Matrices",
+      "label": "Norm matrix",
+      "latex": "\\begin{Vmatrix}a&b\\\\c&d\\end{Vmatrix}"
+    },
+    {
+      "id": "cases",
+      "category": "Matrices",
+      "label": "Piecewise cases",
+      "latex": "\\begin{cases}a&x>0\\\\b&x\\le0\\end{cases}",
+      "icon_latex": "\\begin{cases}a\\\\b\\end{cases}"
+    },
+    {
+      "id": "aligned",
+      "category": "Matrices",
+      "label": "Aligned equations",
+      "latex": "\\begin{aligned}a&=b\\\\c&=d\\end{aligned}",
+      "icon_latex": "\\begin{aligned}a\\\\c\\end{aligned}"
+    },
+    {
+      "id": "paren",
+      "category": "Delimiters",
+      "label": "Parentheses",
+      "latex": "(x)"
+    },
+    {
+      "id": "bracket",
+      "category": "Delimiters",
+      "label": "Brackets",
+      "latex": "[x]"
+    },
+    {
+      "id": "brace",
+      "category": "Delimiters",
+      "label": "Braces",
+      "latex": "\\{x\\}"
+    },
+    {
+      "id": "angle",
+      "category": "Delimiters",
+      "label": "Angle brackets",
+      "latex": "\\langle x\\rangle"
+    },
+    {
+      "id": "abs",
+      "category": "Delimiters",
+      "label": "Absolute value",
+      "latex": "|x|"
+    },
+    {
+      "id": "norm",
+      "category": "Delimiters",
+      "label": "Norm",
+      "latex": "\\lVert x\\rVert"
+    },
+    {
+      "id": "floor",
+      "category": "Delimiters",
+      "label": "Floor",
+      "latex": "\\lfloor x\\rfloor"
+    },
+    {
+      "id": "ceil",
+      "category": "Delimiters",
+      "label": "Ceiling",
+      "latex": "\\lceil x\\rceil"
+    },
+    {
+      "id": "hat",
+      "category": "Accents",
+      "label": "Hat",
+      "latex": "\\hat{x}"
+    },
+    {
+      "id": "bar",
+      "category": "Accents",
+      "label": "Bar",
+      "latex": "\\bar{x}"
+    },
+    {
+      "id": "vec",
+      "category": "Accents",
+      "label": "Vector arrow",
+      "latex": "\\vec{x}"
+    },
+    {
+      "id": "tilde",
+      "category": "Accents",
+      "label": "Tilde",
+      "latex": "\\tilde{x}"
+    },
+    {
+      "id": "dot",
+      "category": "Accents",
+      "label": "Dot accent",
+      "latex": "\\dot{x}"
+    },
+    {
+      "id": "ddot",
+      "category": "Accents",
+      "label": "Double-dot accent",
+      "latex": "\\ddot{x}"
+    },
+    {
+      "id": "underline",
+      "category": "Accents",
+      "label": "Underline",
+      "latex": "\\underline{x}"
+    },
+    {
+      "id": "overline",
+      "category": "Accents",
+      "label": "Overline",
+      "latex": "\\overline{x}"
+    },
+    {
+      "id": "widehat",
+      "category": "Accents",
+      "label": "Wide hat",
+      "latex": "\\widehat{xy}"
+    },
+    {
+      "id": "widetilde",
+      "category": "Accents",
+      "label": "Wide tilde",
+      "latex": "\\widetilde{xy}"
+    },
+    {
+      "id": "land",
+      "category": "Logic",
+      "label": "Logical and",
+      "latex": "\\land"
+    },
+    {
+      "id": "lor",
+      "category": "Logic",
+      "label": "Logical or",
+      "latex": "\\lor"
+    },
+    {
+      "id": "lnot",
+      "category": "Logic",
+      "label": "Logical not",
+      "latex": "\\lnot"
+    },
+    {
+      "id": "forall",
+      "category": "Logic",
+      "label": "For all",
+      "latex": "\\forall"
+    },
+    {
+      "id": "exists",
+      "category": "Logic",
+      "label": "There exists",
+      "latex": "\\exists"
+    },
+    {
+      "id": "therefore",
+      "category": "Logic",
+      "label": "Therefore",
+      "latex": "\\therefore"
+    },
+    {
+      "id": "because",
+      "category": "Logic",
+      "label": "Because",
+      "latex": "\\because"
+    },
+    {
+      "id": "triangle",
+      "category": "Geometry",
+      "label": "Triangle",
+      "latex": "\\triangle"
+    },
+    {
+      "id": "angle-symbol",
+      "category": "Geometry",
+      "label": "Geometric angle",
+      "latex": "\\angle ABC"
+    },
+    {
+      "id": "degree",
+      "category": "Geometry",
+      "label": "Degree",
+      "latex": "90^\\circ"
+    },
+    {
+      "id": "congruent",
+      "category": "Geometry",
+      "label": "Geometrically congruent",
+      "latex": "\\cong"
+    },
+    {
+      "id": "similar",
+      "category": "Geometry",
+      "label": "Geometrically similar",
+      "latex": "\\sim"
+    },
+    {
+      "id": "sin",
+      "category": "Functions",
+      "label": "Sine",
+      "latex": "\\sin(x)"
+    },
+    {
+      "id": "cos",
+      "category": "Functions",
+      "label": "Cosine",
+      "latex": "\\cos(x)"
+    },
+    {
+      "id": "tan",
+      "category": "Functions",
+      "label": "Tangent",
+      "latex": "\\tan(x)"
+    },
+    {
+      "id": "arcsin",
+      "category": "Functions",
+      "label": "Inverse sine",
+      "latex": "\\arcsin(x)",
+      "icon_latex": "\\sin^{-1}(x)"
+    },
+    {
+      "id": "arccos",
+      "category": "Functions",
+      "label": "Inverse cosine",
+      "latex": "\\arccos(x)",
+      "icon_latex": "\\cos^{-1}(x)"
+    },
+    {
+      "id": "arctan",
+      "category": "Functions",
+      "label": "Inverse tangent",
+      "latex": "\\arctan(x)",
+      "icon_latex": "\\tan^{-1}(x)"
+    },
+    {
+      "id": "ln",
+      "category": "Functions",
+      "label": "Natural logarithm",
+      "latex": "\\ln(x)"
+    },
+    {
+      "id": "log",
+      "category": "Functions",
+      "label": "Logarithm",
+      "latex": "\\log_b(x)"
+    },
+    {
+      "id": "exp",
+      "category": "Functions",
+      "label": "Exponential",
+      "latex": "e^x"
+    },
+    {
+      "id": "min",
+      "category": "Functions",
+      "label": "Minimum",
+      "latex": "\\min_x f(x)"
+    },
+    {
+      "id": "max",
+      "category": "Functions",
+      "label": "Maximum",
+      "latex": "\\max_x f(x)"
+    },
+    {
+      "id": "gcd",
+      "category": "Functions",
+      "label": "Greatest common divisor",
+      "latex": "\\gcd(a,b)"
+    },
+    {
+      "id": "plus",
+      "category": "Operators",
+      "label": "Plus",
+      "latex": "+"
+    },
+    {
+      "id": "minus",
+      "category": "Operators",
+      "label": "Minus",
+      "latex": "-"
+    },
+    {
+      "id": "equals",
+      "category": "Relations",
+      "label": "Equals",
+      "latex": "="
+    },
+    {
+      "id": "capital-theta",
+      "category": "Greek Letters",
+      "label": "Capital Theta",
+      "latex": "\\Theta"
+    },
+    {
+      "id": "capital-lambda",
+      "category": "Greek Letters",
+      "label": "Capital Lambda",
+      "latex": "\\Lambda"
+    },
+    {
+      "id": "capital-phi",
+      "category": "Greek Letters",
+      "label": "Capital Phi",
+      "latex": "\\Phi"
+    },
+    {
+      "id": "left-paren",
+      "category": "Delimiters",
+      "label": "Scalable parentheses",
+      "latex": "\\left(x\\right)"
+    },
+    {
+      "id": "left-bracket",
+      "category": "Delimiters",
+      "label": "Scalable brackets",
+      "latex": "\\left[x\\right]"
+    },
+    {
+      "id": "left-brace",
+      "category": "Delimiters",
+      "label": "Scalable braces",
+      "latex": "\\left\\{x\\right\\}"
+    },
+    {
+      "id": "left-abs",
+      "category": "Delimiters",
+      "label": "Scalable absolute value",
+      "latex": "\\left|x\\right|"
+    },
+    {
+      "id": "partial-operator",
+      "category": "Calculus",
+      "label": "Partial derivative operator",
+      "latex": "\\frac{\\partial}{\\partial x}"
+    },
+    {
+      "id": "nabla",
+      "category": "Calculus",
+      "label": "Nabla",
+      "latex": "\\nabla"
+    },
+    {
+      "id": "limit-template",
+      "category": "Calculus",
+      "label": "Limit template",
+      "latex": "\\lim_{x\\to0}f(x)",
+      "icon_latex": "\\lim_{x\\to0}"
+    },
+    {
+      "id": "limsup",
+      "category": "Functions",
+      "label": "Limit superior",
+      "latex": "\\limsup_{n\\to\\infty}a_n"
+    },
+    {
+      "id": "liminf",
+      "category": "Functions",
+      "label": "Limit inferior",
+      "latex": "\\liminf_{n\\to\\infty}a_n"
+    },
+    {
+      "id": "sup",
+      "category": "Functions",
+      "label": "Supremum",
+      "latex": "\\sup A"
+    },
+    {
+      "id": "inf",
+      "category": "Functions",
+      "label": "Infimum",
+      "latex": "\\inf A"
+    },
+    {
+      "id": "det",
+      "category": "Functions",
+      "label": "Determinant",
+      "latex": "\\det A"
+    },
+    {
+      "id": "dim",
+      "category": "Functions",
+      "label": "Dimension",
+      "latex": "\\dim V"
+    },
+    {
+      "id": "ker",
+      "category": "Functions",
+      "label": "Kernel",
+      "latex": "\\ker T"
+    },
+    {
+      "id": "Pr",
+      "category": "Functions",
+      "label": "Probability",
+      "latex": "\\Pr(A)"
+    },
+    {
+      "id": "mathbbN",
+      "category": "Sets",
+      "label": "Natural numbers",
+      "latex": "\\mathbb{N}"
+    },
+    {
+      "id": "mathbbZ",
+      "category": "Sets",
+      "label": "Integers",
+      "latex": "\\mathbb{Z}"
+    },
+    {
+      "id": "mathbbQ",
+      "category": "Sets",
+      "label": "Rational numbers",
+      "latex": "\\mathbb{Q}"
+    },
+    {
+      "id": "mathbbC",
+      "category": "Sets",
+      "label": "Complex numbers",
+      "latex": "\\mathbb{C}"
+    },
+    {
+      "id": "breve",
+      "category": "Accents",
+      "label": "Breve",
+      "latex": "\\breve{x}"
+    },
+    {
+      "id": "check",
+      "category": "Accents",
+      "label": "Check",
+      "latex": "\\check{x}"
+    },
+    {
+      "id": "infty",
+      "category": "Miscellaneous",
+      "label": "Infinity",
+      "latex": "\\infty"
+    },
+    {
+      "id": "measuredangle",
+      "category": "Miscellaneous",
+      "label": "Measured angle",
+      "latex": "\\measuredangle ABC"
+    },
+    {
+      "id": "prime-symbol",
+      "category": "Miscellaneous",
+      "label": "Prime symbol",
+      "latex": "'"
+    },
+    {
+      "id": "cdots",
+      "category": "Miscellaneous",
+      "label": "Centered dots",
+      "latex": "\\cdots"
+    },
+    {
+      "id": "ldots",
+      "category": "Miscellaneous",
+      "label": "Lower dots",
+      "latex": "\\ldots"
+    },
+    {
+      "id": "vdots",
+      "category": "Miscellaneous",
+      "label": "Vertical dots",
+      "latex": "\\vdots"
+    },
+    {
+      "id": "ddots",
+      "category": "Miscellaneous",
+      "label": "Diagonal dots",
+      "latex": "\\ddots"
+    }
+  ],
+  "canvas": {
+    "width": 64,
+    "height": 64,
+    "padding": 8
+  }
+}

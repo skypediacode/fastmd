@@ -1,0 +1,153 @@
+/* FastMD terminal shell. The panel chrome is native Qt; this page owns only the
+ * xterm viewports, one per session, stacked and toggled by visibility so a
+ * background session keeps its scrollback and its layout. */
+
+:root {
+  --fs: 15px;
+  --bg: #f7f7f7;
+  --fg: #1f1f1f;
+  color-scheme: light;
+}
+
+html[data-theme="dark"] {
+  --bg: #191a1b;
+  --fg: #bfbfbf;
+  color-scheme: dark;
+}
+
+/* Same handle color FastMD's own scrollbars use everywhere else (FastScrollBar,
+ * AppStyle's QScrollBar::handle) -- one gray, shared by both themes, so the
+ * terminal's scrollbar reads consistently with the Workspace panel's. */
+:root {
+  --scrollbar-thumb: rgba(130, 130, 130, 0.38);
+  --scrollbar-thumb-hover: rgba(130, 130, 130, 0.60);
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--fg);
+}
+
+#terminals {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+/* The gutter around the grid is made of *insets*, never padding, and this is
+ * load-bearing rather than a style preference. The fit addon sizes the grid
+ * from getComputedStyle(parentElement).height -- which under box-sizing:
+ * border-box is the border-box height, padding included -- and then subtracts
+ * only the .xterm element's own padding, which is zero. Any padding here is
+ * therefore space xterm believes it owns: it lays out
+ * floor(paddedHeight / cellHeight) rows, overflows this box by the vertical
+ * padding, and the bottom row is clipped by however much of it falls past the
+ * edge -- a different amount at every panel height, which is what made the
+ * clipping look intermittent. Insetting the host instead makes the measured
+ * box and the paintable box the same box. Do not reintroduce padding here. */
+.terminal-host {
+  position: absolute;
+  top: 4px;
+  bottom: 8px;
+  left: 8px;
+  /* Reserves the gutter .term-scrollbar paints into, so the grid is sized as
+   * if a scrollbar were there (it always is, just not the browser's). */
+  right: 8px;
+  /* The scrollbar track is deliberately positioned into the right inset.
+   * Clipping the host here also clips that track, so the scrollbar disappears
+   * exactly when scrollback makes it necessary. xterm's own rounding can only
+   * exceed the host by a sub-pixel after fit(). */
+  overflow: visible;
+  /* Kept in the layout but invisible: display:none would give xterm a zero-size
+   * viewport, and the fit addon would then compute nonsense columns for a
+   * session the user is about to come back to. */
+  visibility: hidden;
+  z-index: 0;
+}
+
+.terminal-host.active {
+  visibility: visible;
+  z-index: 1;
+}
+
+/* xterm's stock stylesheet makes its root an I-beam. That is appropriate for
+ * a browser terminal which presents text selection as its primary interaction,
+ * but FastMD's terminal is a panel: its ordinary cursor must agree with the
+ * native panel chrome. Keep xterm's more-specific link, mouse-tracking and
+ * column-selection cursor rules below in its own stylesheet intact. */
+.xterm {
+  cursor: default;
+}
+
+/* Hovering a link underlines it; only Ctrl turns the cursor into a hand,
+ * because only Ctrl+Click follows it. xterm marks the screen
+ * .xterm-cursor-pointer for every hovered link -- OSC 8 links included, whose
+ * decorations the page cannot reach -- so the gate is here, keyed off the
+ * class terminal.js keeps in step with the Ctrl key. */
+html:not(.link-modifier) .xterm .xterm-screen.xterm-cursor-pointer {
+  cursor: inherit;
+}
+
+/* Same face, size, radius and colors as FastMD's QToolTip (AppStyle). */
+.term-link-tooltip {
+  display: none;
+  position: fixed;
+  z-index: 10;
+  pointer-events: none;
+  white-space: nowrap;
+  padding: 4px 6px;
+  border-radius: 4px;
+  font: 13px "Segoe UI", sans-serif;
+  background: #ffffff;
+  color: #222222;
+  border: 1px solid #c4c4c4;
+}
+
+html[data-theme="dark"] .term-link-tooltip {
+  background: #202122;
+  color: #bfbfbf;
+  border-color: #2a2b2c;
+}
+
+.xterm .xterm-viewport {
+  background: var(--bg) !important;
+}
+
+/* WebView2's own scrollbar chrome -- whether classic (fixed native colors,
+ * ignores page CSS) or Fluent overlay (CSS-themeable but auto-hides) -- can't
+ * give a themed, persistently-visible bar. Hidden here; .term-scrollbar below
+ * is FastMD's own paint, the same approach FastScrollBar takes for Qt's
+ * scrollbars rather than fighting the platform style. */
+.xterm-viewport::-webkit-scrollbar {
+  width: 0px;
+  background: transparent;
+}
+
+/* The track spans the host exactly, which is also the viewport's own height --
+ * updateScrollbar() positions the thumb from the viewport's clientHeight, so
+ * the two have to agree. It paints in the gutter the host's right inset
+ * reserved, hence the negative offset. */
+.term-scrollbar {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: -10px;
+  width: 10px;
+}
+
+.term-scrollbar-thumb {
+  position: absolute;
+  right: 2px;
+  width: 6px;
+  border-radius: 3px;
+  background: var(--scrollbar-thumb);
+}
+
+.term-scrollbar-thumb:hover,
+.term-scrollbar-thumb.dragging {
+  background: var(--scrollbar-thumb-hover);
+}

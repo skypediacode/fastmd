@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<title>FastMD math copy layout regression</title>
+<link rel="stylesheet" href="preview.css">
+<script>
+window.requestAnimationFrame = fn => setTimeout(() => fn(performance.now()), 0);
+window.cancelAnimationFrame = clearTimeout;
+window.__posted = [];
+const listeners = [];
+window.chrome = {webview: {
+  addEventListener: (type, fn) => { if (type === 'message') listeners.push(fn); },
+  postMessage: msg => window.__posted.push(msg)
+}};
+window.__send = msg => listeners.forEach(fn => fn({data: msg}));
+</script>
+</head>
+<body>
+<div id="content"></div>
+<script src="mathlayoutdata.js"></script>
+<script src="preview.js"></script>
+<script src="mathlayouttest.js"></script>
+</body>
+</html>

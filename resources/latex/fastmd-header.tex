@@ -1,0 +1,50 @@
+% ── FastMD LaTeX styling ──────────────────────────────────────────────────
+% Injected via Pandoc --include-in-header. Engine-agnostic: compiles under
+% xelatex, lualatex and pdflatex. Body/heading FONTS are set through Pandoc's
+% mainfont/monofont variables (only active under the Unicode engines, guarded by
+% Pandoc's own template), so this file handles color, spacing, headings, links,
+% code background, quotes and tables — the app's light "document" identity.
+
+% Tighter, symmetric page margins so text uses more of the width (Pandoc's
+% default article margins leave large left/right gutters).
+\usepackage[margin=2cm]{geometry}
+
+\usepackage{xcolor}
+\usepackage{soul}
+\definecolor{FastMDText}{HTML}{24292F}
+\definecolor{FastMDMuted}{HTML}{57606A}
+\definecolor{FastMDLink}{HTML}{0969DA}
+\definecolor{FastMDRule}{HTML}{D0D7DE}
+\definecolor{shadecolor}{HTML}{EEF1F4}   % Pandoc's Shaded (code block) fill
+\definecolor{FastMDMark}{HTML}{FFF3B8}
+\sethlcolor{FastMDMark}
+
+% Comfortable leading for body prose.
+\usepackage{setspace}
+\setstretch{1.15}
+
+% Links are colored GitHub-blue via Pandoc's own colorlinks/linkcolor/urlcolor
+% variables (set in MainWindow::doExportLatex). They reference FastMDLink, which
+% is defined just above — header-includes run before Pandoc loads hyperref, so
+% the color is available by the time the template configures links.
+
+% Headings: tighter deliberate spacing, heavier weight, on-brand color.
+\usepackage{titlesec}
+\titleformat*{\section}{\LARGE\bfseries\color{FastMDText}}
+\titleformat*{\subsection}{\Large\bfseries\color{FastMDText}}
+\titleformat*{\subsubsection}{\large\bfseries\color{FastMDText}}
+\titleformat*{\paragraph}{\normalsize\bfseries\color{FastMDText}}
+\titlespacing*{\section}{0pt}{1.6ex plus .3ex minus .2ex}{0.9ex}
+\titlespacing*{\subsection}{0pt}{1.3ex plus .3ex minus .2ex}{0.7ex}
+\titlespacing*{\subsubsection}{0pt}{1.1ex plus .2ex minus .1ex}{0.5ex}
+
+% Block quotes: muted text (matches the preview's restrained quote).
+\usepackage{etoolbox}
+\AtBeginEnvironment{quote}{\color{FastMDMuted}}
+
+% Code: wrap long lines rather than overflow the text block.
+\usepackage{fvextra}
+\fvset{fontsize=\small,breaklines=true,breakanywhere=true}
+
+% Tables: a little more row height so cells breathe.
+\renewcommand{\arraystretch}{1.25}
