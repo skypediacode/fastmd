@@ -4,7 +4,7 @@
 
 [Microsoft Store](https://apps.microsoft.com/detail/9N4DSD4WNZ9D) · [Website](https://skypediacode.github.io/fastmd/) · [Screenshots](https://skypediacode.github.io/fastmd/screenshots.html) · [Release notes](RELEASES.md) · [Privacy policy](https://skypediacode.github.io/fastmd/privacy-policy.html)
 
-![FastMD 3.7.0 with a native Workspace panel, Markdown source, and live preview](docs/screenshots/hero.png)
+![FastMD with a native Workspace panel, Markdown source, and live preview](docs/screenshots/hero.png)
 
 ## Download
 
@@ -143,11 +143,13 @@ FastMD builds on these open-source components:
 | [highlight.js](https://highlightjs.org) | Code block highlighting | BSD 3-Clause |
 | [Mermaid](https://mermaid.js.org) | Diagrams | MIT |
 | [Markmap](https://markmap.js.org) | Mind maps | MIT |
+| [D3](https://d3js.org) | Mind-map layout (with Markmap) | ISC |
 | [xterm.js](https://xtermjs.org) | Terminal | MIT |
 | [Pandoc](https://pandoc.org) | Document conversion (bundled tool) | GPL v2 or later |
 | [AnyDoc](https://github.com/firecrawl/anydoc) | Document import (bundled tool) | MIT |
 | [Material Icons](https://fonts.google.com/icons) | UI icons | Apache 2.0 |
 | [Codicons](https://github.com/microsoft/vscode-codicons) | Title-bar icons | CC BY 4.0 |
+| [Microsoft Edge WebView2](https://developer.microsoft.com/microsoft-edge/webview2/) | Preview and Terminal host (runtime installed separately, not bundled) | Microsoft SDK Terms |
 
 Full notices are in the app under **Help → Third-Party Licenses**, and on the [third-party notices page](https://skypediacode.github.io/fastmd/licenses.html).
 

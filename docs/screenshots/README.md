@@ -18,7 +18,3 @@ retouched, composited, or AI-generated. Keep the whole native window visible.
 Use public sample documents rather than private user files when refreshing them.
 `assets/social-preview.png` is a resized, letterboxed presentation of the same
 hero capture for social cards; its UI content has not been altered.
-
-The numbered `fastmd1.png`–`fastmd9.png` images, root `screenshot.png`, and
-`assets/screenshot.png` are retained historical assets. They are no longer used
-as the current README hero or gallery and must not be presented as current UI.
