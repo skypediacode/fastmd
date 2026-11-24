@@ -82,3 +82,5 @@ CMakeLists_test.txt
 !/dev-docs/RELEASE_DISTRIBUTION.md
 !/dev-docs/SHELL_EXTENSION.md
 !/dev-docs/TERMINAL_VISIBILITY_PERSISTENCE.md
+note.md
+ms_store.md
