@@ -12,13 +12,13 @@
 param(
     # Pandoc ships prebuilt Windows binaries, so this is a GitHub release tag.
     # Releases: https://github.com/jgm/pandoc/releases
-    [string]$PandocVersion = "3.12.1",
+    [string]$PandocVersion = "3.14",
 
     # AnyDoc is a crates.io *library*, so there is no binary to download: this
     # pins the crate that tools\anydoc-wrapper compiles against, and the
     # wrapper is rebuilt locally with cargo.
     # Versions: https://crates.io/crates/anydoc/versions
-    [string]$AnyDocVersion = "0.2.4",
+    [string]$AnyDocVersion = "0.2.5",
 
     [ValidateSet("all", "pandoc", "anydoc")]
     [string]$Tool = "all",

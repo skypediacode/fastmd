@@ -7,4 +7,4 @@ license = "MIT"
 publish = false
 
 [dependencies]
-anydoc = "=0.2.4"
+anydoc = "=0.2.5"

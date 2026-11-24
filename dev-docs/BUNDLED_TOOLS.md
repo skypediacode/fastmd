@@ -53,8 +53,8 @@ what's available. Changes nothing.
 Open **`scripts\sync-bundled-tools.ps1`** and edit the param block at the top:
 
 ```powershell
-[string]$PandocVersion = "3.12.1",    # https://github.com/jgm/pandoc/releases
-[string]$AnyDocVersion = "0.2.4",   # https://crates.io/crates/anydoc/versions
+[string]$PandocVersion = "3.14",    # https://github.com/jgm/pandoc/releases
+[string]$AnyDocVersion = "0.2.5",   # https://crates.io/crates/anydoc/versions
 ```
 
 This is the only place these versions are written. Do not edit them in
