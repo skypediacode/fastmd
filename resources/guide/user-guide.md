@@ -531,7 +531,7 @@ in the Command Palette (`F1`).
 | Bold / Italic / Strikethrough | `Ctrl+B` / `Ctrl+I` / `Ctrl+Shift+-` |
 | Highlight | `Ctrl+Alt+Shift+H` |
 | Heading 1–6 | `Ctrl+1` through `Ctrl+6` |
-| Bullet / Numbered / Checklist | `Ctrl+Shift+U` / `Ctrl+Shift+O` / `Ctrl+Shift+X` |
+| Bullet / Numbered / Checklist | `Ctrl+Shift+8` / `Ctrl+Shift+7` / `Ctrl+Shift+X` |
 | Blockquote | `Ctrl+Shift+Q` |
 | Code Block | ``Ctrl+` `` |
 | Inline Link / Numbered Reference Link / Image | `Ctrl+K` / `Ctrl+Shift+K` / `Ctrl+Shift+I` |

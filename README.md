@@ -39,7 +39,7 @@ See [release information](RELEASES.md) for version history and packaging details
 **Workspace**
 
 - File tree, file search (`Shift+F1`), and a terminal panel.
-- Source Control mode (`Ctrl+Shift+G`): status, staging, commits, history, and read-only diffs. Git runs only on explicit actions and never on the typing path.
+- Source Control mode (`F7`): status, staging, commits, history, and read-only diffs. Git runs only on explicit actions and never on the typing path.
 
 **Export and viewers**
 
