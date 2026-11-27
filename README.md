@@ -1,8 +1,14 @@
 # FastMD
 
-**A fast, native Markdown and text editor for Windows.** Write in a focused editor, see a live preview beside it, and export documents without sending them to a cloud converter.
+**Notepad speed, professional Markdown editing.** FastMD is a fast, native Markdown, plain text, and code editor for Windows. Write in a focused editor, see a live preview beside it, and export documents without sending them to a cloud converter.
 
-[Microsoft Store](https://apps.microsoft.com/detail/9N4DSD4WNZ9D) · [Website](https://skypediacode.github.io/fastmd/) · [Screenshots](https://skypediacode.github.io/fastmd/screenshots.html) · [Release notes](RELEASES.md) · [Privacy policy](https://skypediacode.github.io/fastmd/privacy-policy.html)
+- **Native and lightweight:** quick startup, responsive typing, and native x64 and Arm64 builds.
+- **Free and offline:** no ads, no account, no subscription. Rendering and conversion run on your PC.
+- **Everything in one window:** Explorer-style Workspace, Git source control, an integrated Terminal, and viewers for PDF, HTML, SVG, and images.
+
+*Write faster. Preview instantly. Export beautifully.*
+
+[Microsoft Store](https://apps.microsoft.com/detail/9N4DSD4WNZ9D) · [Website](https://skypediacode.github.io/fastmd/) · [Screenshots](https://skypediacode.github.io/fastmd/screenshots.html) · [Changelog](CHANGELOG.md) · [Privacy policy](https://skypediacode.github.io/fastmd/privacy-policy.html)
 
 ![FastMD with a native Workspace panel, Markdown source, and live preview](docs/screenshots/hero.png)
 
@@ -16,38 +22,60 @@
 
 **Portable ZIP (optional):** download `FastMD-Portable-<version>-x64.zip` (or `-arm64` on ARM64 Windows) from the [latest GitHub release](https://github.com/skypediacode/fastmd/releases/latest), extract it, and run `FastMD.exe`. Nothing is installed, and Microsoft Store remains the channel for automatic updates. Windows SmartScreen can show a warning for downloaded programs that are not code-signed yet. If that happens, select **More info**, then **Run anyway**.
 
-See [release information](RELEASES.md) for version history and packaging details.
+See the [changelog](CHANGELOG.md) for version history and [release information](RELEASES.md) for distribution and packaging details.
 
 ## Features
 
-**Writing**
+**📝 Markdown, code, and plain text**
 
-- Markdown and code editing with syntax highlighting, multiple tabs, and a document outline (`Ctrl+G` → Outline).
-- Tables, task lists, callouts, footnotes, definition lists, and highlighted marks.
-- Searchable command palette (`F1`) for every application command.
+- GitHub-flavored Markdown with tables, task lists, callouts, footnotes, definition lists, and highlighted marks.
+- Syntax highlighting for Markdown and hundreds of programming and markup languages, including inside fenced code blocks.
+- Per-document language, line ending, encoding, and word wrap controls.
+- Formatting, table, Math, and Chemistry toolbars for inserting Markdown and notation.
 - Spell checking with the Windows Spell Checking API, using the languages you have installed in Windows.
-- Auto Save with recovery for untitled and unsaved documents.
+- Auto Save, crash recovery for untitled and unsaved documents, and session restore.
 
-**Live preview and rendering**
+**👁️ Live preview and rendering**
 
 - Rendered Markdown beside your source, with synchronized scrolling.
 - Double-click in the preview to jump to the matching source line.
-- Offline Mermaid diagrams and math rendered with KaTeX, including the `mhchem` extension for chemistry.
-- Visual Math and Chemistry toolbars for inserting notation.
-- Interactive mind map (`F10`) built from your document's headings.
+- Offline math rendered with KaTeX, including the `mhchem` extension for chemistry.
+- Offline Mermaid diagrams with zoom, pan, and image export.
+- Interactive mind map (`F10`) built from your document's headings, with source navigation and HTML export.
+- Separate font choices for the editor, the preview, and print/PDF, plus adjustable line, paragraph, and list spacing.
+- Dark and light themes.
 
-**Workspace**
+**🖨️ Import, export, and print**
 
-- File tree, file search (`Shift+F1`), and a terminal panel.
-- Source Control mode (`F7`): status, staging, commits, history, and read-only diffs. Git runs only on explicit actions and never on the typing path.
+- PDF export with configurable page setup, heading bookmarks, page headers and footers, and Chromium rendering that matches the preview.
+- Export to Word (DOCX), HTML, EPUB, OpenDocument (ODT), RTF, LaTeX, and plain text.
+- Printing for Markdown and plain text documents.
+- **Import as Markdown** from Word, PowerPoint, Excel, OpenDocument, RTF, EPUB, CSV, and PDF files.
 
-**Export and viewers**
+**📂 Workspace**
 
-- PDF export with heading bookmarks, page headers and footers, and Chromium rendering that matches the preview.
-- Word, HTML, EPUB, RTF, OpenDocument, LaTeX, and plain text.
-- Viewer tabs for images, SVG, PDF, and HTML.
+- Explorer-style file tree with drag and drop and file operations (create, rename, copy, move, delete to Recycle Bin).
+- File name search (`Shift+F1`) and search in files across the Workspace.
+- Multiple tabs, which you can drag between windows.
+- **Edit with FastMD** in the File Explorer context menu for files and folders (Microsoft Store install).
 
-**Command line**
+**🖥️ Git and Terminal**
+
+- Source Control mode (`F7`): status, staging, commits, history graph, branch switching, fetch/pull/push, and read-only diffs. Git runs only on explicit actions and never on the typing path.
+- Integrated Terminal with multiple sessions, docked or detached, in light and dark themes. `Ctrl+Click` opens URLs and file paths in its output.
+
+**🔎 Built-in viewers**
+
+- Read-only viewer tabs for PDF, HTML, SVG, and images.
+- Zoom and printing in the viewers, search in PDFs, and rotation for images.
+
+**⌨️ Keyboard productivity**
+
+- Searchable command palette (`F1`) for every application command.
+- Find and Replace, Go To line and document outline (`Ctrl+G`), and document statistics.
+- Keyboard shortcuts for formatting, navigation, and panels.
+
+**⌨️ Command line**
 
 ```bat
 fastmd
@@ -123,6 +151,8 @@ No Git? Download the source ZIP from the repository page and extract it to a sho
 | Path | Contents |
 | --- | --- |
 | `src/`, `resources/`, `tests/`, `tools/` | Application, bundled assets, automated tests, and bundled-tool manifests |
+| `src/shellext/` | The Qt-free "Edit with FastMD" File Explorer extension (MSIX only) |
+| `cmake/` | The md4c patch and the script that applies it at configure time |
 | `scripts/` | Build helpers, bundled-tool sync, and icon generators |
 | `dev-docs/` | Maintainer documentation (bundled tools, shell extension, crash diagnostics) |
 | `docs/` | The [GitHub Pages website](https://skypediacode.github.io/fastmd/) and screenshots |
