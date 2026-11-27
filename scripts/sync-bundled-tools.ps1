@@ -164,6 +164,10 @@ function Sync-AnyDoc {
 
     $rustup = (Get-Command rustup -ErrorAction SilentlyContinue).Source
     if (-not $rustup) {
+        $fallback = Join-Path $env:USERPROFILE ".cargo\bin\rustup.exe"
+        if (Test-Path $fallback) { $rustup = $fallback }
+    }
+    if (-not $rustup) {
         throw "rustup is required to verify the Rust target for AnyDoc. Install Rust with rustup, then run: rustup target add $rustTarget"
     }
 
