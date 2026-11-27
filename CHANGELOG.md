@@ -1,5 +1,14 @@
 # FastMD Changelog
 
+## [3.7.5] - 2026-11-27
+
+### Changed
+- GitHub version releases now attach the Store installer and portable ZIPs for x64 and Arm64, with SmartScreen guidance for the portable build.
+
+### Fixed
+- Fixed the Command Palette placeholder showing underneath IME composition text, such as Vietnamese Telex input.
+- Corrected the User Guide's bullet and numbered list shortcuts to `Ctrl+Shift+8` and `Ctrl+Shift+7`.
+
 ## [3.7.4] - 2026-11-24
 
 ### Added

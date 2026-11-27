@@ -242,7 +242,7 @@ int main(int argc, char* argv[])
     QtGpuProbe::suppress();
     FASTMD_MARK("Qt GPU probe suppressed");
     app.setApplicationName("FastMD");
-    app.setApplicationVersion("3.7.4");
+    app.setApplicationVersion("3.7.5");
     app.setOrganizationName("FastMD");
 
     // Command-line PDF export converts in this process and exits. It must
