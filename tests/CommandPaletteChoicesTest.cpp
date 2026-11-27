@@ -7,10 +7,13 @@
 #include "CommandRegistry.h"
 
 #include <QApplication>
+#include <QImage>
+#include <QInputMethodEvent>
 #include <QLineEdit>
 #include <QListWidget>
 #include <QPointer>
 #include <QTest>
+#include <QTransform>
 
 namespace {
 
@@ -41,6 +44,7 @@ class CommandPaletteChoicesTest : public QObject {
 private slots:
     void choicesReplaceCommandsUntilHidden();
     void emptyChoicesShowEmptyText();
+    void placeholderHiddenWhileComposing();
 };
 
 void CommandPaletteChoicesTest::choicesReplaceCommandsUntilHidden()
@@ -117,6 +121,51 @@ void CommandPaletteChoicesTest::emptyChoicesShowEmptyText()
     popup.showForAnchor(nullptr);
     QCOMPARE(list->item(0)->text(), QStringLiteral("No matching commands"));
     popup.hide();
+}
+
+// An IME composition (e.g. Vietnamese Telex) shows preedit text while text()
+// is still empty; the painted placeholder must not stay underneath it.
+void CommandPaletteChoicesTest::placeholderHiddenWhileComposing()
+{
+    // The app stylesheet makes the edit transparent over the painted row
+    // (AppStyle, QLineEdit#commandPaletteSearchEdit); a native panel would
+    // cover the placeholder.
+    qApp->setStyleSheet(QStringLiteral(
+        "QLineEdit#commandPaletteSearchEdit { background: transparent; border: none;"
+        " padding: 0px; font-family: \"Segoe UI\"; }"));
+    CommandRegistry commands;
+    CommandPalettePopup popup(&commands);
+    auto* search = popup.findChild<QLineEdit*>(QStringLiteral("commandPaletteSearchEdit"));
+    auto* row = popup.findChild<QWidget*>(QStringLiteral("commandPaletteSearchRow"));
+    QVERIFY(search && row);
+    popup.showForAnchor(nullptr);
+
+    // The edit's area past the first typed glyph: only the placeholder's
+    // tail can be drawn there (the caret and the clear button lie outside).
+    const QRect edit = search->geometry().intersected(row->rect());
+    const QRect probe = edit.adjusted(40, 0, 0, 0);
+    QVERIFY(probe.width() > 40);
+    const auto tail = [&] {
+        const qreal dpr = row->devicePixelRatioF();
+        return row->grab().toImage().copy(QTransform::fromScale(dpr, dpr).mapRect(probe));
+    };
+
+    search->setText(QStringLiteral("x"));
+    const QImage committed = tail();
+    search->clear();
+    const QImage empty = tail();
+    QVERIFY(empty != committed);
+
+    QInputMethodEvent compose(QStringLiteral("x"), {});
+    QApplication::sendEvent(search, &compose);
+    QVERIFY(search->text().isEmpty());
+    QCOMPARE(tail(), committed);
+
+    QInputMethodEvent cancel(QString(), {});
+    QApplication::sendEvent(search, &cancel);
+    QCOMPARE(tail(), empty);
+    popup.hide();
+    qApp->setStyleSheet(QString());
 }
 
 QTEST_MAIN(CommandPaletteChoicesTest)

@@ -20,6 +20,7 @@
 #include <QScrollBar>
 #include <QSet>
 #include <QFontInfo>
+#include <QInputMethodEvent>
 #include <QStyledItemDelegate>
 #include <QTimer>
 #include <QToolButton>
@@ -153,6 +154,7 @@ public:
     {
         m_edit = edit;
         m_edit->setParent(this);
+        m_edit->installEventFilter(this);
         QObject::connect(m_edit, &QLineEdit::textChanged, this, [this](const QString& text) {
             setClearVisible(!text.isEmpty());
             update();
@@ -210,7 +212,8 @@ protected:
         CommandPalette::paintSearchBox(painter, rect(), m_background, m_dark, false);
         painter.drawPixmap(QPointF(LeftInset, CommandPalette::iconTop(height())
                                              + m_iconOffset), m_icon);
-        if (m_edit && m_edit->text().isEmpty() && !m_placeholderText.isEmpty()) {
+        if (m_edit && m_edit->text().isEmpty() && !m_composing
+            && !m_placeholderText.isEmpty()) {
             painter.setFont(m_placeholderFont);
             painter.setPen(m_placeholderColor);
             const QRect editRect = m_edit->geometry();
@@ -219,6 +222,22 @@ protected:
                 CommandPalette::textBaseline(editRect.y(), editRect.height(), fm);
             painter.drawText(editRect.x(), baseline, m_placeholderText);
         }
+    }
+
+    // An IME composition (Telex, Pinyin, ...) shows its preedit text in the
+    // line edit while text() stays empty and textChanged never fires, so
+    // track it here the way QLineEdit's own placeholder check does.
+    bool eventFilter(QObject* watched, QEvent* event) override
+    {
+        if (watched == m_edit && event->type() == QEvent::InputMethod) {
+            const bool composing =
+                !static_cast<QInputMethodEvent*>(event)->preeditString().isEmpty();
+            if (composing != m_composing) {
+                m_composing = composing;
+                update();
+            }
+        }
+        return QWidget::eventFilter(watched, event);
     }
 
     void mousePressEvent(QMouseEvent* event) override
@@ -276,6 +295,7 @@ private:
     qreal   m_iconOffset = 0.0;
     bool    m_dark = false;
     bool    m_clearVisible = false;
+    bool    m_composing = false;
 };
 
 // Draws one result row: dimmed "Category:" prefix, the command title with its
